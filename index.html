@@ -326,6 +326,16 @@ img{max-width:100%}
 .login-brand .brand svg{height:54px}
 .login-t{margin:0;font:800 28px/1.1 var(--font-display)}
 .err.ok{color:var(--ok)}
+/* kullanıcılar (yönetici) */
+.ulist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ulist li{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.ulist .uh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ulist .uh b{font-size:15px}
+.ulist .uh small{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.ulist .badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--orta-soft);color:var(--orta-ink)}
+.ulist .pair{margin-top:10px}
+.ulist .uf{display:flex;justify-content:flex-end;margin-top:10px}
+.newuser{border:1px dashed var(--line);border-radius:12px;padding:0 12px 12px;margin-top:14px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
@@ -418,12 +428,16 @@ img{max-width:100%}
 <div class="overlay" id="ovWho" hidden>
   <form class="sheet" id="whoForm" novalidate>
     <div class="sheet-head"><div><h2>Kim olarak çalışıyorsun?</h2><p class="sheet-sub">Bu cihazda hatırlanır. Ortak cihazda vardiya değişince güncelle.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
-    <div class="field"><label class="lbl" for="wName">Adın</label><input type="text" id="wName" placeholder="ör. Ayşe K." autocomplete="off" maxlength="40"></div>
-    <div class="field"><span class="lbl">Departmanın</span><div class="chips wrap" id="wDept"></div></div>
+    <dl class="facts" id="wInfo" hidden></dl>
+    <div class="field" id="wNameF"><label class="lbl" for="wName">Adın</label><input type="text" id="wName" placeholder="ör. Ayşe K." autocomplete="off" maxlength="40"></div>
+    <div class="field" id="wDeptF"><span class="lbl">Departmanın</span><div class="chips wrap" id="wDept"></div></div>
     <p class="err" id="wErr" hidden></p>
-    <div class="sheet-foot"><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button><button type="submit" class="btn primary">Kaydet</button></div>
+    <div class="sheet-foot"><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="submit" class="btn primary" id="wSave">Kaydet</button></div>
   </form>
 </div>
+
+<!-- Kullanıcılar (yalnızca yönetici) -->
+<div class="overlay" id="ovUsers" hidden><div class="sheet" id="users"></div></div>
 <datalist id="people"></datalist>
 
 <script>
@@ -490,6 +504,7 @@ function defaultDue(p){
 let db = null, col = null, readOnly = false, loaded = false, dbFailed = false;
 let tasks = new Map();
 let me = loadMe();
+let profiles = [], profileMode = false, authUser = null, usersMsg = "";
 const DEF = {
   todo: {q:"", dept:"all", prio:"all", time:"all", status:"all", asg:"all", sort:"due"},
   done: {q:"", check:"kontrol", dept:"all", prio:"all", period:"all"}
@@ -506,7 +521,9 @@ let firstSnap = true, audioCtx = null;
 
 function loadMe(){ try { const v = JSON.parse(localStorage.getItem("oia.me") || "null"); if (v && v.name && DEPTS[v.dept]) return v; } catch(e){} return null; }
 function saveMe(v){ me = v; try { localStorage.setItem("oia.me", JSON.stringify(v)); } catch(e){} }
-const who = () => me ? `${me.name} (${DEPTS[me.dept].label})` : "İsimsiz";
+const isAdmin = () => !!(profileMode && me && me.role === "admin");
+const deptOf = m => m && DEPTS[m.dept] ? DEPTS[m.dept] : null;
+const who = () => me ? `${me.name} (${deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Departmansız")})` : "İsimsiz";
 const isOpen = t => t.status !== "tamam";
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
@@ -536,7 +553,7 @@ function closeOv(id){ $(id).hidden = true; if (id === "#ovDetail"){ detailId = n
 document.querySelectorAll(".overlay:not(.login)").forEach(ov => ov.addEventListener("click", e => {
   if (e.target === ov || e.target.closest("[data-close]")) closeOv("#" + ov.id);
 }));
-document.addEventListener("keydown", e => { if (e.key === "Escape") ["#ovNew","#ovDetail","#ovWho","#ovFilter"].forEach(id => { if (!$(id).hidden) closeOv(id); }); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") ["#ovNew","#ovDetail","#ovWho","#ovFilter","#ovUsers"].forEach(id => { if (!$(id).hidden) closeOv(id); }); });
 function setReadOnly(v){
   readOnly = v;
   if (v) banner("Bu uygulamada yalnızca görüntüleme iznin var. İş açmak ve güncellemek için sayfa sahibinin seni Düzenleyici olarak eklemesi gerekiyor.");
@@ -807,17 +824,36 @@ function screenReport(){
       <p class="muted" style="margin:8px 0 0">Açık ve geciken: şu an. Biten, zamanında ve ortalama süre: seçili dönem.</p></div>
     <div class="panel"><h3>Aciliyet dağılımı</h3>${stack}
       <div class="keys"><span style="--c:var(--acil)"><i></i>Acil ${pc("acil")}</span><span style="--c:var(--orta)"><i></i>Orta ${pc("orta")}</span><span style="--c:var(--sureli)"><i></i>Süreli ${pc("sureli")}</span></div></div>
+    ${isAdmin() ? peoplePanel(created, done, open) : ""}
     <div class="panel"><h3>En sık sorunlar</h3>${top(t => `${TYPES[t.type]?.label || ""} · ${t.cat || ""}`)}</div>
     <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>`;
 }
 
+function peoplePanel(created, done, open){
+  const same = (a, b) => a && b && lower(a) === lower(b);
+  const names = new Map();
+  profiles.forEach(p => names.set(lower(p.name), {name: p.name, dept: p.dept}));
+  [...created, ...done, ...open].forEach(t => [t.createdBy, t.assignee].forEach(n => { if (n && !names.has(lower(n))) names.set(lower(n), {name: n, dept: null}); }));
+  const rows = [...names.values()].map(p => {
+    const c = created.filter(t => same(t.createdBy, p.name)).length;
+    const o = open.filter(t => same(t.assignee, p.name)), ov = o.filter(isOver).length;
+    const d = done.filter(t => same(t.assignee, p.name)), ot = d.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
+    return {p, c, o: o.length, ov, d: d.length, pct: d.length ? Math.round(ot / d.length * 100) + "%" : "—"};
+  }).filter(r => r.c || r.o || r.d || profiles.some(x => x.name === r.p.name))
+    .sort((a, b) => (b.o + b.d + b.c) - (a.o + a.d + a.c) || a.p.name.localeCompare(b.p.name, "tr"));
+  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.o}</td><td class="${r.ov ? "over" : ""}">${r.ov}</td><td>${r.d}</td><td>${r.pct}</td></tr>`).join("");
+  return `<div class="panel"><h3>Kişiler</h3><div class="tscroll"><table class="dtable">
+      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Üzerinde</th><th>Geciken</th><th>Bitirdiği</th><th>Zamanında</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="6">Kayıt yok.</td></tr>`}</tbody></table></div>
+      <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Üzerinde ve geciken: şu an atanmış açık işler. Açtığı ve bitirdiği: seçili dönem.</p></div>`;
+}
 function renderWho(){
-  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${DEPTS[me.dept].short}</small>` : `<span class="nm">Kimsin? Seç</span>`;
+  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">${profileMode ? "Hesabım" : "Kimsin? Seç"}</span>`;
 }
 function renderTabs(){
   document.querySelectorAll(".tb").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   const open = [...tasks.values()].filter(isOpen);
-  const mine = me ? open.filter(t => t.dept === me.dept).length : open.length;
+  const mine = deptOf(me) ? open.filter(t => t.dept === me.dept).length : open.length;
   const pend = [...tasks.values()].filter(t => !isOpen(t) && !t.verified).length;
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
   $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
@@ -835,6 +871,7 @@ function renderPeople(){
   const names = new Set();
   tasks.forEach(t => { if (t.assignee) names.add(t.assignee); if (t.createdBy) names.add(t.createdBy); });
   if (me) names.add(me.name);
+  profiles.forEach(p => names.add(p.name));
   $("#people").innerHTML = [...names].sort((a, b) => a.localeCompare(b, "tr")).map(n => `<option value="${esc(n)}"></option>`).join("");
 }
 function renderAll(){ renderWho(); renderTabs(); renderScreen(); renderPeople(); if (detailId) renderDetail(); if (!$("#ovFilter").hidden) renderFilter(); }
@@ -1002,7 +1039,20 @@ function requireMe(fn){ if (me) return fn(); pendingAfterWho = fn; openWho(); }
 
 /* ---------- identity ---------- */
 let whoDept = null;
-function openWho(){ $("#wName").value = me?.name || ""; whoDept = me?.dept || null; $("#wErr").hidden = true; renderWhoDept(); openOv("#ovWho"); setTimeout(() => $("#wName").focus(), 50); }
+function openWho(){
+  $("#wErr").hidden = true;
+  const acct = profileMode && me;
+  ["#wNameF", "#wDeptF", "#wSave"].forEach(id => $(id).hidden = !!acct);
+  $("#wInfo").hidden = !acct; $("#usersBtn").hidden = !isAdmin();
+  $("#ovWho h2").textContent = acct ? "Hesabım" : "Kim olarak çalışıyorsun?";
+  $("#ovWho .sheet-sub").textContent = acct ? "Ad ve departmanı yönetici belirler." : "Bu cihazda hatırlanır. Ortak cihazda vardiya değişince güncelle.";
+  if (acct){
+    $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
+      <dt>Departman</dt><dd>${esc(deptOf(me)?.label || "Atanmadı")}</dd><dt>Yetki</dt><dd>${me.role === "admin" ? "Yönetici" : "Personel"}</dd>`;
+    openOv("#ovWho"); return;
+  }
+  $("#wName").value = me?.name || ""; whoDept = me?.dept || null; renderWhoDept(); openOv("#ovWho"); setTimeout(() => $("#wName").focus(), 50);
+}
 function renderWhoDept(){ $("#wDept").innerHTML = Object.entries(DEPTS).map(([k,v]) => `<button type="button" class="chip" data-v="${k}" aria-pressed="${whoDept === k}">${esc(v.label)}</button>`).join(""); }
 $("#wDept").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; whoDept = b.dataset.v; renderWhoDept(); });
 $("#whoBtn").addEventListener("click", openWho);
@@ -1012,6 +1062,83 @@ $("#whoForm").addEventListener("submit", e => {
   if (!n || !whoDept){ $("#wErr").textContent = !n ? "Adını yaz." : "Departmanını seç."; $("#wErr").hidden = false; return; }
   saveMe({name: n, dept: whoDept}); closeOv("#ovWho"); renderAll();
   const fn = pendingAfterWho; pendingAfterWho = null; if (fn) fn();
+});
+
+/* ---------- profiles & users (yönetici) ---------- */
+async function loadProfiles(){
+  if (!sb || !signedIn) return;
+  try {
+    const {data, error} = await sb.from("fdos_profiles").select("user_id,email,name,dept,role").order("name");
+    if (error){ profileMode = false; return; }   // tablo kurulmamışsa eski düzen (cihazda ad/departman)
+    profiles = data || []; profileMode = true;
+    const mine = profiles.find(p => p.user_id === authUser?.id);
+    me = mine ? {name: mine.name, dept: DEPTS[mine.dept] ? mine.dept : null, role: mine.role}
+              : {name: (authUser?.email || "").split("@")[0] || "İsimsiz", dept: null, role: "user"};
+    if (!$("#ovWho").hidden) openWho();
+    if (!$("#ovUsers").hidden) renderUsers();
+    renderAll();
+  } catch(e){}
+}
+const deptSel = (id, cur) => `<div class="sel"><select id="${id}">${opt("", "Departman yok", !cur)}${Object.entries(DEPTS).map(([k, v]) => opt(k, v.label, k === cur)).join("")}</select></div>`;
+const roleSel = (id, cur, dis) => `<div class="sel"><select id="${id}"${dis ? " disabled" : ""}>${opt("user", "Personel", cur !== "admin")}${opt("admin", "Yönetici", cur === "admin")}</select></div>`;
+function renderUsers(){
+  const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || "", r: $("#uRole")?.value || "user"};
+  const rows = profiles.map((u, i) => `<li data-uid="${esc(u.user_id)}">
+      <div class="uh"><b>${esc(u.name)}</b>${u.role === "admin" ? `<span class="badge">YÖNETİCİ</span>` : ""}<small>${esc(u.email)}</small></div>
+      <div class="pair">
+        <div class="field" style="margin-top:0"><label class="lbl" for="ud${i}">Departman</label>${deptSel("ud" + i, u.dept)}</div>
+        <div class="field" style="margin-top:0"><label class="lbl" for="ur${i}">Yetki</label>${roleSel("ur" + i, u.role, u.user_id === authUser?.id)}</div>
+      </div>
+      <div class="field" style="margin-top:10px"><label class="lbl" for="un${i}">Ad</label><input type="text" id="un${i}" maxlength="40" value="${esc(u.name)}" autocomplete="off"></div>
+      <div class="uf"><button type="button" class="btn" data-usave="${i}">Kaydet</button></div></li>`).join("");
+  $("#users").innerHTML = `
+    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Yeni kullanıcı ekle, departman ata.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+    <form class="newuser" id="uForm" novalidate>
+      <div class="field"><label class="lbl" for="uName">Ad</label><input type="text" id="uName" maxlength="40" placeholder="ör. Ayşe K." autocomplete="off"></div>
+      <div class="field"><label class="lbl" for="uEmail">E-posta</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
+      <div class="field"><label class="lbl" for="uPass">Geçici şifre</label><input type="text" id="uPass" autocomplete="off" placeholder="En az 6 karakter"><span class="hint">Kullanıcıya bu şifreyi ilet. Sonra "Şifremi unuttum" ile değiştirebilir.</span></div>
+      <div class="pair">
+        <div class="field"><label class="lbl" for="uDept">Departman</label>${deptSel("uDept", keep.d)}</div>
+        <div class="field"><label class="lbl" for="uRole">Yetki</label>${roleSel("uRole", keep.r)}</div>
+      </div>
+      <p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" id="uErr" ${usersMsg ? "" : "hidden"}>${esc(usersMsg.replace(/^✓ /, ""))}</p>
+      <div class="sheet-foot" style="margin-top:12px"><button type="submit" class="btn primary" id="uAdd">Kullanıcı ekle</button></div>
+    </form>
+    <h3 class="section-t">Kayıtlı kullanıcılar (${profiles.length})</h3>
+    <ul class="ulist">${rows || "<li>Kullanıcı yok</li>"}</ul>`;
+  $("#uName").value = keep.n; $("#uEmail").value = keep.e; $("#uPass").value = keep.p;
+}
+function openUsers(){ usersMsg = ""; closeOv("#ovWho"); renderUsers(); openOv("#ovUsers"); loadProfiles(); }
+$("#usersBtn").addEventListener("click", () => { if (isAdmin()) openUsers(); });
+async function fnError(error){
+  try { const j = await error.context.json(); if (j && j.error) return j.error; } catch(e){}
+  const m = (error && error.message) || "";
+  if (/failed to send|not found|404|fetch/i.test(m)) return "Kullanıcı ekleme servisi (fdos-admin) kurulmamış ya da internet yok.";
+  return m || "bilinmeyen hata";
+}
+$("#users").addEventListener("submit", async e => {
+  if (e.target.id !== "uForm") return;
+  e.preventDefault();
+  const body = {action: "create", name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null, role: $("#uRole").value};
+  const bad = !body.name ? "Adı yaz." : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email) ? "Geçerli bir e-posta yaz." : body.password.length < 6 ? "Şifre en az 6 karakter olmalı." : "";
+  if (bad){ usersMsg = bad; renderUsers(); return; }
+  $("#uAdd").disabled = true;
+  try {
+    const {error} = await sb.functions.invoke("fdos-admin", {body});
+    if (error){ usersMsg = "Eklenemedi: " + await fnError(error); renderUsers(); return; }
+    usersMsg = `✓ ${body.name} eklendi. Giriş: ${body.email}`;
+    ["#uName", "#uEmail", "#uPass"].forEach(id => $(id).value = "");
+    await loadProfiles(); renderUsers();
+  } catch(err){ usersMsg = "Eklenemedi: " + ((err && err.message) || "bilinmeyen hata"); renderUsers(); }
+});
+$("#users").addEventListener("click", async e => {
+  const b = e.target.closest("[data-usave]"); if (!b) return;
+  const i = b.dataset.usave, u = profiles[i]; if (!u) return;
+  const fields = {name: $("#un" + i).value.trim().slice(0, 40) || u.name, dept: $("#ud" + i).value || null, role: $("#ur" + i).value};
+  b.disabled = true;
+  const {error} = await sb.from("fdos_profiles").update(fields).eq("user_id", u.user_id);
+  if (error){ b.disabled = false; toast("Kaydedilemedi: " + (/yetkini/i.test(error.message) ? "Kendi yönetici yetkini kaldıramazsın." : error.message)); return; }
+  toast(`${fields.name} güncellendi.`); await loadProfiles();
 });
 
 /* ---------- new task (Yapılacak İş) ---------- */
@@ -1160,7 +1287,7 @@ function refetch(){
       const err = a.error || b.error;
       if (err){ listenErr(err); return; }
       tasks = new Map([...(b.data || []), ...(a.data || [])].map(r => [r.id, {id: r.id, ...r.data}]));
-      loaded = true; banner(""); renderAll();
+      loaded = true; banner(""); renderAll(); loadProfiles();
     } catch(e){ listenErr(e); }
   })().finally(() => { fetching = null; });
   return fetching;
@@ -1266,12 +1393,14 @@ $("#passForm").addEventListener("submit", async e => {
 
 /* ---------- start ---------- */
 function onSession(session){
-  const was = signedIn; signedIn = !!session;
+  const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ startLive(); if (!me) setTimeout(openWho, 300); }
+    if (!was){ startLive(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
   } else {
-    stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true; renderAll(); openLogin();
+    stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
+    if (profileMode){ profileMode = false; profiles = []; me = loadMe(); }
+    closeOv("#ovUsers"); renderAll(); openLogin();
   }
 }
 function boot(){

@@ -49,3 +49,88 @@ begin
   alter publication supabase_realtime add table public.fdos_tasks;
 exception when duplicate_object then null;
 end $$;
+
+-- 5) Kullanıcı profilleri: ad, departman ve rol (yönetici / personel)
+--    Ad ve departmanı yönetici atar. Personel kendi kaydını değiştiremez.
+create table if not exists public.fdos_profiles (
+  user_id    uuid primary key references auth.users(id) on delete cascade,
+  email      text not null,
+  name       text not null,
+  dept       text,
+  role       text not null default 'user' check (role in ('user','admin')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- Giriş yapan kişi yönetici mi? (güvenlik kurallarında kullanılır)
+create or replace function public.fdos_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.fdos_profiles where user_id = auth.uid() and role = 'admin');
+$$;
+revoke all on function public.fdos_is_admin() from public, anon;
+grant execute on function public.fdos_is_admin() to authenticated;
+
+alter table public.fdos_profiles enable row level security;
+revoke all on public.fdos_profiles from anon;
+revoke update on public.fdos_profiles from authenticated;
+grant select on public.fdos_profiles to authenticated;
+grant update (name, dept, role) on public.fdos_profiles to authenticated;
+
+drop policy if exists "profil okuma"     on public.fdos_profiles;
+drop policy if exists "profil guncelleme" on public.fdos_profiles;
+create policy "profil okuma"      on public.fdos_profiles for select to authenticated using (true);
+create policy "profil guncelleme" on public.fdos_profiles for update to authenticated
+  using (public.fdos_is_admin()) with check (public.fdos_is_admin());
+
+-- Yönetici kendi yönetici yetkisini yanlışlıkla kaldıramasın
+create or replace function public.fdos_profiles_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if old.user_id = auth.uid() and old.role = 'admin' and new.role <> 'admin' then
+    raise exception 'Kendi yönetici yetkini kaldıramazsın';
+  end if;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists fdos_profiles_guard on public.fdos_profiles;
+create trigger fdos_profiles_guard before update on public.fdos_profiles
+  for each row execute function public.fdos_profiles_guard();
+
+-- Supabase'e yeni kullanıcı eklenince profili kendiliğinden oluşur
+create or replace function public.fdos_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.fdos_profiles (user_id, email, name, dept, role)
+  values (
+    new.id, new.email,
+    coalesce(nullif(new.raw_user_meta_data->>'name', ''), split_part(new.email, '@', 1)),
+    nullif(new.raw_user_meta_data->>'dept', ''),
+    case when lower(new.email) = 'tuncer@feronya.com' then 'admin' else 'user' end
+  )
+  on conflict (user_id) do nothing;
+  return new;
+end $$;
+drop trigger if exists fdos_on_auth_user on auth.users;
+create trigger fdos_on_auth_user after insert on auth.users
+  for each row execute function public.fdos_new_user();
+
+-- Daha önce eklenmiş kullanıcıların profilleri
+insert into public.fdos_profiles (user_id, email, name)
+select id, email, split_part(email, '@', 1) from auth.users
+on conflict (user_id) do nothing;
+
+-- Yönetici: tuncer@feronya.com → ad "Tuncer"
+update public.fdos_profiles set role = 'admin', name = 'Tuncer'
+ where lower(email) = 'tuncer@feronya.com';

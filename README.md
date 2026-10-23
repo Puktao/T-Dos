@@ -68,7 +68,19 @@ Giriş bu adım olmadan da çalışır. Ama yapılmazsa şifre yenileme e-postas
 ### 8. Telefonlara kur
 - **Android (Chrome):** adresi aç → sağ üst ⋮ menü → **Uygulamayı yükle** ya da **Ana ekrana ekle**.
 - **iPhone (Safari):** adresi aç → alttaki Paylaş düğmesi → **Ana Ekrana Ekle**.
-- Personel ilk açışta e-posta ve şifresiyle girer, sonra adını ve departmanını seçer.
+- Personel e-posta ve şifresiyle girer. Adı ve departmanı yöneticinin atadığı bilgilerden gelir.
+
+### 9. Yönetici ve kullanıcı ekleme
+Yönetici hesabı `tuncer@feronya.com` (ad: Tuncer). Yönetici herkesin işlerini ve Rapor'daki **Kişiler** tablosunu görür, uygulamadan kullanıcı ekler ve departman atar.
+1. **Authentication → Users → Add user → Create new user:** `tuncer@feronya.com` + şifre, **Auto Confirm User** işaretli → Create. (Zaten varsa atla.)
+2. **SQL Editor → New query:** `schema.sql` dosyasının tamamını yeniden yapıştır → **Run**. Bu, kullanıcı profillerini kurar ve Tuncer'i yönetici yapar.
+3. **Edge Functions → Deploy a new function → Via Editor:**
+   - Function name: `fdos-admin`
+   - Kod alanındaki her şeyi sil, depodaki `supabase/functions/fdos-admin/index.ts` dosyasının tamamını yapıştır → **Deploy function**.
+   - Fonksiyonun **Details / Settings** bölümünde **Verify JWT** (veya "Enforce JWT verification") ayarını **kapat** → Save. Kimlik kontrolünü fonksiyonun kendisi yapıyor.
+4. Uygulamada Tuncer ile giriş yap → sağ üstteki ada bas → **Kullanıcılar**. Ad, e-posta, geçici şifre ve departman yazıp **Kullanıcı ekle**.
+
+Personel artık adını ve departmanını kendisi seçmez; girişte yöneticinin atadığı bilgiler gelir. Ortak cihaz kullanılıyorsa her personel kendi hesabıyla girip çıkmalı.
 
 ---
 

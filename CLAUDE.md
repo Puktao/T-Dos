@@ -20,7 +20,9 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
   - Realtime: tablo `supabase_realtime` yayınında.
 - **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda ve internet geri geldiğinde `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
 - **Giriş:** Supabase Auth, e-posta ve şifre. Kayıt (sign-up) kapalı, kullanıcıları yönetici panelden ekler. "Şifremi unuttum" → `resetPasswordForEmail` → `PASSWORD_RECOVERY` olayında "Yeni şifre" ekranı açılır.
-- **Kimlik:** Ad ve departman cihazda `localStorage["oia.me"]` içinde tutulur. Kayıtlarda kullanıcı id'si değil, bu ad yazılır (`createdBy`, `log.by`).
+- **Kimlik:** Ad, departman ve rol `public.fdos_profiles` tablosundan gelir (hesaba bağlı). Personel kendi kaydını değiştiremez; yönetici atar. Kayıtlarda kullanıcı id'si değil ad yazılır (`createdBy`, `log.by`). Profil tablosu yoksa eski düzen çalışır: ad ve departman cihazda `localStorage["oia.me"]`.
+- **Yönetici (admin):** `tuncer@feronya.com`, ad "Tuncer" (`schema.sql` bunu kendisi ayarlar). Hesabım → **Kullanıcılar** ekranından yeni kullanıcı ekler, ad/departman/yetki değiştirir. Rapor'da yalnızca yöneticiye görünen **Kişiler** tablosu var. Kendi yönetici yetkisini kaldıramaz (veritabanı tetikleyicisi engeller).
+- **Kullanıcı ekleme:** Tarayıcıdan yapılamaz (service_role gerekir). Edge Function `fdos-admin` (`supabase/functions/fdos-admin/index.ts`) çağrılır; çağıranın yönetici olduğunu kendisi kontrol eder. Supabase panelinde "Verify JWT" kapalı olmalı. Profil satırı `auth.users` tetikleyicisiyle kendiliğinden oluşur.
 - **PWA:** `manifest.webmanifest`, `sw.js` (aynı köken için önce ağ, CDN için önce önbellek), `icons/`. **Her yayında `sw.js` içindeki `CACHE` sürümünü artır.**
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
@@ -74,7 +76,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] GitHub Pages açık (main / root). Adres: https://puktao.github.io/T-Dos/
 - [x] Supabase'de `schema.sql` çalıştırıldı (tablo ve fonksiyon var, `anon` erişimi kapalı).
 - [x] Sign-up kapatıldı.
-- [ ] Kullanıcılar eklenecek (Authentication → Users → Add user, Auto Confirm). Dışarıdan doğrulanamıyor.
+- [ ] `tuncer@feronya.com` Supabase'de eklenecek (Authentication → Users → Add user, Auto Confirm), sonra `schema.sql` yeniden çalıştırılacak.
+- [ ] Edge Function `fdos-admin` panelden yüklenecek, "Verify JWT" kapatılacak. Diğer kullanıcıları yönetici uygulamadan ekler.
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
