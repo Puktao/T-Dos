@@ -1,6 +1,6 @@
 // F-Do’s service worker: uygulamayı telefonda hızlı ve çevrimdışı açar.
 // Uygulamayı güncellediğinde aşağıdaki sürüm numarasını bir artır (v1 -> v2).
-const CACHE = "fdos-v37";
+const CACHE = "fdos-v38";
 const SHELL = ["./", "./index.html", "./supabase-config.js", "./manifest.webmanifest", "./icons/icon-192.png"];
 const CDN = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 

@@ -280,7 +280,7 @@ button{font:inherit;color:inherit}
 
 /* sheets */
 .overlay{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:600px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:600px;max-height:92%;overflow:auto;overscroll-behavior:contain;border-radius:18px 18px 0 0;
   padding-top:10px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 .sheet::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
 @media (min-width:720px){.overlay{align-items:center;padding:24px}.sheet{border-radius:16px;max-height:90%}.sheet::before{display:none}}
@@ -290,7 +290,10 @@ button{font:inherit;color:inherit}
 .sheet-head .hact{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
 .sheet-head .hact .x{margin-left:0}
 .sheet-head .hact .btn{height:38px}
-#detail .sheet-head{position:sticky;top:-18px;z-index:3;padding-block:14px 10px;margin-top:-14px;box-shadow:0 1px 0 var(--line)}
+/* detay başlığı ekranın tepesine sabit; renkli çentik başlığın üst kenarında (kaydırırken kayma olmasın diye negatif konum yok) */
+#detail{padding-top:0;overscroll-behavior:contain}
+#detail::before{display:none}
+#detail .sheet-head{position:sticky;top:0;z-index:3;margin:0 -18px;padding:20px 18px 12px}
 .sheet-sub{margin:4px 0 0;color:var(--muted);font-size:13px}
 .field{display:flex;flex-direction:column;gap:7px;margin-top:16px}
 .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
@@ -318,8 +321,8 @@ button{font:inherit;color:inherit}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
 /* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
 #detail.verified{--c:var(--ok);--cs:var(--ok-soft)} #detail.acil{--c:var(--acil);--cs:var(--acil-soft)} #detail.orta{--c:var(--orta);--cs:var(--orta-soft)} #detail.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
-#detail{background:linear-gradient(var(--c,var(--line)),var(--c,var(--line))) top/100% 6px no-repeat,var(--cs,var(--surface))}
-#detail .sheet-head{background:var(--cs,var(--surface));box-shadow:0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
+#detail{background:var(--cs,var(--surface))}
+#detail .sheet-head{background:var(--cs,var(--surface));box-shadow:inset 0 6px 0 var(--c,var(--line)),0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
 .dcard::before{display:none}
 .dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
