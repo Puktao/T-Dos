@@ -333,7 +333,11 @@ img{max-width:100%}
 .ulist .uh b{font-size:15px}
 .ulist .uh small{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
 .ulist .badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--orta-soft);color:var(--orta-ink)}
-.ulist .pair{margin-top:10px}
+.ulist .urow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.95fr);gap:6px;margin-top:10px}
+.ulist .urow .field{margin-top:0;min-width:0;gap:5px}
+.ulist .urow input[type=text]{padding:10px 8px}
+.ulist .urow .sel select{padding:11px 22px 11px 8px;text-overflow:ellipsis}
+.ulist .urow .sel::after{right:9px;width:6px;height:6px}
 .ulist .uf{display:flex;justify-content:flex-end;margin-top:10px}
 .newuser{border:1px dashed var(--line);border-radius:12px;padding:0 12px 12px;margin-top:14px}
 </style>
@@ -1079,17 +1083,17 @@ async function loadProfiles(){
     renderAll();
   } catch(e){}
 }
-const deptSel = (id, cur) => `<div class="sel"><select id="${id}">${opt("", "Departman yok", !cur)}${Object.entries(DEPTS).map(([k, v]) => opt(k, v.label, k === cur)).join("")}</select></div>`;
+const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
 const roleSel = (id, cur, dis) => `<div class="sel"><select id="${id}"${dis ? " disabled" : ""}>${opt("user", "Personel", cur !== "admin")}${opt("admin", "Yönetici", cur === "admin")}</select></div>`;
 function renderUsers(){
   const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || "", r: $("#uRole")?.value || "user"};
   const rows = profiles.map((u, i) => `<li data-uid="${esc(u.user_id)}">
       <div class="uh"><b>${esc(u.name)}</b>${u.role === "admin" ? `<span class="badge">YÖNETİCİ</span>` : ""}<small>${esc(u.email)}</small></div>
-      <div class="pair">
-        <div class="field" style="margin-top:0"><label class="lbl" for="ud${i}">Departman</label>${deptSel("ud" + i, u.dept)}</div>
-        <div class="field" style="margin-top:0"><label class="lbl" for="ur${i}">Yetki</label>${roleSel("ur" + i, u.role, u.user_id === authUser?.id)}</div>
+      <div class="urow">
+        <div class="field"><label class="lbl" for="un${i}">Ad</label><input type="text" id="un${i}" maxlength="40" value="${esc(u.name)}" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="ud${i}">Departman</label>${deptSel("ud" + i, u.dept, true)}</div>
+        <div class="field"><label class="lbl" for="ur${i}">Yetki</label>${roleSel("ur" + i, u.role, u.user_id === authUser?.id)}</div>
       </div>
-      <div class="field" style="margin-top:10px"><label class="lbl" for="un${i}">Ad</label><input type="text" id="un${i}" maxlength="40" value="${esc(u.name)}" autocomplete="off"></div>
       <div class="uf"><button type="button" class="btn" data-usave="${i}">Kaydet</button></div></li>`).join("");
   $("#users").innerHTML = `
     <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Yeni kullanıcı ekle, departman ata.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
