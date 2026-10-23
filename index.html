@@ -258,6 +258,12 @@ body[data-tab="yapilacak"] #screen .card::before{background:var(--ink)}
 .dtable{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
 .dtable th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:right;padding:0 0 6px 6px}
 .dtable th:first-child,.dtable td:first-child{text-align:left;padding-left:0}
+/* tablo başlık satırı: Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisi */
+.dtable thead th{background:color-mix(in srgb,var(--muted) 30%,var(--surface));color:var(--ink);padding:7px 0 7px 6px;white-space:nowrap}
+.dtable thead th:first-child{padding-left:8px;border-radius:8px 0 0 8px}
+.dtable thead th:last-child{padding-right:8px;border-radius:0 8px 8px 0}
+.dtable td:first-child{padding-left:8px}
+.dtable td:last-child{padding-right:8px}
 .dtable td{text-align:right;padding:8px 0 8px 6px;border-top:1px solid var(--line)}
 .dtable td.over{color:var(--acil-ink);font-weight:600}
 .tscroll{overflow-x:auto}
