@@ -151,6 +151,10 @@ button{font:inherit;color:inherit}
 .flag{font:600 10px/1.6 var(--font-mono);letter-spacing:.05em;border:1px solid currentColor;border-radius:3px;padding:0 5px}
 .flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.actions .reopen{margin-left:auto}   /* "Yeniden aç" sağ alt köşede */
+/* kontrol edilmiş (onaylanmış) iş: yeşil kutu */
+.card.done.verified{--c:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
+.card.done.verified .prio{background:var(--ok);color:var(--surface)}
 .btn{font-weight:600;font-size:13.5px;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;line-height:1.2}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .btn.ghost{background:transparent}
@@ -313,7 +317,7 @@ button{font:inherit;color:inherit}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
 /* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
-#detail.acil{--c:var(--acil);--cs:var(--acil-soft)} #detail.orta{--c:var(--orta);--cs:var(--orta-soft)} #detail.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
+#detail.verified{--c:var(--ok);--cs:var(--ok-soft)} #detail.acil{--c:var(--acil);--cs:var(--acil-soft)} #detail.orta{--c:var(--orta);--cs:var(--orta-soft)} #detail.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
 #detail{background:linear-gradient(var(--c,var(--line)),var(--c,var(--line))) top/100% 6px no-repeat,var(--cs,var(--surface))}
 #detail .sheet-head{background:var(--cs,var(--surface));box-shadow:0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
@@ -566,7 +570,8 @@ const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.
 const canEdit = t => !readOnly && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
 const inDept = t => !readOnly && (!profileMode || !!(me && me.dept && t.dept === me.dept));
-const canVerify = t => canStatus(t);
+const canVerify = t => canStatus(t);                  // "Yeniden aç"
+const canCheck = t => !profileMode || isCreator(t);    // "Kontrol edildi": yalnızca işi atayan kişi
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -641,7 +646,7 @@ function actionsFor(t){
     case "yeni": return b("take","Üstlen","primary");
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
     case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
-    case "tamam": return (t.verified ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost");
+    case "tamam": return (t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost reopen");
   }
   return "";
 }
@@ -652,7 +657,7 @@ function card(t, opts = {}){
     t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
     t.verified ? `<span class="flag ok">KONTROL EDİLDİ</span>` : ""
   ].join("");
-  return `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
+  return `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
       <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
@@ -933,7 +938,7 @@ $("#screen").addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b || b.dataset.act === "open"){ openDetail(id); return; }
   const a = b.dataset.act;
-  if (a === "verify" || a === "reopen" ? !canVerify(t) : !inDept(t)) return;
+  if (a === "verify" ? !canCheck(t) : a === "reopen" ? !canVerify(t) : !inDept(t)) return;
   requireMe(() => {
     if (a === "take") patch(id, {status: "devam"}, "Üstlendi, çalışmaya başladı");
     if (a === "done"){
@@ -966,7 +971,7 @@ function renderDetail(){
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
     : `<b>${esc(STATUS[t.status] || "")}</b>`;
-  el.className = "sheet " + p;
+  el.className = "sheet " + (!isOpen(t) && t.verified ? "verified" : p);
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
