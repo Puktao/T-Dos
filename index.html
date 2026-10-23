@@ -574,7 +574,7 @@ const canEdit = t => !readOnly && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
 const inDept = t => !readOnly && (!profileMode || !!(me && me.dept && t.dept === me.dept));
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
-const canCheck = t => !profileMode || isCreator(t);    // "Kontrol edildi": yalnızca işi atayan kişi
+const canCheck = t => !profileMode || isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
