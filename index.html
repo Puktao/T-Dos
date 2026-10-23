@@ -309,6 +309,18 @@ button{font:inherit;color:inherit}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:14px 0 0;font-size:14px}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
 .facts dd{margin:0;overflow-wrap:anywhere}
+/* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
+.dcard{display:block;cursor:default;margin-top:12px;padding:12px 14px 10px 18px}
+.dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
+.dcard .dc-row .k{color:var(--muted);font-size:12.5px;font-weight:600}
+.dcard .dc-row .v{min-width:0;overflow-wrap:anywhere}
+.dcard .dc-row .rem{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.dcard .dc-row .rem.over{color:var(--acil-ink);font-weight:600}
+.dcard .dc-row .sel select{padding-block:8px}
+.dcard .ddesc{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.dcard .section-t{margin-top:14px;font-size:16px}
+.dcard .clist li{border-color:color-mix(in srgb,var(--c) 30%,var(--line))}
+.dcard .dc-foot{margin-top:12px;text-align:right;font-size:11.5px;line-height:1.45;color:var(--muted)}
 .ddesc{margin:14px 0 0;padding:10px 12px;background:var(--surface-2);border-radius:10px;font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap}
 .inline{display:flex;gap:8px}
 .inline input{flex:1;min-width:0}
@@ -944,25 +956,27 @@ function renderDetail(){
   if (!t){ closeOv("#ovDetail"); return; }
   const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
+  const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
+  const diff = t.dueAt ? t.dueAt - Date.now() : 0;
+  const due = !t.dueAt ? "—" : `${esc(fmt(t.dueAt))}${isOpen(t) ? ` <span class="rem ${diff < 0 ? "over" : ""}">${diff < 0 ? "Gecikti " + dur(-diff) : dur(diff) + " kaldı"}</span>` : ""}`;
+  const status = inDept(t)
+    ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
+    : `<b>${esc(STATUS[t.status] || "")}</b>`;
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
-    <div class="card ${p}" style="cursor:default;margin-top:12px;grid-template-columns:1fr;padding-block:10px"><div class="body">
-      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(t)}</div></div>
-    ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
-    ${checklistDetail(t)}
-    <dl class="facts">
-      <dt>Departman</dt><dd>${esc(DEPTS[t.dept]?.label || "")}</dd>
-      <dt>Bildiren</dt><dd>${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}</dd>
-      <dt>Açılış</dt><dd>${esc(fmt(t.createdAt))} (${ago(t.createdAt)})</dd>
-      <dt>Son tarih</dt><dd>${esc(fmt(t.dueAt) || "—")}</dd>
-      <dt>Durum</dt><dd>${esc(STATUS[t.status] || "")}</dd>
-      ${t.doneAt ? `<dt>Bitiş</dt><dd>${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}</dd>` : ""}
-      ${t.verified ? `<dt>Kontrol</dt><dd>${esc(t.verifiedBy || "")}</dd>` : ""}
-      ${t.ooo || t.guest ? `<dt>Oda</dt><dd>${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}</dd>` : ""}
-    </dl>
-    ${inDept(t) ? `
-    <div class="field"><label class="lbl" for="dStatus">Durumu değiştir</label><div class="sel"><select id="dStatus">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div></div>` : ""}
+    <div class="card ${p} dcard">
+      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
+      ${row("Departman", `<b>${esc(DEPTS[t.dept]?.label || "")}</b>`)}
+      ${row("Son tarih", due)}
+      ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
+      ${checklistDetail(t)}
+      ${row("Durum", status)}
+      ${t.doneAt ? row("Bitiş", `${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}`) : ""}
+      ${t.verified ? row("Kontrol", esc(t.verifiedBy || "")) : ""}
+      ${t.ooo || t.guest ? row("Oda", `${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}`) : ""}
+      <div class="dc-foot">Bildiren: ${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}<br>Açılış: ${esc(fmt(t.createdAt))}</div>
+    </div>
     <h3 class="section-t">Geçmiş</h3>
     <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>`;
 }
