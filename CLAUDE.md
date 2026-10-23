@@ -48,11 +48,12 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 1. Uygulama adı **F-Do’s**. Logo: lacivert zemin, beyaz `F-Do`, sarı tire, üstte küçük sarı `’s`; "Do" F’den küçük, altında yalnızca "Do" boyunca düz sarı çizgi, çizginin alt kenarı F’nin alt ucuyla aynı hizada (Big Shoulders Display 800). Uygulama ikonu, üst köşedeki logo ve giriş ekranındaki logo aynı çizimdir: `index.html` içindeki `#fdosLogo` SVG sembolü ve `icons/*.png`. Yazı tipi ya da renk değiştirilmez.
 2. Alt tablar: **Anasayfa · Yapılacaklar · Tamamlananlar · Rapor**. Uygulama **her açılışta Anasayfa** ile başlar (adres çubuğundaki #sekme dikkate alınmaz); her girişte (hangi kullanıcı olursa olsun) ve arka planda 10 saniyeden uzun kalıp geri gelinince de Anasayfa'ya döner (açık iş/kullanıcı formu varsa dokunulmaz). Üst çubukta logonun yanında sekme adı yazmaz (başlık yalnızca ekran okuyucu için, `sr-only`).
 3. **Anasayfa** sırası:
-   - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
+   - "Bugün yapılacaklar" (gri kutu) ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
    - "Acil yapılacaklar" listesi: aciliyeti Acil olan işler **ve son tarihine 3 saatten az kalan (ya da geçmiş) her iş**; son tarihe göre sıralı. Kartlar kendi aciliyet renginde kalır.
    - "Takvimi yaklaşan" listesi: kalan işler, **son tarihi en yakın olan en üstte**, aciliyet rengine boyanmış kutular, en fazla 12 iş. "Acil yapılacaklar"daki işler burada görünmez.
 4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Formdaki tarih seçici telefonun kendi biçimini kullanır. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
+   - Yapılacaklar listesinde kartların soldaki çentiği aciliyet renginde değil, lacivert (`--ink`; koyu temada açık renk).
    - Üstte arama alanı, sağında Filtre düğmesi.
    - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
    - Panelde "Sıfırla" ve "… işi göster" düğmeleri yok; seçim anında uygulanır, panel ✕ ya da dışına dokunarak kapanır.

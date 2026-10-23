@@ -128,7 +128,9 @@ button{font:inherit;color:inherit}
 /* home: two hero boxes + sections */
 .hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hbox{border-radius:18px;padding:14px 14px 13px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:150px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-width:0}
-.hbox.today{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.hbox.today{background:var(--muted);border-color:var(--muted);color:var(--bg)}   /* gri */
+/* Yapılacaklar listesinde kartların soldaki çentiği lacivert (koyu temada açık) */
+body[data-tab="yapilacak"] #screen .card::before{background:var(--ink)}
 .hbox .hl{font-weight:700;font-size:14.5px;line-height:1.25}
 .hbox b{font:800 64px/.9 var(--font-display);font-variant-numeric:tabular-nums;margin-top:auto}
 .hbox .hs{font-size:12.5px;line-height:1.35;opacity:.8}
@@ -908,7 +910,7 @@ function renderTabs(){
   const pend = visTasks().filter(t => !isOpen(t) && !t.verified).length;
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
   $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
-  $("#hTitle").textContent = TITLES[ui.tab];
+  $("#hTitle").textContent = TITLES[ui.tab]; document.body.dataset.tab = ui.tab;
   $("#newBtn").hidden = readOnly || dbFailed || !(ui.tab === "ana" || ui.tab === "yapilacak");
 }
 function renderScreen(){
