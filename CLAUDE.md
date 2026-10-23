@@ -15,7 +15,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Bağlantı:** `supabase-config.js` → `window.FDOS_SUPABASE = {url, anonKey}`. Yalnızca anon / publishable anahtar. **service_role / secret anahtar asla depoya girmez.**
 - **Veritabanı:** `schema.sql` (birden fazla çalıştırılabilir)
   - Tablo `public.fdos_tasks(id text pk, data jsonb, status gen., done_at gen. bigint, created_at, updated_at)`.
-  - RLS: yalnızca `authenticated`. Okuma, güncelleme ve silme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme herkes. Silme ayrıca yalnızca `status = 'tamam'` olan işlerde. `anon` erişimi yok.
+  - RLS: yalnızca `authenticated`. Okuma ve güncelleme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme herkes. Silme `fdos_can_delete(data)`: işi açan kişi (onaylanmamış işte) ve yönetici. `anon` erişimi yok.
   - `fdos_patch_task(p_id, p_patch jsonb)` → `data = data || p_patch`. Üst düzey alanları birleştirir; güncellemeler bununla yapılır.
   - Realtime: tablo `supabase_realtime` yayınında.
 - **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda ve internet geri geldiğinde `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
@@ -54,6 +54,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Formdaki tarih seçici telefonun kendi biçimini kullanır. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Kartların soldaki çentiği her listede kendi aciliyet renginde (Yapılacaklar dahil).
+   - **Sola kaydırarak silme** (tüm listeler: Anasayfa, Yapılacaklar, Tamamlananlar): kartı sola kaydırınca sağda kırmızı **Sil** çıkar, iki aşamalı (Sil → Eminim). İşi açan kişi kendi işlerini (kontrolü onaylanmamışsa), yönetici her işi siler (`canDelete(t)`; veritabanında `fdos_can_delete(data)`, `schema.sql` 11. bölüm).
    - Üstte arama alanı, sağında Filtre düğmesi.
    - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
    - Panelde "Sıfırla" ve "… işi göster" düğmeleri yok; seçim anında uygulanır, panel ✕ ya da dışına dokunarak kapanır.
@@ -100,7 +101,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
 - [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
 - [x] `schema.sql` 8. bölüm (görünürlük kuralı) kuruldu.
-- [ ] `schema.sql` 9. bölüm (yalnızca Tuncer yönetici, Yönetici departmanı) ve 10. bölüm (kullanıcı silme) için dosya yeniden çalıştırılacak.
+- [ ] `schema.sql` 9. bölüm (yalnızca Tuncer yönetici), 10. bölüm (kullanıcı silme) ve 11. bölüm (iş silme kuralı) için dosya yeniden çalıştırılacak.
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.

@@ -383,3 +383,25 @@ begin
 end $$;
 revoke all on function public.fdos_admin_delete_user(uuid) from public, anon;
 grant execute on function public.fdos_admin_delete_user(uuid) to authenticated;
+
+-- 11) Silme: işi açan kişi (kontrolü onaylanmamış işte) ve yönetici (her işte) siler.
+--     (8. bölümdeki "yalnızca tamamlanmış iş silinir" kuralının yerine geçer.)
+create or replace function public.fdos_can_delete(d jsonb)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.fdos_is_admin()
+      or ( coalesce((d->>'verified')::boolean, false) = false
+           and ( d->>'createdUid' = auth.uid()::text
+                 or ( coalesce(d->>'createdUid', '') = ''
+                      and exists (select 1 from public.fdos_profiles p
+                                   where p.user_id = auth.uid() and lower(p.name) = lower(d->>'createdBy')) ) ) );
+$$;
+revoke all on function public.fdos_can_delete(jsonb) from public, anon;
+grant execute on function public.fdos_can_delete(jsonb) to authenticated;
+
+drop policy if exists "fdos silme" on public.fdos_tasks;
+create policy "fdos silme" on public.fdos_tasks for delete to authenticated using (public.fdos_can_delete(data));

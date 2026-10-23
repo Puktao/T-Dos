@@ -114,6 +114,12 @@ button{font:inherit;color:inherit}
 .card.done .prio{background:var(--surface-2);color:var(--muted)}
 .card .plate{background:var(--surface)}
 .card.fresh{animation:fresh 2.4s ease-out}
+/* sola kaydırınca silme */
+.swc{position:relative;border-radius:12px;overflow:hidden;touch-action:pan-y}
+.swc .card{transition:transform .2s ease;position:relative;z-index:1}
+.swc-act{position:absolute;inset:0 0 0 auto;width:96px;display:flex;background:var(--acil);border-radius:12px}
+.swc-del{flex:1;border:0;background:none;color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.swc-del.armed{background:var(--acil-ink)}
 @keyframes fresh{0%{box-shadow:0 0 0 4px var(--c)}100%{box-shadow:0 0 0 0 transparent}}
 .plate{width:60px;min-height:62px;border:1.5px solid var(--ink);background:var(--surface-2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 3px;text-align:center}
 .plate small{font:600 9px/1 var(--font-mono);letter-spacing:.14em;color:var(--muted)}
@@ -568,7 +574,7 @@ const ui = {
   done: {...DEF.done},
   rep: "7"
 };
-let detailId = null, pendingAfterWho = null, deleteArmed = false;
+let detailId = null, pendingAfterWho = null, deleteArmed = false, delArmed = null;
 const myCreated = new Set(), fresh = new Set();
 let firstSnap = true, audioCtx = null;
 
@@ -594,6 +600,8 @@ const canEdit = t => !readOnly && !locked(t) && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
 const inDept = t => !readOnly && !locked(t) && (!profileMode || !!(me && me.dept && t.dept === me.dept));
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
+// Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
+const canDelete = t => !readOnly && (!profileMode || isAdmin() || (isCreator(t) && !locked(t)));
 const canCheck = t => !profileMode || isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
@@ -679,7 +687,7 @@ function card(t, opts = {}){
     t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
     t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
   ].join("");
-  return `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
+  const art = `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
       <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
@@ -695,6 +703,9 @@ function card(t, opts = {}){
       ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
     </div>
   </article>`;
+  if (!canDelete(t)) return art;
+  const armed = delArmed === t.id;
+  return `<div class="swc" data-sid="${esc(t.id)}"><div class="swc-act"><button type="button" class="swc-del ${armed ? "armed" : ""}" data-cdel="${esc(t.id)}">${armed ? "Eminim" : "Sil"}</button></div>${art}</div>`;
 }
 const byPrioDue = (a, b) => PRIO[prioOf(a)].rank - PRIO[prioOf(b)].rank || (a.dueAt || 9e15) - (b.dueAt || 9e15);
 const byDue = (a, b) => (a.dueAt || 9e15) - (b.dueAt || 9e15) || PRIO[prioOf(a)].rank - PRIO[prioOf(b)].rank;
@@ -941,7 +952,41 @@ $("#tabbar").addEventListener("click", e => {
   const b = e.target.closest("[data-tab]"); if (!b) return;
   ui.tab = b.dataset.tab; window.scrollTo(0, 0); renderAll();
 });
+// Kartı sola kaydırınca sağda "Sil" çıkar (yalnızca silme yetkisi olan kartlarda)
+const CSW = 96;
+function cardSwipeClose(){ document.querySelectorAll("#screen .swc.open").forEach(w => { w.classList.remove("open"); w.querySelector(".card").style.transform = ""; }); if (delArmed){ delArmed = null; renderScreen(); } }
+function cardSwipeOpen(id){ const w = document.querySelector(`#screen .swc[data-sid="${CSS.escape(id)}"]`); if (!w) return; w.classList.add("open"); w.querySelector(".card").style.transform = `translateX(${-CSW}px)`; }
+let csw = null;
+$("#screen").addEventListener("pointerdown", e => {
+  const w = e.target.closest(".swc"); if (!w || e.target.closest(".swc-act, .btn")) return;
+  csw = {w, x: e.clientX, y: e.clientY, base: w.classList.contains("open") ? -CSW : 0, dx: 0, lock: null};
+});
+$("#screen").addEventListener("pointermove", e => {
+  if (!csw) return;
+  const dx = e.clientX - csw.x, dy = e.clientY - csw.y;
+  if (csw.lock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) csw.lock = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+  if (csw.lock !== "x") return;
+  csw.dx = dx; csw.w._moved = true;
+  const c = csw.w.querySelector(".card"); c.style.transition = "none"; c.style.transform = `translateX(${Math.max(-CSW, Math.min(0, csw.base + dx))}px)`;
+});
+const cswEnd = () => {
+  if (!csw) return;
+  const c = csw.w.querySelector(".card"); c.style.transition = "";
+  if (csw.lock === "x"){ const open = csw.base + csw.dx < -CSW / 2, id = csw.w.dataset.sid; document.querySelectorAll("#screen .swc.open").forEach(w => { if (w !== csw.w){ w.classList.remove("open"); w.querySelector(".card").style.transform = ""; } }); if (open) cardSwipeOpen(id); else { csw.w.classList.remove("open"); c.style.transform = ""; } }
+  csw = null;
+};
+$("#screen").addEventListener("pointerup", cswEnd);
+$("#screen").addEventListener("pointercancel", cswEnd);
 $("#screen").addEventListener("click", e => {
+  const cd = e.target.closest("[data-cdel]");
+  if (cd){
+    const id = cd.dataset.cdel, t = tasks.get(id); if (!t || !canDelete(t)) return;
+    if (delArmed !== id){ delArmed = id; renderScreen(); cardSwipeOpen(id); return; }
+    delArmed = null; requireMe(() => remove(id)); return;
+  }
+  const sw0 = e.target.closest(".swc");
+  if (sw0 && sw0._moved){ sw0._moved = false; return; }
+  if (sw0 && sw0.classList.contains("open")){ cardSwipeClose(); return; }
   const j = e.target.closest("[data-jump]");
   if (j){
     ui.tab = "yapilacak"; ui.todo = {...DEF.todo};
@@ -1482,8 +1527,10 @@ async function remove(id){
   if (!guard()) return;
   tasks.delete(id); closeOv("#ovDetail"); renderAll();
   try {
-    const {error} = await sb.from(TABLE).delete().eq("id", id);
-    if (error){ writeError(error); refetch(); } else toast("Kayıt silindi.");
+    const {data, error} = await sb.from(TABLE).delete().eq("id", id).select("id");
+    if (error){ writeError(error); refetch(); }
+    else if (!data || !data.length){ toast("Silinemedi: bu işi silme yetkin yok."); refetch(); }
+    else toast("İş silindi.");
   } catch(e){ writeError(e); refetch(); }
 }
 async function insertTask(doc){
