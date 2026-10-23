@@ -355,7 +355,7 @@ img{max-width:100%}
 /* kullanıcılar (yönetici) */
 .ulist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
 .ulist .uitem{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2);touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.ulist .uact{position:absolute;inset:0 auto 0 0;width:168px;display:flex}
+.ulist .uact{position:absolute;inset:0 0 0 auto;width:168px;display:flex}
 .ulist .ua{flex:1;border:0;font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:#fff}
 .ulist .ua.edit{background:var(--sureli)}
 .ulist .ua.del{background:var(--acil)}
@@ -1084,7 +1084,7 @@ async function loadProfiles(){
 }
 const ADMIN_DEPT = "yonetici";   // yalnızca Tuncer'in departmanı; başkasına atanamaz
 const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === cur)).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
-// Kullanıcılar: önce liste. Satırı sağa kaydırınca "Düzenle" ve "Sil" çıkar. Sağ üstteki + kayıt formunu açar.
+// Kullanıcılar: önce liste. Satırı sola kaydırınca sağda "Düzenle" ve "Sil" çıkar. Sağ üstteki + kayıt formunu açar.
 let usersView = "list", userEdit = null, userDelArmed = null;
 function renderUsers(){
   if (usersView === "form") return renderUserForm();
@@ -1102,7 +1102,7 @@ function renderUsers(){
       </div></li>`;
   }).join("");
   $("#users").innerHTML = `
-    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Satırı sağa kaydır: düzenle ya da sil.</p></div>
+    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Satırı sola kaydır: düzenle ya da sil.</p></div>
       <div class="hact"><button type="button" class="iconbtn" id="uNew" aria-label="Kullanıcı ekle" title="Kullanıcı ekle">${plus}</button><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
     ${usersMsg ? `<p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" style="margin-top:12px">${esc(usersMsg.replace(/^✓ /, ""))}</p>` : ""}
     <h3 class="section-t">Kayıtlı kullanıcılar (${profiles.length})</h3>
@@ -1180,14 +1180,14 @@ $("#users").addEventListener("click", async e => {
     const open = li.classList.contains("open"); closeSwipes(); if (!open) openSwipe(li.dataset.uid);
   }
 });
-// kaydırma (sağa çekince eylemler soldan görünür)
+// kaydırma (sola çekince eylemler sağdan görünür)
 const SWIPE = 168;
 function closeSwipes(){ document.querySelectorAll("#users .uitem.open").forEach(li => { li.classList.remove("open"); li.querySelector(".ufront").style.transform = ""; }); }
-function openSwipe(uid){ const li = document.querySelector(`#users .uitem[data-uid="${CSS.escape(uid)}"]`); if (!li) return; li.classList.add("open"); li.querySelector(".ufront").style.transform = `translateX(${SWIPE}px)`; }
+function openSwipe(uid){ const li = document.querySelector(`#users .uitem[data-uid="${CSS.escape(uid)}"]`); if (!li) return; li.classList.add("open"); li.querySelector(".ufront").style.transform = `translateX(${-SWIPE}px)`; }
 let sw = null;
 $("#users").addEventListener("pointerdown", e => {
   const li = e.target.closest(".uitem"); if (!li || e.target.closest(".uact")) return;
-  sw = {li, x: e.clientX, y: e.clientY, base: li.classList.contains("open") ? SWIPE : 0, dx: 0, lock: null};
+  sw = {li, x: e.clientX, y: e.clientY, base: li.classList.contains("open") ? -SWIPE : 0, dx: 0, lock: null};
 });
 $("#users").addEventListener("pointermove", e => {
   if (!sw) return;
@@ -1195,13 +1195,13 @@ $("#users").addEventListener("pointermove", e => {
   if (sw.lock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) sw.lock = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
   if (sw.lock !== "x") return;
   sw.dx = dx; sw.li._moved = true;
-  const v = Math.max(0, Math.min(SWIPE, sw.base + dx));
+  const v = Math.max(-SWIPE, Math.min(0, sw.base + dx));
   const f = sw.li.querySelector(".ufront"); f.style.transition = "none"; f.style.transform = `translateX(${v}px)`;
 });
 const swipeEnd = () => {
   if (!sw) return;
   const f = sw.li.querySelector(".ufront"); f.style.transition = "";
-  if (sw.lock === "x"){ const open = sw.base + sw.dx > SWIPE / 2; const uid = sw.li.dataset.uid; closeSwipes(); if (open) openSwipe(uid); else if (userDelArmed){ userDelArmed = null; renderUsers(); } }
+  if (sw.lock === "x"){ const open = sw.base + sw.dx < -SWIPE / 2; const uid = sw.li.dataset.uid; closeSwipes(); if (open) openSwipe(uid); else if (userDelArmed){ userDelArmed = null; renderUsers(); } }
   sw = null;
 };
 $("#users").addEventListener("pointerup", swipeEnd);
