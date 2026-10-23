@@ -151,7 +151,7 @@ button{font:inherit;color:inherit}
 .flag{font:600 10px/1.6 var(--font-mono);letter-spacing:.05em;border:1px solid currentColor;border-radius:3px;padding:0 5px}
 .flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
-.actions .reopen{margin-left:auto}   /* "Yeniden aç" sağ alt köşede */
+.meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
 /* kontrol edilmiş (onaylanmış) iş: yeşil kutu */
 .card.done.verified{--c:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
 .card.done.verified .prio{background:var(--ok);color:var(--surface)}
@@ -633,9 +633,9 @@ function plate(room, dept){
   const r = String(room), num = /^\d{1,5}[A-Za-z]?$/.test(r);
   return `<div class="plate"><small>${num ? "ODA" : "ALAN"}</small><b class="${r.length > 4 ? "long" : ""}">${esc(r)}</b></div>`;
 }
-function dueLine(t){
+function dueLine(t, extra = ""){
   if (!isOpen(t)){
-    return `<div class="due">${clockSvg}<span>Bitti ${esc(dueLabel(t.doneAt))}</span></div>`;
+    return `<div class="due">${clockSvg}<span>Bitti ${esc(dueLabel(t.doneAt))}</span>${extra ? `<span style="margin-left:auto">${extra}</span>` : ""}</div>`;
   }
   if (!t.dueAt) return `<div class="due">${clockSvg}<span>Son tarih yok</span></div>`;
   const diff = t.dueAt - Date.now();
@@ -649,7 +649,7 @@ function actionsFor(t){
     case "yeni": return "";   // "Üstlen" yok; durum detaydan ya da sonraki düğmelerden değişir
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
     case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
-    case "tamam": return (t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost reopen");
+    case "tamam": return t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary");   // "Yeniden aç" durum satırında
   }
   return "";
 }
@@ -658,19 +658,19 @@ function card(t, opts = {}){
   const flags = [
     t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
     t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
-    t.verified ? `<span class="flag ok">KONTROL EDİLDİ</span>` : ""
   ].join("");
   return `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
       <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
-      ${dueLine(t)}
+      ${dueLine(t, t.verified && !isOpen(t) ? `<span class="flag ok">KONTROL EDİLDİ</span>` : "")}
       ${t.desc ? `<p class="desc">${esc(t.desc)}</p>` : ""}
       ${itemsProg(t)}
       <div class="meta">
         ${opts.hideDept ? "" : `<span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>`}
         <span class="st">${STATUS[t.status] || ""}</span>
         ${flags}
+        ${!isOpen(t) && !readOnly && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
       </div>
       ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
     </div>
