@@ -278,6 +278,9 @@ button{font:inherit;color:inherit}
 .sheet-head{display:flex;align-items:flex-start;gap:12px}
 .sheet-head h2{margin:0;font:800 26px/1.05 var(--font-display);text-wrap:balance}
 .sheet-head .x{margin-left:auto}
+.sheet-head .hact{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
+.sheet-head .hact .x{margin-left:0}
+.sheet-head .hact .btn{height:38px}
 .sheet-sub{margin:4px 0 0;color:var(--muted);font-size:13px}
 .field{display:flex;flex-direction:column;gap:7px;margin-top:16px}
 .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
@@ -538,6 +541,11 @@ const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
 // Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
 const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
 // Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
+// Atanan departman görüntüleme ekranı: durum ve tikler taslakta tutulur, "Güncelle" ile kaydedilir.
+const draftMode = t => !readOnly && viewOnly(t) && canStatus(t);
+let draft = {status: null, items: {}};
+const draftList = t => (t.items || []).map(x => draft.items[x.id] === undefined ? x : {...x, done: draft.items[x.id]});
+const draftDirty = t => (draft.status && draft.status !== t.status) || (t.items || []).some(x => draft.items[x.id] !== undefined && draft.items[x.id] !== !!x.done);
 const canVerify = t => canStatus(t) || !!(me && me.dept && t.createdDept === me.dept);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
@@ -548,10 +556,10 @@ function itemsProg(t){
   return `<div class="cprog"><span>Liste ${d}/${it.length}</span><div class="cbar"><div style="width:${d / it.length * 100}%"></div></div></div>`;
 }
 function checklistDetail(t){
-  const it = t.items || [];
+  const it = draftMode(t) ? draftList(t) : (t.items || []);
   if (!it.length) return "";   // liste yoksa bölüm hiç görünmez
   const edit = !readOnly && !viewOnly(t);
-  const d = it.length - openItems(t);
+  const d = it.filter(x => x.done).length;
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
       <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${readOnly || !canStatus(t) ? "disabled" : ""}><span class="t">${esc(x.text)}</span></label>
@@ -944,7 +952,7 @@ function renderDetail(){
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
-      <button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+      <div class="hact">${draftMode(t) ? `<button type="button" class="btn primary" id="dSave"${draftDirty(t) ? "" : " disabled"}>Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
     <div class="card ${p}" style="cursor:default;margin-top:12px;grid-template-columns:1fr;padding-block:10px"><div class="body">
       <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(t)}</div></div>
     ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
@@ -960,7 +968,7 @@ function renderDetail(){
     </dl>
     ${readOnly ? "" : `
     <div class="pair">
-      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div></div>
+      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === (draftMode(t) && draft.status || t.status))).join("")}</select></div></div>
       <div class="field"><label class="lbl" for="dPrio">Aciliyet</label><div class="sel" data-p="${p}"><select id="dPrio"${viewOnly(t) ? " disabled" : ""}>${Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === p)).join("")}</select></div></div>
     </div>`}
     ${readOnly || viewOnly(t) ? "" : `
@@ -979,8 +987,30 @@ function renderDetail(){
   if (keep.focus === "dDue" && $("#dDue")) $("#dDue").value = keep.due;
   if (keep.focus && document.getElementById(keep.focus)) document.getElementById(keep.focus).focus();
 }
-function openDetail(id){ detailId = id; deleteArmed = false; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
+function openDetail(id){ detailId = id; deleteArmed = false; draft = {status: null, items: {}}; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
 $("#detail").addEventListener("click", e => {
+  if (e.target.closest("#dSave") && detailId){
+    const t = tasks.get(detailId); if (!t || !draftMode(t) || !draftDirty(t)) return;
+    requireMe(() => {
+      const old = new Map((t.items || []).map(x => [x.id, !!x.done]));
+      const changed = draftList(t).filter(x => x.done !== old.get(x.id));
+      const items = draftList(t).map(x => x.done === old.get(x.id) ? x : {...x, by: x.done ? who() : null, at: x.done ? Date.now() : null});
+      const st = draft.status && draft.status !== t.status ? draft.status : null;
+      const left = items.filter(x => !x.done).length;
+      if ((st || t.status) === "tamam" && left){ toast(`Önce listedeki ${left} kalemi onayla.`); return; }
+      const f = {}, msgs = [];
+      if (changed.length){ f.items = items; msgs.push(changed.map(x => `${x.done ? "Onayladı" : "Onayı kaldırdı"}: ${x.text}`).join(", ")); }
+      if (st){
+        f.status = st;
+        if (st === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
+        msgs.push(`Durumu “${STATUS[st]}” yaptı`);
+      }
+      draft = {status: null, items: {}};
+      patch(t.id, f, msgs.join(" · "));
+      toast("Güncellendi.");
+    });
+    return;
+  }
   const b = e.target.closest("[data-dact]"); if (!b || !detailId) return;
   const t = tasks.get(detailId); if (!t) return;
   const a = b.dataset.dact, v = b.dataset.v;
@@ -1023,12 +1053,22 @@ function setStatus(t, v){
 }
 $("#detail").addEventListener("change", e => {
   const t0 = detailId && tasks.get(detailId);
-  if (t0 && e.target.id === "dStatus"){ if (!canStatus(t0)) return; const v = e.target.value; requireMe(() => setStatus(t0, v)); return; }
+  if (t0 && e.target.id === "dStatus"){
+    if (!canStatus(t0)) return;
+    const v = e.target.value;
+    if (draftMode(t0)){ draft.status = v; $("#dSave").disabled = !draftDirty(t0); return; }
+    requireMe(() => setStatus(t0, v)); return;
+  }
   if (t0 && e.target.id === "dPrio"){ if (viewOnly(t0)) return; const v = e.target.value; if (v !== prioOf(t0)) requireMe(() => patch(t0.id, {prio: v}, `Aciliyeti “${PRIO[v].label}” yaptı`)); return; }
   const c = e.target.closest("[data-item]"); if (!c || !detailId) return;
   const t = tasks.get(detailId); if (!t || !canStatus(t)) return;
   const id = c.dataset.item, on = c.checked;
   c.closest("li")?.classList.toggle("done", on);
+  if (draftMode(t)){
+    draft.items[id] = on; $("#dSave").disabled = !draftDirty(t);
+    const it = draftList(t), m = $("#detail .section-t .muted"); if (m) m.textContent = `${it.filter(x => x.done).length}/${it.length}`;
+    return;
+  }
   requireMe(() => {
     const items = (t.items || []).map(x => x.id === id ? {...x, done: on, by: on ? who() : null, at: on ? Date.now() : null} : x);
     const it = items.find(x => x.id === id); if (!it) return;
