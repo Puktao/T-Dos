@@ -403,7 +403,7 @@ img{max-width:100%}
       <label class="check"><input type="checkbox" id="fGuest"><span>Misafir odada<small>Girişten önce kapı çalınmalı ya da misafirle saat ayarlanmalı.</small></span></label>
     </div>
     <p class="err" id="fErr" hidden></p>
-    <div class="sheet-foot"><button type="button" class="btn ghost" data-close>Vazgeç</button><button type="submit" class="btn primary" id="fSubmit">İşi kaydet</button></div>
+    <div class="sheet-foot"><button type="button" class="btn danger" id="fDel" hidden>Kaydı sil</button><button type="button" class="btn ghost" data-close>Vazgeç</button><button type="submit" class="btn primary" id="fSubmit">İşi kaydet</button></div>
   </form>
 </div>
 
@@ -542,16 +542,10 @@ const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
 // Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
 const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
 // Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
-// İşi atayan kişi (ve yönetici) düzenleme ekranı: değişiklikler taslakta tutulur, başlıktaki "Güncelle" ile kaydedilir.
-// İşi alan departman ise yalnızca durumu değiştirir ve listeyi onaylar; bunlar anında kaydedilir.
-const draftMode = t => !readOnly && !viewOnly(t);
-let draft = {};
-const DRAFT_KEYS = ["status", "prio", "dueAt", "dept", "ooo", "guest", "items"];
-const eff = t => draftMode(t) ? {...t, ...draft} : t;
-const sameVal = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
-const draftDirty = t => DRAFT_KEYS.some(k => k in draft && !sameVal(draft[k], k === "prio" ? prioOf(t) : k === "ooo" || k === "guest" ? !!t[k] : t[k]))
-  || !!($("#dNote")?.value || "").trim();
-const syncSave = t => { const b = $("#dSave"); if (b) b.disabled = !draftDirty(t); };
+// Detay ekranı yalnızca görüntüleme. İşi açan kişi ve yönetici "Güncelle" ile işi Yapılacak İş formunda açar.
+const canEdit = t => !readOnly && !viewOnly(t);
+// İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
+const inDept = t => !readOnly && (!profileMode || !!(me && me.dept && t.dept === me.dept));
 const canVerify = t => canStatus(t) || !!(me && me.dept && t.createdDept === me.dept);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
@@ -562,15 +556,12 @@ function itemsProg(t){
   return `<div class="cprog"><span>Liste ${d}/${it.length}</span><div class="cbar"><div style="width:${d / it.length * 100}%"></div></div></div>`;
 }
 function checklistDetail(t){
-  const it = eff(t).items || [];
+  const it = t.items || [];
   if (!it.length) return "";   // liste yoksa bölüm hiç görünmez
-  const edit = !readOnly && !viewOnly(t);
   const d = it.filter(x => x.done).length;
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
-      <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${readOnly || !canStatus(t) ? "disabled" : ""}><span class="t">${esc(x.text)}</span></label>
-      ${!edit ? "" : `<button type="button" class="rm" data-dact="itemdel" data-v="${esc(x.id)}" aria-label="Kalemi sil">✕</button>`}</li>`).join("")}</ul>` : ""}
-    ${!edit ? "" : `<div class="field" style="margin-top:8px"><div class="inline"><input type="text" id="dItem" maxlength="120" placeholder="Kalem yaz" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" data-dact="itemadd">Ekle</button></div></div>`}`;
+      <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${inDept(t) ? "" : "disabled"}><span class="t">${esc(x.text)}</span></label></li>`).join("")}</ul>` : ""}`;
 }
 
 /* ---------- helpers ---------- */
@@ -626,7 +617,7 @@ function dueLine(t){
 function actionsFor(t){
   if (readOnly) return "";
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
-  if (t.status === "tamam" ? !canVerify(t) : !canStatus(t)) return b("open","Detay","ghost");
+  if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return b("open","Detay","ghost");
   switch (t.status){
     case "yeni": return b("take","Üstlen","primary") + b("open","Detay","ghost");
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
@@ -926,7 +917,7 @@ $("#screen").addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b || b.dataset.act === "open"){ openDetail(id); return; }
   const a = b.dataset.act;
-  if (a === "verify" || a === "reopen" ? !canVerify(t) : !canStatus(t)) return;
+  if (a === "verify" || a === "reopen" ? !canVerify(t) : !inDept(t)) return;
   requireMe(() => {
     if (a === "take") patch(id, {status: "devam"}, "Üstlendi, çalışmaya başladı");
     if (a === "done"){
@@ -951,16 +942,13 @@ $("#screen").addEventListener("input", e => {
 function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
-  const keep = {note: $("#dNote")?.value || "", item: $("#dItem")?.value || "", focus: document.activeElement?.id};
-  const d = eff(t), p = prioOf(d), type = TYPES[t.type] || {label:"İş"}, edit = draftMode(t);
-  const chips = (act, entries, cur, cls = () => "") => entries.map(([k,l]) =>
-    `<button type="button" class="chip ${cls(k)}" data-dact="${act}" data-v="${k}" aria-pressed="${cur === k}">${cls(k) ? "<i></i>" : ""}${esc(l)}</button>`).join("");
+  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
   el.innerHTML = `
-    <div class="sheet-head">${plate(t.room, d.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
-      <div class="hact">${edit ? `<button type="button" class="btn primary" id="dSave" disabled>Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
+    <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
+      <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
     <div class="card ${p}" style="cursor:default;margin-top:12px;grid-template-columns:1fr;padding-block:10px"><div class="body">
-      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(d)}</div></div>
+      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(t)}</div></div>
     ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
     ${checklistDetail(t)}
     <dl class="facts">
@@ -968,83 +956,21 @@ function renderDetail(){
       <dt>Bildiren</dt><dd>${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}</dd>
       <dt>Açılış</dt><dd>${esc(fmt(t.createdAt))} (${ago(t.createdAt)})</dd>
       <dt>Son tarih</dt><dd>${esc(fmt(t.dueAt) || "—")}</dd>
+      <dt>Durum</dt><dd>${esc(STATUS[t.status] || "")}</dd>
       ${t.doneAt ? `<dt>Bitiş</dt><dd>${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}</dd>` : ""}
       ${t.verified ? `<dt>Kontrol</dt><dd>${esc(t.verifiedBy || "")}</dd>` : ""}
       ${t.ooo || t.guest ? `<dt>Oda</dt><dd>${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}</dd>` : ""}
     </dl>
-    ${readOnly ? "" : `
-    <div class="pair">
-      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === d.status)).join("")}</select></div></div>
-      <div class="field"><label class="lbl" for="dPrio">Aciliyet</label><div class="sel" data-p="${p}"><select id="dPrio"${edit ? "" : " disabled"}>${Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === p)).join("")}</select></div></div>
-    </div>`}
-    ${!edit ? "" : `
-    <div class="field"><label class="lbl" for="dDue">Son tarih</label><input type="datetime-local" id="dDue" value="${d.dueAt ? toInput(d.dueAt) : ""}"></div>
-    <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), d.dept)}</div></div>
-    <div class="field"><span class="lbl">Oda durumu</span><div class="chips wrap">
-      <button type="button" class="chip" data-dact="ooo" aria-pressed="${!!d.ooo}">Satışa kapalı</button>
-      <button type="button" class="chip" data-dact="guest" aria-pressed="${!!d.guest}">Misafir odada</button></div></div>
-    <div class="field"><label class="lbl" for="dNote">Not ekle</label><textarea id="dNote" placeholder="ör. Kompresör parçası sipariş edildi, yarın 10:00"></textarea></div>`}
+    ${inDept(t) ? `
+    <div class="field"><label class="lbl" for="dStatus">Durumu değiştir</label><div class="sel"><select id="dStatus">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div></div>` : ""}
     <h3 class="section-t">Geçmiş</h3>
-    <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>
-    ${edit && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
-  if ($("#dNote")) $("#dNote").value = keep.note;
-  if ($("#dItem")) $("#dItem").value = keep.item;
-  if (keep.focus && keep.focus !== "dDue" && document.getElementById(keep.focus)) document.getElementById(keep.focus).focus();
-  syncSave(t);
+    <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>`;
 }
-function openDetail(id){ detailId = id; deleteArmed = false; draft = {}; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
-function saveDraft(t){
-  const d = eff(t), f = {}, msgs = [];
-  const items = (d.items || []).map(x => {
-    const o = (t.items || []).find(y => y.id === x.id);
-    return o && !!o.done === !!x.done ? x : {...x, by: x.done ? who() : null, at: x.done ? Date.now() : null};
-  });
-  if ("dueAt" in draft && !draft.dueAt){ toast("Geçerli bir tarih ve saat seç."); return; }
-  const left = items.filter(x => !x.done).length;
-  if (d.status === "tamam" && left){ toast(`Önce listedeki ${left} kalemi onayla.`); return; }
-  if (d.status !== t.status){
-    f.status = d.status;
-    if (d.status === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
-    msgs.push(`Durumu “${STATUS[d.status]}” yaptı`);
-  }
-  if (p0(d) !== prioOf(t)){ f.prio = d.prio; msgs.push(`Aciliyeti “${PRIO[d.prio].label}” yaptı`); }
-  if (d.dueAt !== t.dueAt){ f.dueAt = d.dueAt; msgs.push(`Son tarihi ${fmt(d.dueAt)} yaptı`); }
-  if (d.dept !== t.dept){ f.dept = d.dept; msgs.push(`${DEPTS[d.dept]?.label || d.dept} departmanına aktardı`); }
-  if (!!d.ooo !== !!t.ooo){ f.ooo = !!d.ooo; msgs.push(d.ooo ? "Odayı satışa kapattı" : "Odayı satışa açtı"); }
-  if (!!d.guest !== !!t.guest){ f.guest = !!d.guest; msgs.push(d.guest ? "“Misafir odada” olarak işaretledi" : "“Misafir odada” işaretini kaldırdı"); }
-  if (!sameVal(items, t.items || [])){
-    f.items = items;
-    const oldIds = new Set((t.items || []).map(x => x.id)), newIds = new Set(items.map(x => x.id));
-    items.filter(x => !oldIds.has(x.id)).forEach(x => msgs.push("Listeye ekledi: " + x.text));
-    (t.items || []).filter(x => !newIds.has(x.id)).forEach(x => msgs.push("Listeden çıkardı: " + x.text));
-    items.filter(x => oldIds.has(x.id) && !!(t.items.find(y => y.id === x.id) || {}).done !== !!x.done).forEach(x => msgs.push(`${x.done ? "Onayladı" : "Onayı kaldırdı"}: ${x.text}`));
-  }
-  const note = ($("#dNote")?.value || "").trim().slice(0, 500);
-  if (note) msgs.push("Not: " + note);
-  if (!msgs.length) return;
-  draft = {}; if ($("#dNote")) $("#dNote").value = "";
-  patch(t.id, f, msgs.join(" · "));
-  toast("Güncellendi.");
-}
-const p0 = d => PRIO[d.prio] ? d.prio : prioOf(d);
+function openDetail(id){ detailId = id; deleteArmed = false; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
 $("#detail").addEventListener("click", e => {
   const t = detailId && tasks.get(detailId); if (!t) return;
-  if (e.target.closest("#dSave")){ if (draftMode(t) && draftDirty(t)) requireMe(() => saveDraft(t)); return; }
-  const b = e.target.closest("[data-dact]"); if (!b || !draftMode(t)) return;
-  const a = b.dataset.dact, v = b.dataset.v, d = eff(t);
-  if (a === "delete"){ requireMe(() => { if (!deleteArmed){ deleteArmed = true; renderDetail(); return; } remove(t.id); }); return; }
-  if (a === "dept") draft.dept = v;
-  if (a === "ooo") draft.ooo = !d.ooo;
-  if (a === "guest") draft.guest = !d.guest;
-  if (a === "itemadd"){
-    const txt = ($("#dItem").value || "").trim().slice(0, 120); if (!txt) return;
-    if ((d.items || []).length >= 50){ toast("En fazla 50 kalem eklenebilir."); return; }
-    draft.items = [...(d.items || []), {id: newId(), text: txt, done: false}]; $("#dItem").value = "";
-  }
-  if (a === "itemdel") draft.items = (d.items || []).filter(x => x.id !== v);
-  renderDetail();
+  if (e.target.closest("#dEdit") && canEdit(t)){ requireMe(() => { closeOv("#ovDetail"); openNew(t); }); }
 });
-
 function setStatus(t, v){
   if (v === t.status) return;
   if (v === "tamam" && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); renderDetail(); return; }
@@ -1053,34 +979,17 @@ function setStatus(t, v){
   patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
 }
 $("#detail").addEventListener("change", e => {
-  const t = detailId && tasks.get(detailId); if (!t) return;
-  const id = e.target.id, edit = draftMode(t);
-  if (id === "dStatus"){
-    if (!canStatus(t)) return;
-    if (edit){ draft.status = e.target.value; syncSave(t); return; }
-    const v = e.target.value; requireMe(() => setStatus(t, v)); return;
-  }
-  if (id === "dPrio"){ if (edit){ draft.prio = e.target.value; renderDetail(); } return; }
-  if (id === "dDue"){ if (edit){ draft.dueAt = fromInput(e.target.value); syncSave(t); } return; }
-  const c = e.target.closest("[data-item]"); if (!c || !canStatus(t)) return;
+  const t = detailId && tasks.get(detailId); if (!t || !inDept(t)) return;
+  if (e.target.id === "dStatus"){ const v = e.target.value; requireMe(() => setStatus(t, v)); return; }
+  const c = e.target.closest("[data-item]"); if (!c) return;
   const iid = c.dataset.item, on = c.checked;
   c.closest("li")?.classList.toggle("done", on);
-  if (edit){
-    draft.items = (eff(t).items || []).map(x => x.id === iid ? {...x, done: on} : x);
-    const it = draft.items, m = $("#detail .section-t .muted"); if (m) m.textContent = `${it.filter(x => x.done).length}/${it.length}`;
-    syncSave(t); return;
-  }
-  // işi alan departman: liste onayı anında kaydedilir
   requireMe(() => {
     const items = (t.items || []).map(x => x.id === iid ? {...x, done: on, by: on ? who() : null, at: on ? Date.now() : null} : x);
     const it = items.find(x => x.id === iid); if (!it) return;
     patch(t.id, {items}, `${on ? "Onayladı" : "Onayı kaldırdı"}: ${it.text}`);
     if (on && items.every(x => x.done)) toast("Listenin tamamı onaylandı. İşi tamamlayabilirsin.");
   });
-});
-$("#detail").addEventListener("input", e => { if (e.target.id === "dNote" || e.target.id === "dDue"){ const t = detailId && tasks.get(detailId); if (t && draftMode(t)){ if (e.target.id === "dDue") draft.dueAt = fromInput(e.target.value); syncSave(t); } } });
-$("#detail").addEventListener("keydown", e => {
-  if (e.target.id === "dItem" && e.key === "Enter"){ e.preventDefault(); $('#detail [data-dact="itemadd"]')?.click(); }
 });
 
 function requireMe(fn){ if (me) return fn(); pendingAfterWho = fn; openWho(); }
@@ -1274,30 +1183,69 @@ $("#fType").addEventListener("change", fillCat);
 $("#fArea").addEventListener("change", () => syncArea(true));
 $("#fPrio").addEventListener("change", syncPrio);
 $("#fDue").addEventListener("input", () => { dueTouched = true; $("#dueHint").hidden = true; });
-function openNew(){
+let editId = null;   // doluysa form var olan işi güncelliyor
+const ensureOpt = (sel, v, label) => { if (v && ![...$(sel).options].some(o => o.value === v)) $(sel).insertAdjacentHTML("beforeend", opt(v, label || v)); };
+function openNew(t){
+  editId = t ? t.id : null;
   $("#fDept").innerHTML = opt("", "Departman seç", true) + deptList().filter(([k]) => typesFor(k).length).map(([k, v]) => opt(k, v.label)).join("");
   $("#fArea").innerHTML = opt("", "Alan seç", true) + AREAS.map(a => opt(a, a)).join("") + opt("oda", "Oda No");
-  $("#fPrio").innerHTML = Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === "orta")).join("");
+  $("#fPrio").innerHTML = Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === (t ? prioOf(t) : "orta"))).join("");
   ["#fRoom", "#fDesc"].forEach(s => $(s).value = "");
   $("#fOoo").checked = false; $("#fGuest").checked = false; $("#fErr").hidden = true; $("#fSubmit").disabled = false;
-  $("#fItem").value = ""; draftItems = []; renderDraftItems();
-  dueTouched = false; fillType(); syncDeptArea(); syncPrio();
+  $("#fItem").value = ""; draftItems = []; dueTouched = false;
+  $("#ovNew h2").textContent = t ? "Yapılacak İşi Güncelle" : "Yapılacak İş";
+  $("#fSubmit").textContent = t ? "Güncelle" : "İşi kaydet";
+  $("#fDel").hidden = !(t && t.status === "tamam"); $("#fDel").classList.remove("armed"); $("#fDel").textContent = "Kaydı sil";
+  if (t){
+    ensureOpt("#fDept", t.dept, DEPTS[t.dept]?.label); $("#fDept").value = t.dept || "";
+    fillType(); ensureOpt("#fType", t.type, TYPES[t.type]?.label); $("#fType").value = t.type || ""; fillCat();
+    ensureOpt("#fCat", t.cat); $("#fCat").value = t.cat || "";
+    syncDeptArea();
+    if (t.room && AREAS.includes(t.room)) $("#fArea").value = t.room;
+    else if (t.room){ $("#fArea").value = "oda"; syncArea(false); $("#fRoom").value = t.room; }
+    $("#fDesc").value = t.desc || "";
+    $("#fOoo").checked = !!t.ooo; $("#fGuest").checked = !!t.guest;
+    draftItems = (t.items || []).map(x => ({...x}));
+    dueTouched = true; $("#fDue").value = t.dueAt ? toInput(t.dueAt) : "";
+    $("#prioWrap").dataset.p = $("#fPrio").value; $("#dueHint").hidden = true;
+  } else { fillType(); syncDeptArea(); syncPrio(); }
+  renderDraftItems();
   openOv("#ovNew"); $("#newForm").scrollTop = 0;
 }
-$("#newBtn").addEventListener("click", () => requireMe(openNew));
+$("#newBtn").addEventListener("click", () => requireMe(() => openNew()));
+$("#fDel").addEventListener("click", () => {
+  const b = $("#fDel"); if (!editId) return;
+  if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Eminim, kaydı sil"; return; }
+  const id = editId; editId = null; closeOv("#ovNew"); remove(id);
+});
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
   const roomNo = $("#fRoom").value.trim().slice(0, 10);
   const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area;
-  const due = fromInput($("#fDue").value);
+  const editT = editId && tasks.get(editId);
+  // düzenlemede son tarihe dokunulmadıysa kayıttaki değer aynen kalır (dakika yuvarlaması değişiklik sayılmaz)
+  const due = editT && editT.dueAt && $("#fDue").value === toInput(editT.dueAt) ? editT.dueAt : fromInput($("#fDue").value);
   if ($("#fItem").value.trim()) addDraftItem();
   const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && !DEPTS[dept]?.noArea ? "Alanı seç."
     : area === "oda" && !roomNo ? "Oda numarasını yaz." : !cat ? "Kategoriyi seç." : !due ? "Son tarihi seç."
-    : due < Date.now() - 5 * 60000 ? "Son tarih geçmişte olamaz." : "";
+    : due < Date.now() - 5 * 60000 && !(editT && due === editT.dueAt) ? "Son tarih geçmişte olamaz." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
   const now = Date.now();
+  if (editId){
+    const t = tasks.get(editId); if (!t){ closeOv("#ovNew"); return; }
+    const items = draftItems.map(x => { const o = (t.items || []).find(y => y.id === x.id); return o && !!o.done === !!x.done ? x : {...x, by: x.done ? who() : null, at: x.done ? now : null}; });
+    const next = {type, cat, dept, prio: PRIO[prio] ? prio : "orta", dueAt: due, room, desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked, items};
+    const names = {type: "tür", cat: "kategori", dept: "departman", prio: "aciliyet", dueAt: "son tarih", room: "alan/oda", desc: "açıklama", ooo: "satışa kapalı", guest: "misafir odada", items: "liste"};
+    const cur = {...t, prio: prioOf(t), ooo: !!t.ooo, guest: !!t.guest, items: t.items || [], desc: t.desc || "", room: t.room || ""};
+    const f = {}; Object.keys(next).forEach(k => { if (JSON.stringify(next[k]) !== JSON.stringify(cur[k])) f[k] = next[k]; });
+    if (!Object.keys(f).length){ closeOv("#ovNew"); toast("Değişiklik yok."); return; }
+    if (t.status === "tamam" && items.some(x => !x.done)){ $("#fErr").textContent = "İş tamamlanmış; listedeki tüm kalemler onaylı kalmalı."; $("#fErr").hidden = false; return; }
+    closeOv("#ovNew"); editId = null;
+    patch(t.id, f, "Güncelledi: " + Object.keys(f).map(k => names[k]).join(", "));
+    toast("Güncellendi."); return;
+  }
   const doc = {
     type, cat, dept, prio: PRIO[prio] ? prio : "orta", dueAt: due, room,
     desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked,
