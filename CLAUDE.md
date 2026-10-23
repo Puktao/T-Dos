@@ -76,6 +76,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - İşin atandığı departman (`inDept(t)`): Güncelle yok. Yalnızca "Durumu değiştir" açılır listesi ve liste maddelerini onaylama; ikisi de anında kaydedilir. Kartlardaki durum düğmeleri (Üstlen, Tamamlandı, Beklemeye al…) da yalnızca bu departmanda çıkar; diğerlerinde yalnızca "Detay".
    - "Kontrol edildi" / "Yeniden aç" ayrıca işi açan kişi ve departmanında (`canVerify(t)`).
    - Liste boşsa detayda Liste bölümü görünmez. Tüm kalemler tiklenmeden "Tamamlandı" kaydedilmez.
+   - Geçmiş listesinde değişikliği yapan kişinin adı (ve departmanı) kalın yazılır.
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.

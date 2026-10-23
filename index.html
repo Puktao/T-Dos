@@ -332,6 +332,7 @@ button{font:inherit;color:inherit}
 .inline input{flex:1;min-width:0}
 .log{list-style:none;margin:8px 0 0;padding:0 0 0 12px;display:flex;flex-direction:column;gap:8px;border-left:2px solid var(--line)}
 .log li{font-size:13.5px}
+.log .by{font-weight:700;color:var(--ink)}
 .log time{display:block;font:500 11.5px var(--font-mono);color:var(--muted)}
 .section-t{margin:22px 0 0;font:800 18px var(--font-display);letter-spacing:.02em}
 
@@ -960,7 +961,7 @@ function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
   const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
-  const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
+  const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time><b class="by">${esc(l.by)}</b>: ${esc(l.msg)}</li>`).join("");
   const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
   const diff = t.dueAt ? t.dueAt - Date.now() : 0;
   const due = !t.dueAt ? "—" : `<span class="${isOpen(t) && diff < 0 ? "over" : ""}">${esc(fmt(t.dueAt))}</span>`;
