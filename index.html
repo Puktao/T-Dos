@@ -152,6 +152,8 @@ button{font:inherit;color:inherit}
 .flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
 .meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
+.card.done .actions{justify-content:flex-end}   /* "Kontrol edildi" sağda, "Yeniden aç"ın altında */
+.card.done .actions [data-act="verify"]{padding:6px 11px;font-size:13px}
 /* kontrol edilmiş (onaylanmış) iş: yeşil kutu */
 .card.done.verified{--c:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
 .card.done.verified .prio{background:var(--ok);color:var(--surface)}
