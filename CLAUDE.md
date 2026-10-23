@@ -41,7 +41,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 3. **Anasayfa** sırası:
    - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
    - "Acil yapılacaklar" listesi, kırmızı kutular.
-   - "Takvimi yaklaşan" listesi, son tarihe göre sıralı, aciliyet rengine boyanmış kutular, en fazla 12 iş.
+   - "Takvimi yaklaşan" listesi, son tarihe göre sıralı, aciliyet rengine boyanmış kutular, en fazla 12 iş. Acil işler bu listede görünmez (yalnızca "Acil yapılacaklar"da).
 4. Kartlar aciliyet rengiyle boyanır, her kartta son tarih ve kalan süre ya da gecikme yazar.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Üstte arama alanı, sağında Filtre düğmesi.
@@ -58,7 +58,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
    - Formda **"Kişiye ata" yok**; atama iş detayından yapılır.
-7. **Satınalma** seçilince Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
+7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.
@@ -67,8 +67,6 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Tüm kalemler tiklenmeden iş "Tamamlandı" yapılamaz.
 
 ## Açık konular
-- Acil işler Anasayfa'da hem "Acil yapılacaklar" hem "Takvimi yaklaşan" listesinde görünüyor. Kullanıcıya "ikinci listeden çıkarılsın mı?" diye soruldu, yanıt bekleniyor.
-- Satınalma için alan listesine "Depo" eklensin mi? Soruldu, yanıt bekleniyor.
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı).
 
 ## Kurulum durumu

@@ -626,7 +626,7 @@ function screenHome(){
   const today = open.filter(t => t.dueAt && t.dueAt < tEnd);
   const over = open.filter(isOver);
   const urgent = open.filter(t => prioOf(t) === "acil").sort(byDue);
-  const upcoming = open.slice().sort(byDue);
+  const upcoming = open.filter(t => prioOf(t) !== "acil").sort(byDue);
   const UP = 12;
   const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name} ${n}`).join(" · ") || "Açık iş yok";
   const hero = `<div class="hero">
@@ -647,8 +647,8 @@ function screenHome(){
   const upSec = `<section class="sec">
     <div class="sech"><h3>Takvimi yaklaşan</h3><span class="cnt">${upcoming.length}</span>
       ${upcoming.length > UP ? `<button type="button" class="more" data-jump="due">Tümünü gör</button>` : ""}</div>
-    <div class="keys" style="margin:0 0 10px"><span style="--c:var(--acil)"><i></i>Acil</span><span style="--c:var(--orta)"><i></i>Orta</span><span style="--c:var(--sureli)"><i></i>Süreli</span></div>
-    ${upcoming.length ? `<div class="list">${upcoming.slice(0, UP).map(t => card(t)).join("")}</div>` : `<div class="none">Açık iş yok.</div>`}
+    <div class="keys" style="margin:0 0 10px"><span style="--c:var(--orta)"><i></i>Orta</span><span style="--c:var(--sureli)"><i></i>Süreli</span></div>
+    ${upcoming.length ? `<div class="list">${upcoming.slice(0, UP).map(t => card(t)).join("")}</div>` : `<div class="none">Yaklaşan iş yok.</div>`}
   </section>`;
   return hero + urgentSec + upSec;
 }
