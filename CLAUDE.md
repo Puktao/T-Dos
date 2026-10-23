@@ -55,6 +55,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Üstte arama alanı, sağında Filtre düğmesi.
    - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
+   - Panelde "Sıfırla" ve "… işi göster" düğmeleri yok; seçim anında uygulanır, panel ✕ ya da dışına dokunarak kapanır.
    - Açık filtreler arama alanının altında kaldırılabilir etiket olarak görünür.
    - "Son tarih" filtresi panelde yok; yalnızca Anasayfa kutusundan gelir.
 6. **"Yapılacak İş" formu** sırası:

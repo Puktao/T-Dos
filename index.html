@@ -785,20 +785,17 @@ let fKind = null, fDraft = null;
 function openFilter(kind){ fKind = kind; fDraft = {...ui[kind]}; renderFilter(); openOv("#ovFilter"); }
 function renderFilter(){
   if (!fKind) return;
-  const n = (fKind === "todo" ? applyTodo(fDraft) : applyDone(fDraft)).length;
   $("#filterSheet").innerHTML = `
     <div class="sheet-head"><div><h2>Filtrele</h2><p class="sheet-sub">${fKind === "todo" ? "Yapılacaklar" : "Tamamlananlar"}</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
     ${FILTERS[fKind].filter(d => d.sheet !== false).map(d => `<div class="field"><span class="lbl">${esc(d.label)}</span><div class="chips wrap">${d.opts().map(([k, l]) => {
       const col = d.color && k !== "all";
       return `<button type="button" class="chip ${col ? "c-" + k : ""}" data-fk="${d.key}" data-v="${k}" aria-pressed="${fDraft[d.key] === k}">${col ? "<i></i>" : ""}${esc(l)}</button>`;
-    }).join("")}</div></div>`).join("")}
-    <div class="sheet-foot sticky-foot"><button type="button" class="btn ghost" data-freset>Sıfırla</button><button type="button" class="btn primary" data-fapply>${n} işi göster</button></div>`;
+    }).join("")}</div></div>`).join("")}`;
 }
 $("#filterSheet").addEventListener("click", e => {
   const c = e.target.closest("[data-fk]");
-  if (c){ fDraft[c.dataset.fk] = c.dataset.v; renderFilter(); return; }
-  if (e.target.closest("[data-freset]")){ FILTERS[fKind].forEach(d => fDraft[d.key] = d.noChip ? d.opts()[0][0] : "all"); renderFilter(); return; }
-  if (e.target.closest("[data-fapply]")){ ui[fKind] = {...fDraft}; closeOv("#ovFilter"); fKind = null; window.scrollTo(0, 0); renderScreen(); }
+  // seçim anında uygulanır; panel ✕ ya da dışına dokunarak kapanır
+  if (c){ fDraft[c.dataset.fk] = c.dataset.v; ui[fKind] = {...fDraft}; renderFilter(); renderScreen(); }
 });
 function screenReport(){
   const s = stateScreen(); if (s) return s;
