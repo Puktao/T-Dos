@@ -1415,13 +1415,13 @@ function startLive(){
   refetch();
 }
 function stopLive(){ if (channel && sb){ try { sb.removeChannel(channel); } catch(e){} } channel = null; }
-// Telefonda uygulama arka plandan yeniden açılınca (1 dakikadan uzun ayrı kalındıysa) Anasayfa'ya dön.
+// Telefonda uygulama arka plandan yeniden açılınca Anasayfa'ya dön (birkaç saniyelik kısa geçişler hariç).
 // Yazılmakta olan bir form (iş ya da kullanıcı) açıksa dokunulmaz.
 let hiddenAt = 0;
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden"){ hiddenAt = Date.now(); return; }
   refetch();
-  if (hiddenAt && Date.now() - hiddenAt > 60000 && $("#ovNew").hidden && $("#ovUsers").hidden){
+  if (hiddenAt && Date.now() - hiddenAt > 10000 && $("#ovNew").hidden && $("#ovUsers").hidden){
     ["#ovDetail", "#ovFilter", "#ovWho"].forEach(id => { if (!$(id).hidden) closeOv(id); });
     ui.tab = "ana"; window.scrollTo(0, 0); renderAll();
   }
@@ -1516,7 +1516,7 @@ function onSession(session){
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ startLive(); loadLists(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
+    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
   } else {
     stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
     if (profileMode){ profileMode = false; profiles = []; me = loadMe(); }

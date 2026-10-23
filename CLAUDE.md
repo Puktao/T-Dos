@@ -46,7 +46,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 
 ## Kullanıcının kesinleştirdiği arayüz kararları
 1. Uygulama adı **F-Do’s**. Logo: lacivert zemin, beyaz `F-Do`, sarı tire, üstte küçük sarı `’s`; "Do" F’den küçük, altında yalnızca "Do" boyunca düz sarı çizgi, çizginin alt kenarı F’nin alt ucuyla aynı hizada (Big Shoulders Display 800). Uygulama ikonu, üst köşedeki logo ve giriş ekranındaki logo aynı çizimdir: `index.html` içindeki `#fdosLogo` SVG sembolü ve `icons/*.png`. Yazı tipi ya da renk değiştirilmez.
-2. Alt tablar: **Anasayfa · Yapılacaklar · Tamamlananlar · Rapor**. Uygulama **her açılışta Anasayfa** ile başlar (adres çubuğundaki #sekme dikkate alınmaz); arka planda 1 dakikadan uzun kalıp geri gelinince de Anasayfa'ya döner (açık iş/kullanıcı formu varsa dokunulmaz). Üst çubukta logonun yanında sekme adı yazmaz (başlık yalnızca ekran okuyucu için, `sr-only`).
+2. Alt tablar: **Anasayfa · Yapılacaklar · Tamamlananlar · Rapor**. Uygulama **her açılışta Anasayfa** ile başlar (adres çubuğundaki #sekme dikkate alınmaz); her girişte (hangi kullanıcı olursa olsun) ve arka planda 10 saniyeden uzun kalıp geri gelinince de Anasayfa'ya döner (açık iş/kullanıcı formu varsa dokunulmaz). Üst çubukta logonun yanında sekme adı yazmaz (başlık yalnızca ekran okuyucu için, `sr-only`).
 3. **Anasayfa** sırası:
    - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
    - "Acil yapılacaklar" listesi, kırmızı kutular.
