@@ -49,8 +49,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 2. Alt tablar: **Anasayfa · Yapılacaklar · Tamamlananlar · Rapor**. Uygulama **her açılışta Anasayfa** ile başlar (adres çubuğundaki #sekme dikkate alınmaz); her girişte (hangi kullanıcı olursa olsun) ve arka planda 10 saniyeden uzun kalıp geri gelinince de Anasayfa'ya döner (açık iş/kullanıcı formu varsa dokunulmaz). Üst çubukta logonun yanında sekme adı yazmaz (başlık yalnızca ekran okuyucu için, `sr-only`).
 3. **Anasayfa** sırası:
    - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
-   - "Acil yapılacaklar" listesi, kırmızı kutular.
-   - "Takvimi yaklaşan" listesi, son tarihe göre sıralı, aciliyet rengine boyanmış kutular, en fazla 12 iş. Acil işler bu listede görünmez (yalnızca "Acil yapılacaklar"da).
+   - "Acil yapılacaklar" listesi: aciliyeti Acil olan işler **ve son tarihine 3 saatten az kalan (ya da geçmiş) her iş**; son tarihe göre sıralı. Kartlar kendi aciliyet renginde kalır.
+   - "Takvimi yaklaşan" listesi: kalan işler, **son tarihi en yakın olan en üstte**, aciliyet rengine boyanmış kutular, en fazla 12 iş. "Acil yapılacaklar"daki işler burada görünmez.
 4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Formdaki tarih seçici telefonun kendi biçimini kullanır. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Üstte arama alanı, sağında Filtre düğmesi.

@@ -696,8 +696,11 @@ function screenHome(){
   const open = visTasks().filter(isOpen);
   const today = open.filter(t => t.dueAt && t.dueAt < tEnd);
   const over = open.filter(isOver);
-  const urgent = open.filter(t => prioOf(t) === "acil").sort(byDue);
-  const upcoming = open.filter(t => prioOf(t) !== "acil").sort(byDue);
+  // Son tarihine 3 saatten az kalan (ya da geçmiş) iş, aciliyeti ne olursa olsun "Acil yapılacaklar"a düşer.
+  const soon = t => t.dueAt && t.dueAt - Date.now() <= 3 * 3600000;
+  const isUrgent = t => prioOf(t) === "acil" || soon(t);
+  const urgent = open.filter(isUrgent).sort(byDue);
+  const upcoming = open.filter(t => !isUrgent(t)).sort(byDue);   // son tarihi en yakın olan en üstte
   const UP = 12;
   const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name} ${n}`).join(" · ") || "Açık iş yok";
   const hero = `<div class="hero">
