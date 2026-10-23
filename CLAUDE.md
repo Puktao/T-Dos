@@ -75,7 +75,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Dosyalar GitHub'a yüklendi.
 - [ ] GitHub Pages açılacak (Settings → Pages → main / root). Bu işi kullanıcı yapacak.
 - [ ] Supabase'de `schema.sql` çalıştırılacak, sign-up kapatılacak, kullanıcılar eklenecek (Auto Confirm).
-- [ ] `supabase-config.js` doldurulacak. Kullanıcı Project URL ve anon anahtarını gönderecek.
+- [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına Pages adresi yazılacak.
 
 ## Geliştirme notları
