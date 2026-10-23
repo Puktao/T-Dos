@@ -1025,7 +1025,11 @@ $("#screen").addEventListener("click", e => {
     if (a === "hold") patch(id, {status: "beklemede"}, "Beklemeye aldı");
     if (a === "resume") patch(id, {status: "devam"}, "Çalışmaya devam ediyor");
     if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
-    if (a === "reopen") patch(id, {status: "yeni", doneAt: null, doneBy: null, verified: false, verifiedBy: null}, "Yeniden açtı");
+    if (a === "reopen"){
+      // yeniden açılan işte listedeki onaylar da kalkar
+      const items = (t.items || []).map(x => ({...x, done: false, by: null, at: null}));
+      patch(id, {status: "yeni", doneAt: null, doneBy: null, verified: false, verifiedBy: null, ...(items.length ? {items} : {})}, "Yeniden açtı" + (items.length ? ", liste onayları kaldırıldı" : ""));
+    }
   });
 });
 let qTimer;
