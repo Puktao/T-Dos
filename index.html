@@ -536,6 +536,10 @@ const visTasks = () => [...tasks.values()].filter(canSee);
 // Detay ekranı: işi açan kişi ve yönetici her şeyi değiştirir; diğerleri yalnızca durumu ve listedeki tikleri.
 const isCreator = t => t.createdUid ? t.createdUid === authUser?.id : !!(me && t.createdBy && lower(t.createdBy) === lower(me.name));
 const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
+// Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
+const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
+// Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
+const canVerify = t => canStatus(t) || !!(me && me.dept && t.createdDept === me.dept);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -551,7 +555,7 @@ function checklistDetail(t){
   const d = it.length - openItems(t);
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
-      <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${readOnly ? "disabled" : ""}><span class="t">${esc(x.text)}</span></label>
+      <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${readOnly || !canStatus(t) ? "disabled" : ""}><span class="t">${esc(x.text)}</span></label>
       ${!edit ? "" : `<button type="button" class="rm" data-dact="itemdel" data-v="${esc(x.id)}" aria-label="Kalemi sil">✕</button>`}</li>`).join("")}</ul>` : ""}
     ${!edit ? "" : `<div class="field" style="margin-top:8px"><div class="inline"><input type="text" id="dItem" maxlength="120" placeholder="Kalem yaz" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" data-dact="itemadd">Ekle</button></div></div>`}`;
 }
@@ -609,6 +613,7 @@ function dueLine(t){
 function actionsFor(t){
   if (readOnly) return "";
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
+  if (t.status === "tamam" ? !canVerify(t) : !canStatus(t)) return b("open","Detay","ghost");
   switch (t.status){
     case "yeni": return b("take","Üstlen","primary") + b("open","Detay","ghost");
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
@@ -918,6 +923,7 @@ $("#screen").addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b || b.dataset.act === "open"){ openDetail(id); return; }
   const a = b.dataset.act;
+  if (a === "verify" || a === "reopen" ? !canVerify(t) : !canStatus(t)) return;
   requireMe(() => {
     if (a === "take") patch(id, {status: "devam", assignee: me.name}, "Üstlendi, çalışmaya başladı");
     if (a === "done"){
@@ -965,9 +971,11 @@ function renderDetail(){
       ${t.ooo || t.guest ? `<dt>Oda</dt><dd>${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}</dd>` : ""}
     </dl>
     ${readOnly ? "" : `
-    <div class="field"><span class="lbl">Durum</span><div class="chips wrap">${chips("status", Object.entries(STATUS), t.status)}</div></div>`}
+    <div class="pair">
+      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div></div>
+      <div class="field"><label class="lbl" for="dPrio">Aciliyet</label><div class="sel" data-p="${p}"><select id="dPrio"${viewOnly(t) ? " disabled" : ""}>${Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === p)).join("")}</select></div></div>
+    </div>`}
     ${readOnly || viewOnly(t) ? "" : `
-    <div class="field"><span class="lbl">Aciliyet</span><div class="chips wrap">${chips("prio", Object.entries(PRIO).map(([k,v]) => [k, v.label]), p, k => "c-" + k)}</div></div>
     <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
     <div class="field"><label class="lbl" for="dAsg">Kişiye ata</label><div class="inline"><input type="text" id="dAsg" list="people" placeholder="İsim yaz veya seç" value="${esc(t.assignee || "")}" autocomplete="off"><button type="button" class="btn" data-dact="assign">Ata</button></div></div>
     <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), t.dept)}</div></div>
@@ -990,16 +998,8 @@ $("#detail").addEventListener("click", e => {
   const b = e.target.closest("[data-dact]"); if (!b || !detailId) return;
   const t = tasks.get(detailId); if (!t) return;
   const a = b.dataset.dact, v = b.dataset.v;
-  if (viewOnly(t) && a !== "status") return;
+  if (viewOnly(t)) return;
   requireMe(() => {
-    if (a === "status" && v === "tamam" && v !== t.status && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); return; }
-    if (a === "status" && v !== t.status){
-      const f = {status: v};
-      if (v === "tamam") f.doneAt = Date.now(); else { f.doneAt = null; f.verified = false; f.verifiedBy = null; }
-      if (v === "devam" && !t.assignee) f.assignee = me.name;
-      patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
-    }
-    if (a === "prio" && v !== prioOf(t)) patch(t.id, {prio: v}, `Aciliyeti “${PRIO[v].label}” yaptı`);
     if (a === "due"){
       const ms = fromInput($("#dDue").value);
       if (!ms){ toast("Geçerli bir tarih ve saat seç."); return; }
@@ -1033,9 +1033,20 @@ $("#detail").addEventListener("click", e => {
   });
 });
 
+function setStatus(t, v){
+  if (v === t.status) return;
+  if (v === "tamam" && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); renderDetail(); return; }
+  const f = {status: v};
+  if (v === "tamam") f.doneAt = Date.now(); else { f.doneAt = null; f.verified = false; f.verifiedBy = null; }
+  if (v === "devam" && !t.assignee) f.assignee = me.name;
+  patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
+}
 $("#detail").addEventListener("change", e => {
+  const t0 = detailId && tasks.get(detailId);
+  if (t0 && e.target.id === "dStatus"){ if (!canStatus(t0)) return; const v = e.target.value; requireMe(() => setStatus(t0, v)); return; }
+  if (t0 && e.target.id === "dPrio"){ if (viewOnly(t0)) return; const v = e.target.value; if (v !== prioOf(t0)) requireMe(() => patch(t0.id, {prio: v}, `Aciliyeti “${PRIO[v].label}” yaptı`)); return; }
   const c = e.target.closest("[data-item]"); if (!c || !detailId) return;
-  const t = tasks.get(detailId); if (!t) return;
+  const t = tasks.get(detailId); if (!t || !canStatus(t)) return;
   const id = c.dataset.item, on = c.checked;
   c.closest("li")?.classList.toggle("done", on);
   requireMe(() => {

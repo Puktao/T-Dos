@@ -69,7 +69,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Formda **"Kişiye ata" yok**; atama iş detayından işi açan kişi ya da yönetici yapar (diğerlerinde durum "Devam ediyor" olunca kendiliğinden).
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
-10. **İş detayı:** İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici her şeyi düzenler. Diğerleri yalnızca **Durum**u değiştirir ve listedeki kalemleri tikler; madde ekleyemez, silemez (`viewOnly(t)`). Liste boşsa bölüm hiç görünmez. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
+10. **İş detayı:** Durum ve Aciliyet yan yana açılır liste (select). İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici her şeyi düzenler. **Durum** ve liste tikleri ayrıca işin atandığı departmanda açıktır (`canStatus(t)`); diğerlerinde kilitli görünür. "Kontrol edildi" / "Yeniden aç" işi açan departmanda da açıktır (`canVerify(t)`). Liste boşsa bölüm hiç görünmez; madde ekleme/silme yalnızca açan kişi ve yöneticide. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.
