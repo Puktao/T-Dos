@@ -503,16 +503,11 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const lower = s => String(s ?? "").toLocaleLowerCase("tr");
 const prioOf = t => PRIO[t.prio] ? t.prio : (t.prio === "normal" ? "orta" : t.prio === "dusuk" ? "sureli" : "orta");
-const fmtDT = new Intl.DateTimeFormat("tr-TR", {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"});
-const fmtT = new Intl.DateTimeFormat("tr-TR", {hour:"2-digit", minute:"2-digit"});
-const fmt = ms => ms ? fmtDT.format(ms) : "";
+// tüm tarihler gg/aa/yy ss:dd (ör. 23/10/26 14:30)
+const fmt = ms => { if (!ms) return ""; const d = new Date(ms); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const dayStart = d => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
 function dueLabel(ms){
   if (!ms) return "Son tarih yok";
-  const d = dayStart(ms), today = dayStart(Date.now());
-  if (d === today) return "Bugün " + fmtT.format(ms);
-  if (d === today + 86400000) return "Yarın " + fmtT.format(ms);
-  if (d === today - 86400000) return "Dün " + fmtT.format(ms);
   return fmt(ms);
 }
 function dur(ms){

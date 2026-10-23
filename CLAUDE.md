@@ -51,7 +51,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
    - "Acil yapılacaklar" listesi, kırmızı kutular.
    - "Takvimi yaklaşan" listesi, son tarihe göre sıralı, aciliyet rengine boyanmış kutular, en fazla 12 iş. Acil işler bu listede görünmez (yalnızca "Acil yapılacaklar"da).
-4. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
+4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Formdaki tarih seçici telefonun kendi biçimini kullanır. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Üstte arama alanı, sağında Filtre düğmesi.
    - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
