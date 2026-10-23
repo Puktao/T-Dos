@@ -533,8 +533,9 @@ const isOpen = t => t.status !== "tamam";
 const canSee = t => !profileMode || !me || isAdmin() || !me.dept || t.dept === me.dept || t.createdDept === me.dept
   || (t.createdBy && lower(t.createdBy) === lower(me.name));
 const visTasks = () => [...tasks.values()].filter(canSee);
-// Detay ekranı: yönetici her şeyi değiştirir; personel yalnızca durumu (ve listedeki tikleri).
-const viewOnly = () => !isAdmin() && profileMode;
+// Detay ekranı: işi açan kişi ve yönetici her şeyi değiştirir; diğerleri yalnızca durumu ve listedeki tikleri.
+const isCreator = t => t.createdUid ? t.createdUid === authUser?.id : !!(me && t.createdBy && lower(t.createdBy) === lower(me.name));
+const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -545,8 +546,8 @@ function itemsProg(t){
 }
 function checklistDetail(t){
   const it = t.items || [];
-  if (!it.length && (readOnly || viewOnly())) return "";
-  const edit = !readOnly && !viewOnly();
+  if (!it.length && (readOnly || viewOnly(t))) return "";
+  const edit = !readOnly && !viewOnly(t);
   const d = it.length - openItems(t);
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
@@ -965,7 +966,7 @@ function renderDetail(){
     </dl>
     ${readOnly ? "" : `
     <div class="field"><span class="lbl">Durum</span><div class="chips wrap">${chips("status", Object.entries(STATUS), t.status)}</div></div>`}
-    ${readOnly || viewOnly() ? "" : `
+    ${readOnly || viewOnly(t) ? "" : `
     <div class="field"><span class="lbl">Aciliyet</span><div class="chips wrap">${chips("prio", Object.entries(PRIO).map(([k,v]) => [k, v.label]), p, k => "c-" + k)}</div></div>
     <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
     <div class="field"><label class="lbl" for="dAsg">Kişiye ata</label><div class="inline"><input type="text" id="dAsg" list="people" placeholder="İsim yaz veya seç" value="${esc(t.assignee || "")}" autocomplete="off"><button type="button" class="btn" data-dact="assign">Ata</button></div></div>
@@ -977,7 +978,7 @@ function renderDetail(){
       <div><button type="button" class="btn" data-dact="note">Notu kaydet</button></div></div>`}
     <h3 class="section-t">Geçmiş</h3>
     <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>
-    ${!readOnly && !viewOnly() && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
+    ${!readOnly && !viewOnly(t) && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
   if ($("#dNote")) $("#dNote").value = keep.note;
   if ($("#dItem")) $("#dItem").value = keep.item;
   if (keep.focus === "dAsg" && $("#dAsg")) $("#dAsg").value = keep.asg;
@@ -989,7 +990,7 @@ $("#detail").addEventListener("click", e => {
   const b = e.target.closest("[data-dact]"); if (!b || !detailId) return;
   const t = tasks.get(detailId); if (!t) return;
   const a = b.dataset.dact, v = b.dataset.v;
-  if (viewOnly() && a !== "status") return;
+  if (viewOnly(t) && a !== "status") return;
   requireMe(() => {
     if (a === "status" && v === "tamam" && v !== t.status && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); return; }
     if (a === "status" && v !== t.status){
@@ -1268,7 +1269,7 @@ $("#newForm").addEventListener("submit", async e => {
     desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked,
     items: draftItems.map(x => x.done ? {...x, by: who(), at: now} : {...x}),
     status: "yeni", assignee, createdAt: now, updatedAt: now, doneAt: null, verified: false, verifiedBy: null,
-    createdBy: me ? me.name : "İsimsiz", createdDept: me ? me.dept : null,
+    createdBy: me ? me.name : "İsimsiz", createdDept: me ? me.dept : null, createdUid: authUser?.id || null,
     log: [{t: now, by: who(), msg: `İşi açtı (${PRIO[prio]?.label || "Orta"}, son tarih ${fmt(due)})` + (draftItems.length ? `, ${draftItems.length} kalemlik liste` : "")}]
   };
   $("#fSubmit").disabled = true;

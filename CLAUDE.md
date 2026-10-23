@@ -27,7 +27,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
 ## İş kaydı (`data` alanı)
-`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, assignee, createdAt, updatedAt, doneAt, verified, verifiedBy, createdBy, createdDept, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
+`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, assignee, createdAt, updatedAt, doneAt, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
 - `prio`: `acil` (kırmızı) · `orta` (sarı) · `sureli` (mavi). Eski kayıtlardaki `normal` ve `dusuk` değerleri `prioOf()` ile `orta` ve `sureli`ye eşlenir.
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
 - Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
@@ -66,10 +66,10 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Liste.
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
-   - Formda **"Kişiye ata" yok**; atama iş detayından yalnızca yönetici yapar (personelde durum "Devam ediyor" olunca kendiliğinden).
+   - Formda **"Kişiye ata" yok**; atama iş detayından işi açan kişi ya da yönetici yapar (diğerlerinde durum "Devam ediyor" olunca kendiliğinden).
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
-10. **İş detayı (personel):** Yalnızca görüntüleme. Değiştirilebilen tek şey **Durum** (ve listedeki tikler, çünkü kural 8 tüm kalemler tiklenmeden tamamlamaya izin vermiyor). Aciliyet, son tarih, kişiye atama, departman aktarma, oda durumu, not ve silme yalnızca yöneticide (`viewOnly()`). Liste boşsa bölüm hiç görünmez; doluysa madde madde görünür. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
+10. **İş detayı:** İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici her şeyi düzenler. Diğerleri yalnızca **Durum**u değiştirir ve listedeki kalemleri tikler; madde ekleyemez, silemez (`viewOnly(t)`). Liste boşsa bölüm hiç görünmez. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.
