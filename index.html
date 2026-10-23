@@ -550,7 +550,7 @@ function itemsProg(t){
 }
 function checklistDetail(t){
   const it = t.items || [];
-  if (!it.length && (readOnly || viewOnly(t))) return "";
+  if (!it.length) return "";   // liste yoksa bölüm hiç görünmez
   const edit = !readOnly && !viewOnly(t);
   const d = it.length - openItems(t);
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
