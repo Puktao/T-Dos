@@ -311,10 +311,10 @@ button{font:inherit;color:inherit}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
-/* iş detayı: kutu yok; ekranın kendisi aciliyet renginden beyaza (koyu temada zemine) yukarıdan aşağı geçişli */
-#detail.acil{--c:var(--acil)} #detail.orta{--c:var(--orta)} #detail.sureli{--c:var(--sureli)} #detail.done{--c:var(--ok)}
-#detail{--top:color-mix(in srgb,var(--c,var(--surface)) 38%,var(--surface));background:linear-gradient(180deg,var(--top) 0,var(--top) 120px,var(--surface) 100%) var(--surface);background-attachment:local}
-#detail .sheet-head{background:var(--top)}
+/* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
+#detail.acil{--c:var(--acil);--cs:var(--acil-soft)} #detail.orta{--c:var(--orta);--cs:var(--orta-soft)} #detail.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
+#detail{background:linear-gradient(var(--c,var(--line)),var(--c,var(--line))) top/100% 6px no-repeat,var(--cs,var(--surface))}
+#detail .sheet-head{background:var(--cs,var(--surface));box-shadow:0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
 .dcard::before{display:none}
 .dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
