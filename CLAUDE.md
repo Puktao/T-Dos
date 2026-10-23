@@ -73,10 +73,13 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 
 ## Kurulum durumu
 - [x] Dosyalar GitHub'a yüklendi.
-- [ ] GitHub Pages açılacak (Settings → Pages → main / root). Bu işi kullanıcı yapacak.
-- [ ] Supabase'de `schema.sql` çalıştırılacak, sign-up kapatılacak, kullanıcılar eklenecek (Auto Confirm).
+- [x] GitHub Pages açık (main / root). Adres: https://puktao.github.io/T-Dos/
+- [x] Supabase'de `schema.sql` çalıştırıldı (tablo ve fonksiyon var, `anon` erişimi kapalı).
+- [x] Sign-up kapatıldı.
+- [ ] Kullanıcılar eklenecek (Authentication → Users → Add user, Auto Confirm). Dışarıdan doğrulanamıyor.
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
-- [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına Pages adresi yazılacak.
+- [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
+- Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
 - Yerel deneme: `python3 -m http.server` ile aç. `supabase-config.js` boşken "Kurulum tamamlanmadı" ekranı görünmesi beklenen davranıştır.
