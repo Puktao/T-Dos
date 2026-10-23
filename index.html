@@ -128,7 +128,9 @@ button{font:inherit;color:inherit}
 /* home: two hero boxes + sections */
 .hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hbox{border-radius:18px;padding:14px 14px 13px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:150px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-width:0}
-.hbox.today{background:var(--muted);border-color:var(--muted);color:var(--bg)}   /* gri */
+/* açık gri kutu, solda koyu çentik (kartlardaki gibi) */
+.hbox.today{position:relative;overflow:hidden;padding-left:19px;background:color-mix(in srgb,var(--muted) 30%,var(--surface));border-color:color-mix(in srgb,var(--muted) 45%,var(--surface));color:var(--ink)}
+.hbox.today::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--ink)}
 /* Yapılacaklar listesinde kartların soldaki çentiği lacivert (koyu temada açık) */
 body[data-tab="yapilacak"] #screen .card::before{background:var(--ink)}
 .hbox .hl{font-weight:700;font-size:14.5px;line-height:1.25}
