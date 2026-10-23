@@ -281,6 +281,7 @@ button{font:inherit;color:inherit}
 .sheet-head .hact{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
 .sheet-head .hact .x{margin-left:0}
 .sheet-head .hact .btn{height:38px}
+#detail .sheet-head{position:sticky;top:-18px;z-index:3;background:var(--surface);padding-block:14px 10px;margin-top:-14px;box-shadow:0 1px 0 var(--line)}
 .sheet-sub{margin:4px 0 0;color:var(--muted);font-size:13px}
 .field{display:flex;flex-direction:column;gap:7px;margin-top:16px}
 .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
@@ -541,11 +542,16 @@ const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
 // Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
 const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
 // Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
-// Atanan departman görüntüleme ekranı: durum ve tikler taslakta tutulur, "Güncelle" ile kaydedilir.
-const draftMode = t => !readOnly && viewOnly(t) && canStatus(t);
-let draft = {status: null, items: {}};
-const draftList = t => (t.items || []).map(x => draft.items[x.id] === undefined ? x : {...x, done: draft.items[x.id]});
-const draftDirty = t => (draft.status && draft.status !== t.status) || (t.items || []).some(x => draft.items[x.id] !== undefined && draft.items[x.id] !== !!x.done);
+// İşi atayan kişi (ve yönetici) düzenleme ekranı: değişiklikler taslakta tutulur, başlıktaki "Güncelle" ile kaydedilir.
+// İşi alan departman ise yalnızca durumu değiştirir ve listeyi onaylar; bunlar anında kaydedilir.
+const draftMode = t => !readOnly && !viewOnly(t);
+let draft = {};
+const DRAFT_KEYS = ["status", "prio", "dueAt", "dept", "ooo", "guest", "items"];
+const eff = t => draftMode(t) ? {...t, ...draft} : t;
+const sameVal = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+const draftDirty = t => DRAFT_KEYS.some(k => k in draft && !sameVal(draft[k], k === "prio" ? prioOf(t) : k === "ooo" || k === "guest" ? !!t[k] : t[k]))
+  || !!($("#dNote")?.value || "").trim();
+const syncSave = t => { const b = $("#dSave"); if (b) b.disabled = !draftDirty(t); };
 const canVerify = t => canStatus(t) || !!(me && me.dept && t.createdDept === me.dept);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
@@ -556,7 +562,7 @@ function itemsProg(t){
   return `<div class="cprog"><span>Liste ${d}/${it.length}</span><div class="cbar"><div style="width:${d / it.length * 100}%"></div></div></div>`;
 }
 function checklistDetail(t){
-  const it = draftMode(t) ? draftList(t) : (t.items || []);
+  const it = eff(t).items || [];
   if (!it.length) return "";   // liste yoksa bölüm hiç görünmez
   const edit = !readOnly && !viewOnly(t);
   const d = it.filter(x => x.done).length;
@@ -945,16 +951,16 @@ $("#screen").addEventListener("input", e => {
 function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
-  const keep = {note: $("#dNote")?.value || "", item: $("#dItem")?.value || "", focus: document.activeElement?.id, due: $("#dDue")?.value};
-  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
+  const keep = {note: $("#dNote")?.value || "", item: $("#dItem")?.value || "", focus: document.activeElement?.id};
+  const d = eff(t), p = prioOf(d), type = TYPES[t.type] || {label:"İş"}, edit = draftMode(t);
   const chips = (act, entries, cur, cls = () => "") => entries.map(([k,l]) =>
     `<button type="button" class="chip ${cls(k)}" data-dact="${act}" data-v="${k}" aria-pressed="${cur === k}">${cls(k) ? "<i></i>" : ""}${esc(l)}</button>`).join("");
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
   el.innerHTML = `
-    <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
-      <div class="hact">${draftMode(t) ? `<button type="button" class="btn primary" id="dSave"${draftDirty(t) ? "" : " disabled"}>Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
+    <div class="sheet-head">${plate(t.room, d.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
+      <div class="hact">${edit ? `<button type="button" class="btn primary" id="dSave" disabled>Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
     <div class="card ${p}" style="cursor:default;margin-top:12px;grid-template-columns:1fr;padding-block:10px"><div class="body">
-      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(t)}</div></div>
+      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>${dueLine(d)}</div></div>
     ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
     ${checklistDetail(t)}
     <dl class="facts">
@@ -968,80 +974,75 @@ function renderDetail(){
     </dl>
     ${readOnly ? "" : `
     <div class="pair">
-      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === (draftMode(t) && draft.status || t.status))).join("")}</select></div></div>
-      <div class="field"><label class="lbl" for="dPrio">Aciliyet</label><div class="sel" data-p="${p}"><select id="dPrio"${viewOnly(t) ? " disabled" : ""}>${Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === p)).join("")}</select></div></div>
+      <div class="field"><label class="lbl" for="dStatus">Durum</label><div class="sel"><select id="dStatus"${canStatus(t) ? "" : " disabled"}>${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === d.status)).join("")}</select></div></div>
+      <div class="field"><label class="lbl" for="dPrio">Aciliyet</label><div class="sel" data-p="${p}"><select id="dPrio"${edit ? "" : " disabled"}>${Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === p)).join("")}</select></div></div>
     </div>`}
-    ${readOnly || viewOnly(t) ? "" : `
-    <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
-    <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), t.dept)}</div></div>
+    ${!edit ? "" : `
+    <div class="field"><label class="lbl" for="dDue">Son tarih</label><input type="datetime-local" id="dDue" value="${d.dueAt ? toInput(d.dueAt) : ""}"></div>
+    <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), d.dept)}</div></div>
     <div class="field"><span class="lbl">Oda durumu</span><div class="chips wrap">
-      <button type="button" class="chip" data-dact="ooo" aria-pressed="${!!t.ooo}">Satışa kapalı</button>
-      <button type="button" class="chip" data-dact="guest" aria-pressed="${!!t.guest}">Misafir odada</button></div></div>
-    <div class="field"><label class="lbl" for="dNote">Not ekle</label><textarea id="dNote" placeholder="ör. Kompresör parçası sipariş edildi, yarın 10:00"></textarea>
-      <div><button type="button" class="btn" data-dact="note">Notu kaydet</button></div></div>`}
+      <button type="button" class="chip" data-dact="ooo" aria-pressed="${!!d.ooo}">Satışa kapalı</button>
+      <button type="button" class="chip" data-dact="guest" aria-pressed="${!!d.guest}">Misafir odada</button></div></div>
+    <div class="field"><label class="lbl" for="dNote">Not ekle</label><textarea id="dNote" placeholder="ör. Kompresör parçası sipariş edildi, yarın 10:00"></textarea></div>`}
     <h3 class="section-t">Geçmiş</h3>
     <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>
-    ${!readOnly && !viewOnly(t) && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
+    ${edit && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
   if ($("#dNote")) $("#dNote").value = keep.note;
   if ($("#dItem")) $("#dItem").value = keep.item;
-  if (keep.focus === "dDue" && $("#dDue")) $("#dDue").value = keep.due;
-  if (keep.focus && document.getElementById(keep.focus)) document.getElementById(keep.focus).focus();
+  if (keep.focus && keep.focus !== "dDue" && document.getElementById(keep.focus)) document.getElementById(keep.focus).focus();
+  syncSave(t);
 }
-function openDetail(id){ detailId = id; deleteArmed = false; draft = {status: null, items: {}}; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
-$("#detail").addEventListener("click", e => {
-  if (e.target.closest("#dSave") && detailId){
-    const t = tasks.get(detailId); if (!t || !draftMode(t) || !draftDirty(t)) return;
-    requireMe(() => {
-      const old = new Map((t.items || []).map(x => [x.id, !!x.done]));
-      const changed = draftList(t).filter(x => x.done !== old.get(x.id));
-      const items = draftList(t).map(x => x.done === old.get(x.id) ? x : {...x, by: x.done ? who() : null, at: x.done ? Date.now() : null});
-      const st = draft.status && draft.status !== t.status ? draft.status : null;
-      const left = items.filter(x => !x.done).length;
-      if ((st || t.status) === "tamam" && left){ toast(`Önce listedeki ${left} kalemi onayla.`); return; }
-      const f = {}, msgs = [];
-      if (changed.length){ f.items = items; msgs.push(changed.map(x => `${x.done ? "Onayladı" : "Onayı kaldırdı"}: ${x.text}`).join(", ")); }
-      if (st){
-        f.status = st;
-        if (st === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
-        msgs.push(`Durumu “${STATUS[st]}” yaptı`);
-      }
-      draft = {status: null, items: {}};
-      patch(t.id, f, msgs.join(" · "));
-      toast("Güncellendi.");
-    });
-    return;
-  }
-  const b = e.target.closest("[data-dact]"); if (!b || !detailId) return;
-  const t = tasks.get(detailId); if (!t) return;
-  const a = b.dataset.dact, v = b.dataset.v;
-  if (viewOnly(t)) return;
-  requireMe(() => {
-    if (a === "due"){
-      const ms = fromInput($("#dDue").value);
-      if (!ms){ toast("Geçerli bir tarih ve saat seç."); return; }
-      if (ms === t.dueAt) return;
-      patch(t.id, {dueAt: ms}, `Son tarihi ${fmt(ms)} yaptı`);
-    }
-    if (a === "dept" && v !== t.dept) patch(t.id, {dept: v}, `${DEPTS[v].label} departmanına aktardı`);
-    if (a === "ooo") patch(t.id, {ooo: !t.ooo}, t.ooo ? "Odayı satışa açtı" : "Odayı satışa kapattı");
-    if (a === "guest") patch(t.id, {guest: !t.guest}, t.guest ? "“Misafir odada” işaretini kaldırdı" : "“Misafir odada” olarak işaretledi");
-    if (a === "note"){
-      const n = ($("#dNote").value || "").trim().slice(0, 500); if (!n) return;
-      $("#dNote").value = ""; patch(t.id, {}, "Not: " + n);
-    }
-    if (a === "itemadd"){
-      const txt = ($("#dItem").value || "").trim().slice(0, 120); if (!txt) return;
-      const items = [...(t.items || [])];
-      if (items.length >= 50){ toast("En fazla 50 kalem eklenebilir."); return; }
-      items.push({id: newId(), text: txt, done: false});
-      $("#dItem").value = ""; patch(t.id, {items}, "Listeye ekledi: " + txt);
-    }
-    if (a === "itemdel"){
-      const it = (t.items || []).find(x => x.id === v);
-      patch(t.id, {items: (t.items || []).filter(x => x.id !== v)}, "Listeden çıkardı: " + (it?.text || ""));
-    }
-    if (a === "delete"){ if (!deleteArmed){ deleteArmed = true; renderDetail(); return; } remove(t.id); }
+function openDetail(id){ detailId = id; deleteArmed = false; draft = {}; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
+function saveDraft(t){
+  const d = eff(t), f = {}, msgs = [];
+  const items = (d.items || []).map(x => {
+    const o = (t.items || []).find(y => y.id === x.id);
+    return o && !!o.done === !!x.done ? x : {...x, by: x.done ? who() : null, at: x.done ? Date.now() : null};
   });
+  if ("dueAt" in draft && !draft.dueAt){ toast("Geçerli bir tarih ve saat seç."); return; }
+  const left = items.filter(x => !x.done).length;
+  if (d.status === "tamam" && left){ toast(`Önce listedeki ${left} kalemi onayla.`); return; }
+  if (d.status !== t.status){
+    f.status = d.status;
+    if (d.status === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
+    msgs.push(`Durumu “${STATUS[d.status]}” yaptı`);
+  }
+  if (p0(d) !== prioOf(t)){ f.prio = d.prio; msgs.push(`Aciliyeti “${PRIO[d.prio].label}” yaptı`); }
+  if (d.dueAt !== t.dueAt){ f.dueAt = d.dueAt; msgs.push(`Son tarihi ${fmt(d.dueAt)} yaptı`); }
+  if (d.dept !== t.dept){ f.dept = d.dept; msgs.push(`${DEPTS[d.dept]?.label || d.dept} departmanına aktardı`); }
+  if (!!d.ooo !== !!t.ooo){ f.ooo = !!d.ooo; msgs.push(d.ooo ? "Odayı satışa kapattı" : "Odayı satışa açtı"); }
+  if (!!d.guest !== !!t.guest){ f.guest = !!d.guest; msgs.push(d.guest ? "“Misafir odada” olarak işaretledi" : "“Misafir odada” işaretini kaldırdı"); }
+  if (!sameVal(items, t.items || [])){
+    f.items = items;
+    const oldIds = new Set((t.items || []).map(x => x.id)), newIds = new Set(items.map(x => x.id));
+    items.filter(x => !oldIds.has(x.id)).forEach(x => msgs.push("Listeye ekledi: " + x.text));
+    (t.items || []).filter(x => !newIds.has(x.id)).forEach(x => msgs.push("Listeden çıkardı: " + x.text));
+    items.filter(x => oldIds.has(x.id) && !!(t.items.find(y => y.id === x.id) || {}).done !== !!x.done).forEach(x => msgs.push(`${x.done ? "Onayladı" : "Onayı kaldırdı"}: ${x.text}`));
+  }
+  const note = ($("#dNote")?.value || "").trim().slice(0, 500);
+  if (note) msgs.push("Not: " + note);
+  if (!msgs.length) return;
+  draft = {}; if ($("#dNote")) $("#dNote").value = "";
+  patch(t.id, f, msgs.join(" · "));
+  toast("Güncellendi.");
+}
+const p0 = d => PRIO[d.prio] ? d.prio : prioOf(d);
+$("#detail").addEventListener("click", e => {
+  const t = detailId && tasks.get(detailId); if (!t) return;
+  if (e.target.closest("#dSave")){ if (draftMode(t) && draftDirty(t)) requireMe(() => saveDraft(t)); return; }
+  const b = e.target.closest("[data-dact]"); if (!b || !draftMode(t)) return;
+  const a = b.dataset.dact, v = b.dataset.v, d = eff(t);
+  if (a === "delete"){ requireMe(() => { if (!deleteArmed){ deleteArmed = true; renderDetail(); return; } remove(t.id); }); return; }
+  if (a === "dept") draft.dept = v;
+  if (a === "ooo") draft.ooo = !d.ooo;
+  if (a === "guest") draft.guest = !d.guest;
+  if (a === "itemadd"){
+    const txt = ($("#dItem").value || "").trim().slice(0, 120); if (!txt) return;
+    if ((d.items || []).length >= 50){ toast("En fazla 50 kalem eklenebilir."); return; }
+    draft.items = [...(d.items || []), {id: newId(), text: txt, done: false}]; $("#dItem").value = "";
+  }
+  if (a === "itemdel") draft.items = (d.items || []).filter(x => x.id !== v);
+  renderDetail();
 });
 
 function setStatus(t, v){
@@ -1052,30 +1053,32 @@ function setStatus(t, v){
   patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
 }
 $("#detail").addEventListener("change", e => {
-  const t0 = detailId && tasks.get(detailId);
-  if (t0 && e.target.id === "dStatus"){
-    if (!canStatus(t0)) return;
-    const v = e.target.value;
-    if (draftMode(t0)){ draft.status = v; $("#dSave").disabled = !draftDirty(t0); return; }
-    requireMe(() => setStatus(t0, v)); return;
+  const t = detailId && tasks.get(detailId); if (!t) return;
+  const id = e.target.id, edit = draftMode(t);
+  if (id === "dStatus"){
+    if (!canStatus(t)) return;
+    if (edit){ draft.status = e.target.value; syncSave(t); return; }
+    const v = e.target.value; requireMe(() => setStatus(t, v)); return;
   }
-  if (t0 && e.target.id === "dPrio"){ if (viewOnly(t0)) return; const v = e.target.value; if (v !== prioOf(t0)) requireMe(() => patch(t0.id, {prio: v}, `Aciliyeti “${PRIO[v].label}” yaptı`)); return; }
-  const c = e.target.closest("[data-item]"); if (!c || !detailId) return;
-  const t = tasks.get(detailId); if (!t || !canStatus(t)) return;
-  const id = c.dataset.item, on = c.checked;
+  if (id === "dPrio"){ if (edit){ draft.prio = e.target.value; renderDetail(); } return; }
+  if (id === "dDue"){ if (edit){ draft.dueAt = fromInput(e.target.value); syncSave(t); } return; }
+  const c = e.target.closest("[data-item]"); if (!c || !canStatus(t)) return;
+  const iid = c.dataset.item, on = c.checked;
   c.closest("li")?.classList.toggle("done", on);
-  if (draftMode(t)){
-    draft.items[id] = on; $("#dSave").disabled = !draftDirty(t);
-    const it = draftList(t), m = $("#detail .section-t .muted"); if (m) m.textContent = `${it.filter(x => x.done).length}/${it.length}`;
-    return;
+  if (edit){
+    draft.items = (eff(t).items || []).map(x => x.id === iid ? {...x, done: on} : x);
+    const it = draft.items, m = $("#detail .section-t .muted"); if (m) m.textContent = `${it.filter(x => x.done).length}/${it.length}`;
+    syncSave(t); return;
   }
+  // işi alan departman: liste onayı anında kaydedilir
   requireMe(() => {
-    const items = (t.items || []).map(x => x.id === id ? {...x, done: on, by: on ? who() : null, at: on ? Date.now() : null} : x);
-    const it = items.find(x => x.id === id); if (!it) return;
+    const items = (t.items || []).map(x => x.id === iid ? {...x, done: on, by: on ? who() : null, at: on ? Date.now() : null} : x);
+    const it = items.find(x => x.id === iid); if (!it) return;
     patch(t.id, {items}, `${on ? "Onayladı" : "Onayı kaldırdı"}: ${it.text}`);
     if (on && items.every(x => x.done)) toast("Listenin tamamı onaylandı. İşi tamamlayabilirsin.");
   });
 });
+$("#detail").addEventListener("input", e => { if (e.target.id === "dNote" || e.target.id === "dDue"){ const t = detailId && tasks.get(detailId); if (t && draftMode(t)){ if (e.target.id === "dDue") draft.dueAt = fromInput(e.target.value); syncSave(t); } } });
 $("#detail").addEventListener("keydown", e => {
   if (e.target.id === "dItem" && e.key === "Enter"){ e.preventDefault(); $('#detail [data-dact="itemadd"]')?.click(); }
 });
