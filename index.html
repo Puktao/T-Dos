@@ -529,6 +529,12 @@ const isAdmin = () => !!(profileMode && me && me.role === "admin");
 const deptOf = m => m && DEPTS[m.dept] ? DEPTS[m.dept] : null;
 const who = () => me ? `${me.name} (${deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Departmansız")})` : "İsimsiz";
 const isOpen = t => t.status !== "tamam";
+// Personel yalnızca departmanına atanan işleri ve kendi departmanının açtığı işleri görür; yönetici hepsini.
+const canSee = t => !profileMode || !me || isAdmin() || !me.dept || t.dept === me.dept || t.createdDept === me.dept
+  || (t.createdBy && lower(t.createdBy) === lower(me.name));
+const visTasks = () => [...tasks.values()].filter(canSee);
+// Detay ekranı: yönetici her şeyi değiştirir; personel yalnızca durumu (ve listedeki tikleri).
+const viewOnly = () => !isAdmin() && profileMode;
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -539,13 +545,14 @@ function itemsProg(t){
 }
 function checklistDetail(t){
   const it = t.items || [];
-  if (!it.length && readOnly) return "";
+  if (!it.length && (readOnly || viewOnly())) return "";
+  const edit = !readOnly && !viewOnly();
   const d = it.length - openItems(t);
   return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
       <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${readOnly ? "disabled" : ""}><span class="t">${esc(x.text)}</span></label>
-      ${readOnly ? "" : `<button type="button" class="rm" data-dact="itemdel" data-v="${esc(x.id)}" aria-label="Kalemi sil">✕</button>`}</li>`).join("")}</ul>` : ""}
-    ${readOnly ? "" : `<div class="field" style="margin-top:8px"><div class="inline"><input type="text" id="dItem" maxlength="120" placeholder="Kalem yaz" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" data-dact="itemadd">Ekle</button></div></div>`}`;
+      ${!edit ? "" : `<button type="button" class="rm" data-dact="itemdel" data-v="${esc(x.id)}" aria-label="Kalemi sil">✕</button>`}</li>`).join("")}</ul>` : ""}
+    ${!edit ? "" : `<div class="field" style="margin-top:8px"><div class="inline"><input type="text" id="dItem" maxlength="120" placeholder="Kalem yaz" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" data-dact="itemadd">Ekle</button></div></div>`}`;
 }
 
 /* ---------- helpers ---------- */
@@ -602,7 +609,7 @@ function actionsFor(t){
   if (readOnly) return "";
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
   switch (t.status){
-    case "yeni": return b("take","Üstlen","primary") + b("open","Ata / detay","ghost");
+    case "yeni": return b("take","Üstlen","primary") + b("open","Detay","ghost");
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
     case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
     case "tamam": return (t.verified ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost");
@@ -646,7 +653,7 @@ function stateScreen(){
 function screenHome(){
   const s = stateScreen(); if (s) return s;
   const tEnd = dayStart(Date.now()) + 86400000;
-  const open = [...tasks.values()].filter(isOpen);
+  const open = visTasks().filter(isOpen);
   const today = open.filter(t => t.dueAt && t.dueAt < tEnd);
   const over = open.filter(isOver);
   const urgent = open.filter(t => prioOf(t) === "acil").sort(byDue);
@@ -695,7 +702,7 @@ const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
 const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.assignee, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
 function applyTodo(f){
   const now = Date.now(), tEnd = dayStart(now) + 86400000;
-  let arr = [...tasks.values()].filter(isOpen);
+  let arr = visTasks().filter(isOpen);
   if (f.dept !== "all") arr = arr.filter(t => t.dept === f.dept);
   if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
   if (f.status !== "all") arr = arr.filter(t => t.status === f.status);
@@ -709,7 +716,7 @@ function applyTodo(f){
 }
 function applyDone(f){
   const now = Date.now();
-  let arr = [...tasks.values()].filter(t => !isOpen(t));
+  let arr = visTasks().filter(t => !isOpen(t));
   if (f.check === "kontrol") arr = arr.filter(t => !t.verified);
   if (f.check === "ok") arr = arr.filter(t => t.verified);
   if (f.dept !== "all") arr = arr.filter(t => t.dept === f.dept);
@@ -787,7 +794,7 @@ function screenReport(){
   const s = stateScreen(); if (s) return s;
   const now = Date.now();
   const from = ui.rep === "0" ? dayStart(now) : now - Number(ui.rep) * 86400000;
-  const all = [...tasks.values()];
+  const all = visTasks();
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
   const open = all.filter(isOpen), over = open.filter(isOver);
@@ -856,9 +863,9 @@ function renderWho(){
 }
 function renderTabs(){
   document.querySelectorAll(".tb").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
-  const open = [...tasks.values()].filter(isOpen);
+  const open = visTasks().filter(isOpen);
   const mine = deptOf(me) ? open.filter(t => t.dept === me.dept).length : open.length;
-  const pend = [...tasks.values()].filter(t => !isOpen(t) && !t.verified).length;
+  const pend = visTasks().filter(t => !isOpen(t) && !t.verified).length;
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
   $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
   $("#hTitle").textContent = TITLES[ui.tab];
@@ -957,7 +964,8 @@ function renderDetail(){
       ${t.ooo || t.guest ? `<dt>Oda</dt><dd>${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}</dd>` : ""}
     </dl>
     ${readOnly ? "" : `
-    <div class="field"><span class="lbl">Durum</span><div class="chips wrap">${chips("status", Object.entries(STATUS), t.status)}</div></div>
+    <div class="field"><span class="lbl">Durum</span><div class="chips wrap">${chips("status", Object.entries(STATUS), t.status)}</div></div>`}
+    ${readOnly || viewOnly() ? "" : `
     <div class="field"><span class="lbl">Aciliyet</span><div class="chips wrap">${chips("prio", Object.entries(PRIO).map(([k,v]) => [k, v.label]), p, k => "c-" + k)}</div></div>
     <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
     <div class="field"><label class="lbl" for="dAsg">Kişiye ata</label><div class="inline"><input type="text" id="dAsg" list="people" placeholder="İsim yaz veya seç" value="${esc(t.assignee || "")}" autocomplete="off"><button type="button" class="btn" data-dact="assign">Ata</button></div></div>
@@ -969,7 +977,7 @@ function renderDetail(){
       <div><button type="button" class="btn" data-dact="note">Notu kaydet</button></div></div>`}
     <h3 class="section-t">Geçmiş</h3>
     <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>
-    ${!readOnly && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
+    ${!readOnly && !viewOnly() && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
   if ($("#dNote")) $("#dNote").value = keep.note;
   if ($("#dItem")) $("#dItem").value = keep.item;
   if (keep.focus === "dAsg" && $("#dAsg")) $("#dAsg").value = keep.asg;
@@ -981,6 +989,7 @@ $("#detail").addEventListener("click", e => {
   const b = e.target.closest("[data-dact]"); if (!b || !detailId) return;
   const t = tasks.get(detailId); if (!t) return;
   const a = b.dataset.dact, v = b.dataset.v;
+  if (viewOnly() && a !== "status") return;
   requireMe(() => {
     if (a === "status" && v === "tamam" && v !== t.status && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); return; }
     if (a === "status" && v !== t.status){

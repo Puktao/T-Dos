@@ -66,8 +66,10 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Liste.
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
-   - Formda **"Kişiye ata" yok**; atama iş detayından yapılır.
+   - Formda **"Kişiye ata" yok**; atama iş detayından yalnızca yönetici yapar (personelde durum "Devam ediyor" olunca kendiliğinden).
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
+9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
+10. **İş detayı (personel):** Yalnızca görüntüleme. Değiştirilebilen tek şey **Durum** (ve listedeki tikler, çünkü kural 8 tüm kalemler tiklenmeden tamamlamaya izin vermiyor). Aciliyet, son tarih, kişiye atama, departman aktarma, oda durumu, not ve silme yalnızca yöneticide (`viewOnly()`). Liste boşsa bölüm hiç görünmez; doluysa madde madde görünür. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.
@@ -85,7 +87,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Sign-up kapatıldı.
 - [x] Profil tablosu kuruldu (`schema.sql` 5. bölüm).
 - [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
-- [ ] `schema.sql` 7. bölüm (liste tabloları) için dosya yeniden çalıştırılacak.
+- [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
