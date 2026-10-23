@@ -288,6 +288,14 @@ body[data-tab="yapilacak"] #screen .card::before{background:var(--ink)}
 .overlay{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--surface);color:var(--ink);width:100%;max-width:600px;max-height:92%;overflow:auto;overscroll-behavior:contain;border-radius:18px 18px 0 0;
   padding-top:10px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+/* alttan gelen ekranlar aşağıdan yukarı kayarak açılır */
+.overlay:not([hidden]){animation:scrimIn .22s ease-out}
+.overlay:not([hidden]) > .sheet{animation:sheetUp .3s cubic-bezier(.2,.8,.25,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes scrimIn{from{background-color:transparent}}
+@media (min-width:720px){.overlay:not([hidden]) > .sheet{animation:sheetPop .22s ease-out}}
+@keyframes sheetPop{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.overlay:not([hidden]),.overlay:not([hidden]) > .sheet{animation:none}}
 .sheet::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
 @media (min-width:720px){.overlay{align-items:center;padding:24px}.sheet{border-radius:16px;max-height:90%}.sheet::before{display:none}}
 .sheet-head{display:flex;align-items:flex-start;gap:12px}

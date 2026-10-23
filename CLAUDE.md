@@ -110,5 +110,5 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - Yerel deneme: `python3 -m http.server` ile aç. `supabase-config.js` boşken "Kurulum tamamlanmadı" ekranı görünmesi beklenen davranıştır.
 - Değişiklikten sonra: satır içi script'in söz dizimini kontrol et (`node --check`), telefon genişliğinde (≈400px) açık ve koyu temada bak, `sw.js` sürümünü artır.
 - Renkler `:root` içindeki token'lardan gelir. Koyu tema iki blokta tanımlı: `prefers-color-scheme` ve `[data-theme=dark]`.
-- `[hidden]{display:none!important}` kuralı gerekli; overlay'ler `hidden` özniteliğiyle açılıp kapanır.
+- `[hidden]{display:none!important}` kuralı gerekli; overlay'ler `hidden` özniteliğiyle açılıp kapanır. Alttan gelen ekranlar (`.sheet`) açılırken aşağıdan yukarı kayar (`sheetUp`, 0,3 sn; geniş ekranda hafif belirme; "hareketi azalt" ayarında animasyon yok).
 - Commit mesajları Türkçe.
