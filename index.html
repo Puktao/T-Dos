@@ -829,7 +829,9 @@ function screenReport(){
   const s = stateScreen(); if (s) return s;
   const now = Date.now();
   const from = ui.rep === "0" ? dayStart(now) : now - Number(ui.rep) * 86400000;
-  const all = visTasks();
+  // Rapor: personel yalnızca kendi departmanının işlerini görür; yönetici hepsini.
+  const ownDept = profileMode && !isAdmin() && me ? me.dept || "__yok" : null;
+  const all = visTasks().filter(t => !ownDept || t.dept === ownDept);
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
   const open = all.filter(isOpen), over = open.filter(isOver);
@@ -843,7 +845,7 @@ function screenReport(){
   const stack = created.length
     ? `<div class="stack">${["acil","orta","sureli"].map(k => `<div style="width:${pc(k) / tot * 100}%;background:var(--${k})"></div>`).join("")}</div>`
     : `<div class="stack"></div>`;
-  const rows = Object.entries(DEPTS).filter(([k, v]) => (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
+  const rows = Object.entries(DEPTS).filter(([k, v]) => ownDept ? k === ownDept : (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
     const o = open.filter(t => t.dept === k), ov = o.filter(isOver), dn = done.filter(t => t.dept === k);
     const ot = dn.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
     return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td class="${ov.length ? "over" : ""}">${ov.length}</td><td>${dn.length}</td><td>${dn.length ? Math.round(ot / dn.length * 100) + "%" : "—"}</td><td>${avg(dn)}</td></tr>`;
@@ -864,7 +866,7 @@ function screenReport(){
       <div class="kpi"><b style="${over.length ? "color:var(--acil-ink)" : ""}">${over.length}</b><span>Son tarihi geçen</span></div>
       <div class="kpi"><b>${avg(done)}</b><span>Ort. çözüm süresi</span></div>
     </div>
-    <div class="panel"><h3>Departmanlar</h3><div class="tscroll"><table class="dtable">
+    <div class="panel"><h3>${ownDept ? esc(DEPTS[ownDept]?.label || "Departmanım") : "Departmanlar"}</h3><div class="tscroll"><table class="dtable">
       <thead><tr><th>Departman</th><th>Açık</th><th>Geciken</th><th>Biten</th><th>Zamanında</th><th>Ort. süre</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
       <p class="muted" style="margin:8px 0 0">Açık ve geciken: şu an. Biten, zamanında ve ortalama süre: seçili dönem.</p></div>

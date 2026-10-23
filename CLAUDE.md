@@ -85,6 +85,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Satır sağında ✕ ile silme.
    - Tüm kalemler tiklenmeden iş "Tamamlandı" yapılamaz.
 
+11. **Rapor:** Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
+
 ## Açık konular
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı).
 
