@@ -359,7 +359,7 @@ img{max-width:100%}
 .ulist .uh b{font-size:15px}
 .ulist .uh small{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
 .ulist .badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--orta-soft);color:var(--orta-ink)}
-.ulist .urow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.95fr);gap:6px;margin-top:10px}
+.ulist .urow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
 .ulist .urow .field{margin-top:0;min-width:0;gap:5px}
 .ulist .urow input[type=text]{padding:10px 8px}
 .ulist .urow .sel select{padding:11px 22px 11px 8px;text-overflow:ellipsis}
@@ -476,7 +476,8 @@ const DEPTS = {
   kat:{label:"Kat Hizmetleri", short:"HK", name:"Kat"},
   resepsiyon:{label:"Resepsiyon", short:"ÖN", name:"Resepsiyon"},
   satinalma:{label:"Satınalma", short:"SAT", name:"Satınalma", noArea:true},
-  mutfak:{label:"Mutfak", short:"MUT", name:"Mutfak"}
+  mutfak:{label:"Mutfak", short:"MUT", name:"Mutfak"},
+  yonetici:{label:"Yönetici", short:"YÖN", name:"Yönetici"}
 };
 const TYPES = {
   ariza:{label:"Arıza", dept:"teknik", cats:["Klima / ısıtma","Elektrik / aydınlatma","Su / tesisat","TV / internet","Kapı / kilit / kasa","Mobilya","Minibar / buzdolabı","Diğer"]},
@@ -832,7 +833,7 @@ function screenReport(){
   const stack = created.length
     ? `<div class="stack">${["acil","orta","sureli"].map(k => `<div style="width:${pc(k) / tot * 100}%;background:var(--${k})"></div>`).join("")}</div>`
     : `<div class="stack"></div>`;
-  const rows = Object.entries(DEPTS).filter(([k, v]) => v.active !== false || all.some(t => t.dept === k)).map(([k,v]) => {
+  const rows = Object.entries(DEPTS).filter(([k, v]) => (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
     const o = open.filter(t => t.dept === k), ov = o.filter(isOver), dn = done.filter(t => t.dept === k);
     const ot = dn.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
     return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td class="${ov.length ? "over" : ""}">${ov.length}</td><td>${dn.length}</td><td>${dn.length ? Math.round(ot / dn.length * 100) + "%" : "—"}</td><td>${avg(dn)}</td></tr>`;
@@ -1025,7 +1026,7 @@ function openWho(){
   $("#ovWho .sheet-sub").textContent = acct ? "Ad ve departmanı yönetici belirler." : "Bu cihazda hatırlanır. Ortak cihazda vardiya değişince güncelle.";
   if (acct){
     $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
-      <dt>Departman</dt><dd>${esc(deptOf(me)?.label || "Atanmadı")}</dd><dt>Yetki</dt><dd>${me.role === "admin" ? "Yönetici" : "Personel"}</dd>`;
+      <dt>Departman</dt><dd>${esc(deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Atanmadı"))}</dd>`;
     openOv("#ovWho"); return;
   }
   $("#wName").value = me?.name || ""; whoDept = me?.dept || null; renderWhoDept(); openOv("#ovWho"); setTimeout(() => $("#wName").focus(), 50);
@@ -1079,16 +1080,16 @@ async function loadProfiles(){
     renderAll();
   } catch(e){}
 }
-const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => v.active !== false || k === cur).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
-const roleSel = (id, cur, dis) => `<div class="sel"><select id="${id}"${dis ? " disabled" : ""}>${opt("user", "Personel", cur !== "admin")}${opt("admin", "Yönetici", cur === "admin")}</select></div>`;
+const ADMIN_DEPT = "yonetici";   // yalnızca Tuncer'in departmanı; başkasına atanamaz
+const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === cur)).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
 function renderUsers(){
-  const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || "", r: $("#uRole")?.value || "user"};
+  const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || ""};
   const rows = profiles.map((u, i) => `<li data-uid="${esc(u.user_id)}">
       <div class="uh"><b>${esc(u.name)}</b>${u.role === "admin" ? `<span class="badge">YÖNETİCİ</span>` : ""}<small>${esc(u.email)}</small></div>
       <div class="urow">
         <div class="field"><label class="lbl" for="un${i}">Ad</label><input type="text" id="un${i}" maxlength="40" value="${esc(u.name)}" autocomplete="off"></div>
-        <div class="field"><label class="lbl" for="ud${i}">Departman</label>${deptSel("ud" + i, u.dept, true)}</div>
-        <div class="field"><label class="lbl" for="ur${i}">Yetki</label>${roleSel("ur" + i, u.role, u.user_id === authUser?.id)}</div>
+        <div class="field"><label class="lbl" for="ud${i}">Departman</label>${u.role === "admin"
+          ? `<div class="sel"><select id="ud${i}" disabled>${opt(ADMIN_DEPT, "Yönetici", true)}</select></div>` : deptSel("ud" + i, u.dept, true)}</div>
       </div>
       <div class="uf"><button type="button" class="btn" data-usave="${i}">Kaydet</button></div></li>`).join("");
   $("#users").innerHTML = `
@@ -1097,10 +1098,7 @@ function renderUsers(){
       <div class="field"><label class="lbl" for="uName">Ad</label><input type="text" id="uName" maxlength="40" placeholder="ör. Ayşe K." autocomplete="off"></div>
       <div class="field"><label class="lbl" for="uEmail">E-posta</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
       <div class="field"><label class="lbl" for="uPass">Geçici şifre</label><input type="text" id="uPass" autocomplete="off" placeholder="En az 6 karakter"><span class="hint">Kullanıcıya bu şifreyi ilet. Sonra "Şifremi unuttum" ile değiştirebilir.</span></div>
-      <div class="pair">
-        <div class="field"><label class="lbl" for="uDept">Departman</label>${deptSel("uDept", keep.d)}</div>
-        <div class="field"><label class="lbl" for="uRole">Yetki</label>${roleSel("uRole", keep.r)}</div>
-      </div>
+      <div class="field"><label class="lbl" for="uDept">Departman</label>${deptSel("uDept", keep.d)}</div>
       <p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" id="uErr" ${usersMsg ? "" : "hidden"}>${esc(usersMsg.replace(/^✓ /, ""))}</p>
       <div class="sheet-foot" style="margin-top:12px"><button type="submit" class="btn primary" id="uAdd">Kullanıcı ekle</button></div>
     </form>
@@ -1119,12 +1117,12 @@ function createError(error){
 $("#users").addEventListener("submit", async e => {
   if (e.target.id !== "uForm") return;
   e.preventDefault();
-  const body = {name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null, role: $("#uRole").value};
+  const body = {name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null};
   const bad = !body.name ? "Adı yaz." : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email) ? "Geçerli bir e-posta yaz." : body.password.length < 6 ? "Şifre en az 6 karakter olmalı." : "";
   if (bad){ usersMsg = bad; renderUsers(); return; }
   $("#uAdd").disabled = true;
   try {
-    const {error} = await sb.rpc("fdos_admin_create_user", {p_email: body.email, p_password: body.password, p_name: body.name, p_dept: body.dept, p_role: body.role});
+    const {error} = await sb.rpc("fdos_admin_create_user", {p_email: body.email, p_password: body.password, p_name: body.name, p_dept: body.dept, p_role: "user"});
     if (error){ usersMsg = "Eklenemedi: " + createError(error); renderUsers(); return; }
     usersMsg = `✓ ${body.name} eklendi. Giriş: ${body.email}`;
     ["#uName", "#uEmail", "#uPass"].forEach(id => $(id).value = "");
@@ -1134,7 +1132,8 @@ $("#users").addEventListener("submit", async e => {
 $("#users").addEventListener("click", async e => {
   const b = e.target.closest("[data-usave]"); if (!b) return;
   const i = b.dataset.usave, u = profiles[i]; if (!u) return;
-  const fields = {name: $("#un" + i).value.trim().slice(0, 40) || u.name, dept: $("#ud" + i).value || null, role: $("#ur" + i).value};
+  const fields = {name: $("#un" + i).value.trim().slice(0, 40) || u.name};
+  if (u.role !== "admin") fields.dept = $("#ud" + i).value || null;
   b.disabled = true;
   const {error} = await sb.from("fdos_profiles").update(fields).eq("user_id", u.user_id);
   if (error){ b.disabled = false; toast("Kaydedilemedi: " + (/yetkini/i.test(error.message) ? "Kendi yönetici yetkini kaldıramazsın." : error.message)); return; }

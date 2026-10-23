@@ -21,7 +21,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda ve internet geri geldiğinde `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
 - **Giriş:** Supabase Auth, e-posta ve şifre. Kayıt (sign-up) kapalı, kullanıcıları yönetici panelden ekler. "Şifremi unuttum" → `resetPasswordForEmail` → `PASSWORD_RECOVERY` olayında "Yeni şifre" ekranı açılır.
 - **Kimlik:** Ad, departman ve rol `public.fdos_profiles` tablosundan gelir (hesaba bağlı). Personel kendi kaydını değiştiremez; yönetici atar. Kayıtlarda kullanıcı id'si değil ad yazılır (`createdBy`, `log.by`). Profil tablosu yoksa eski düzen çalışır: ad ve departman cihazda `localStorage["oia.me"]`.
-- **Yönetici (admin):** `tuncer@feronya.com`, ad "Tuncer" (`schema.sql` bunu kendisi ayarlar). Hesabım → **Kullanıcılar** ekranından yeni kullanıcı ekler, ad/departman/yetki değiştirir. Rapor'da yalnızca yöneticiye görünen **Kişiler** tablosu var. Kendi yönetici yetkisini kaldıramaz (veritabanı tetikleyicisi engeller).
+- **Yönetici (admin):** Yalnızca `tuncer@feronya.com` (ad "Tuncer", departman `yonetici` = "Yönetici", rozet YÖN). Diğer herkes personeldir. Uygulamada **"Yetki" seçimi yoktur**; rol veritabanında e-postaya göre zorlanır (`fdos_profiles_guard` tetikleyicisi, `schema.sql` 9. bölüm). "Yönetici" departmanı başkasına atanamaz, iş formunda ve Rapor departman tablosunda görünmez (türü yok). Hesabım → **Kullanıcılar** ekranından yeni kullanıcı ekler, ad ve departman değiştirir. Rapor'da yalnızca yöneticiye görünen **Kişiler** tablosu var.
 - **Kullanıcı ekleme:** `fdos_admin_create_user(p_email, p_password, p_name, p_dept, p_role)` SQL fonksiyonu (security definer, yalnızca yönetici). `auth.users` ve `auth.identities` satırlarını doğrudan ekler, kullanıcı onaylı açılır. Bu Supabase'in iç tablolarına yazdığı için resmî yol değildir; Supabase Auth şeması değişirse güncellenmesi gerekebilir. Edge Function kullanılmıyor (kullanıcı panelden yükleyemedi). Profil satırı `auth.users` tetikleyicisiyle kendiliğinden oluşur.
 - **PWA:** `manifest.webmanifest`, `sw.js` (aynı köken için önce ağ, CDN için önce önbellek), `icons/`. **Her yayında `sw.js` içindeki `CACHE` sürümünü artır.**
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
@@ -40,7 +40,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - Okuma: giriş yapan herkes. Yazma: yalnızca yönetici (`fdos_is_admin()`); Supabase paneli bu kurala takılmaz.
 
 ## Sabitler (index.html içinde, tablolar yoksa yedek)
-- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak.
+- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak, yonetici (yalnızca Tuncer).
 - `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak. Kategoriler türün içinde tanımlı.
 - `AREAS`: Lobi, Restoran, Bar, Mutfak, Toplantı Odası, Koridor. Bunlara ek olarak "Oda No" seçeneği var; seçilince yanındaki oda numarası alanı açılır.
 
@@ -96,6 +96,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
 - [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
 - [x] `schema.sql` 8. bölüm (görünürlük kuralı) kuruldu.
+- [ ] `schema.sql` 9. bölüm (yalnızca Tuncer yönetici, Yönetici departmanı) için dosya yeniden çalıştırılacak.
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.

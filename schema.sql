@@ -337,3 +337,30 @@ create policy "fdos guncelleme" on public.fdos_tasks for update to authenticated
   using (public.fdos_can_see(data)) with check (public.fdos_can_see(data));
 create policy "fdos silme"      on public.fdos_tasks for delete to authenticated
   using (status = 'tamam' and public.fdos_can_see(data));
+
+-- 9) Yetki: yalnızca tuncer@feronya.com yöneticidir, departmanı "Yönetici". Diğer herkes personeldir.
+--    Uygulamada "Yetki" seçimi yoktur; bu kural veritabanında zorlanır.
+insert into public.fdos_departmanlar (kod, ad, kisa_ad, rozet, alan_gerekli, sira)
+values ('yonetici', 'Yönetici', 'Yönetici', 'YÖN', true, 90)
+on conflict (kod) do nothing;
+
+create or replace function public.fdos_profiles_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if lower(new.email) = 'tuncer@feronya.com' then
+    new.role := 'admin'; new.dept := 'yonetici';
+  else
+    new.role := 'user';
+    if new.dept = 'yonetici' then new.dept := null; end if;
+  end if;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists fdos_profiles_guard on public.fdos_profiles;
+create trigger fdos_profiles_guard before insert or update on public.fdos_profiles
+  for each row execute function public.fdos_profiles_guard();
+
+update public.fdos_profiles set role = role;   -- kuralı mevcut kayıtlara uygula
