@@ -137,6 +137,9 @@ button{font:inherit;color:inherit}
 /* açık gri kutu, solda koyu çentik (kartlardaki gibi) */
 .hbox.today{position:relative;overflow:hidden;padding-left:19px;background:color-mix(in srgb,var(--muted) 30%,var(--surface));border-color:color-mix(in srgb,var(--muted) 45%,var(--surface));color:var(--ink)}
 .hbox.today::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--ink)}
+/* "Bitmemiş işler": solda açık gri çentik */
+.hbox.open{position:relative;overflow:hidden;padding-left:19px}
+.hbox.open::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:color-mix(in srgb,var(--muted) 45%,var(--surface))}
 .hbox .hl{font-weight:700;font-size:14.5px;line-height:1.25}
 .hbox b{font:800 64px/.9 var(--font-display);font-variant-numeric:tabular-nums;margin-top:auto}
 .hbox .hs{font-size:12.5px;line-height:1.35;opacity:.8}
@@ -729,7 +732,7 @@ function screenHome(){
   const urgent = open.filter(isUrgent).sort(byDue);
   const upcoming = open.filter(t => !isUrgent(t)).sort(byDue);   // son tarihi en yakın olan en üstte
   const UP = 12;
-  const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name} ${n}`).join(" · ") || "Açık iş yok";
+  const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name}\u00a0${n}`).join(" · ") || "Açık iş yok";
   const hero = `<div class="hero">
     <button type="button" class="hbox today" data-jump="today">
       <span class="hl">Bugün yapılacaklar</span><b>${today.length}</b>
