@@ -646,7 +646,7 @@ function actionsFor(t){
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
   if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
-    case "yeni": return b("take","Üstlen","primary");
+    case "yeni": return "";   // "Üstlen" yok; durum detaydan ya da sonraki düğmelerden değişir
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
     case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
     case "tamam": return (t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost reopen");
