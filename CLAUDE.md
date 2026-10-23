@@ -15,7 +15,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Bağlantı:** `supabase-config.js` → `window.FDOS_SUPABASE = {url, anonKey}`. Yalnızca anon / publishable anahtar. **service_role / secret anahtar asla depoya girmez.**
 - **Veritabanı:** `schema.sql` (birden fazla çalıştırılabilir)
   - Tablo `public.fdos_tasks(id text pk, data jsonb, status gen., done_at gen. bigint, created_at, updated_at)`.
-  - RLS: yalnızca `authenticated` okur, ekler ve günceller. Silme yalnızca `status = 'tamam'` olan işlerde. `anon` erişimi yok.
+  - RLS: yalnızca `authenticated`. Okuma, güncelleme ve silme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme herkes. Silme ayrıca yalnızca `status = 'tamam'` olan işlerde. `anon` erişimi yok.
   - `fdos_patch_task(p_id, p_patch jsonb)` → `data = data || p_patch`. Üst düzey alanları birleştirir; güncellemeler bununla yapılır.
   - Realtime: tablo `supabase_realtime` yayınında.
 - **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda ve internet geri geldiğinde `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
@@ -69,12 +69,12 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Tüm seçimler açılır liste (select).
    - **Kişiye atama yok.** İş yalnızca departmana atanır ("Departman" = atanan departman). Departmanı değiştirmek için işi açan kişi ya da yönetici detaydaki Güncelle ile formu açar.
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
-9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
+9. **Görünürlük:** Bir iş yalnızca **atandığı departmana** ve **işi açan kişiye** görünür; başka departman göremez. Yönetici her şeyi görür. Hem ekranda (`canSee()`) hem veritabanında (`fdos_can_see(data)` RLS kuralı, `schema.sql` 8. bölüm: okuma, güncelleme, silme) uygulanır. İşi açan kişi `createdUid` ile, eski kayıtlarda `createdBy` adıyla tanınır.
 10. **İş detayı yalnızca görüntüleme ekranıdır.** Hiçbir alan detayda düzenlenmez.
    - Ayrı kutu yok: detay ekranının zemini aciliyet renginden (acil kırmızı, orta sarı, süreli mavi) aşağı doğru beyaza (koyu temada zemin rengine) geçişlidir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (yalnızca tarih; geçmişse kırmızı), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
    - İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici: başlıkta ✕ yanında **Güncelle** (`canEdit(t)`). Basınca iş, verileriyle **Yapılacak İş formunda** açılır (başlık "Yapılacak İşi Güncelle", düğme "Güncelle"); kayıtta yalnızca değişen alanlar yazılır, geçmişe "Güncelledi: …" düşer. Tamamlanmış işte formda "Kaydı sil" çıkar.
    - İşin atandığı departman (`inDept(t)`): Güncelle yok. Yalnızca "Durumu değiştir" açılır listesi ve liste maddelerini onaylama; ikisi de anında kaydedilir. Kartlardaki durum düğmeleri (Üstlen, Tamamlandı, Beklemeye al…) da yalnızca bu departmanda çıkar; "Detay" düğmesi yok (karta dokununca detay açılır); düğmesi olmayan kartta düğme satırı hiç görünmez.
-   - "Kontrol edildi" / "Yeniden aç" ayrıca işi açan kişi ve departmanında (`canVerify(t)`).
+   - "Kontrol edildi" / "Yeniden aç": işin atandığı departman, işi açan kişi ve yönetici (`canVerify(t)`).
    - Liste boşsa detayda Liste bölümü görünmez. Tüm kalemler tiklenmeden "Tamamlandı" kaydedilmez.
    - Geçmiş listesinde değişikliği yapan kişinin adı (ve departmanı) kalın yazılır.
 8. **Liste (checklist):**
@@ -95,6 +95,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Profil tablosu kuruldu (`schema.sql` 5. bölüm).
 - [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
 - [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
+- [ ] `schema.sql` 8. bölüm (görünürlük kuralı) için dosya yeniden çalıştırılacak.
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.

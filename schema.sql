@@ -307,3 +307,33 @@ insert into public.fdos_alanlar (ad, sira) values
   ('Toplantı Odası', 50),
   ('Koridor', 60)
 on conflict (ad) do nothing;
+
+-- 8) Görünürlük: bir işi yalnızca atandığı departman, işi açan kişi ve yönetici görür / değiştirir.
+--    (2. bölümdeki herkese açık kuralların yerine geçer.)
+create or replace function public.fdos_can_see(d jsonb)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.fdos_profiles p
+     where p.user_id = auth.uid()
+       and ( p.role = 'admin'
+             or (p.dept is not null and p.dept = d->>'dept')
+             or d->>'createdUid' = auth.uid()::text
+             or (coalesce(d->>'createdUid', '') = '' and lower(d->>'createdBy') = lower(p.name)) )
+  );
+$$;
+revoke all on function public.fdos_can_see(jsonb) from public, anon;
+grant execute on function public.fdos_can_see(jsonb) to authenticated;
+
+drop policy if exists "fdos okuma"      on public.fdos_tasks;
+drop policy if exists "fdos guncelleme" on public.fdos_tasks;
+drop policy if exists "fdos silme"      on public.fdos_tasks;
+create policy "fdos okuma"      on public.fdos_tasks for select to authenticated using (public.fdos_can_see(data));
+create policy "fdos guncelleme" on public.fdos_tasks for update to authenticated
+  using (public.fdos_can_see(data)) with check (public.fdos_can_see(data));
+create policy "fdos silme"      on public.fdos_tasks for delete to authenticated
+  using (status = 'tamam' and public.fdos_can_see(data));

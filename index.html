@@ -554,9 +554,8 @@ const isAdmin = () => !!(profileMode && me && me.role === "admin");
 const deptOf = m => m && DEPTS[m.dept] ? DEPTS[m.dept] : null;
 const who = () => me ? `${me.name} (${deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Departmansız")})` : "İsimsiz";
 const isOpen = t => t.status !== "tamam";
-// Personel yalnızca departmanına atanan işleri ve kendi departmanının açtığı işleri görür; yönetici hepsini.
-const canSee = t => !profileMode || !me || isAdmin() || !me.dept || t.dept === me.dept || t.createdDept === me.dept
-  || (t.createdBy && lower(t.createdBy) === lower(me.name));
+// Bir işi yalnızca atandığı departman ve işi açan kişi görür; yönetici hepsini (veritabanında da aynı kural: fdos_can_see).
+const canSee = t => !profileMode || !me || isAdmin() || (!!me.dept && t.dept === me.dept) || isCreator(t);
 const visTasks = () => [...tasks.values()].filter(canSee);
 // Detay ekranı: işi açan kişi ve yönetici her şeyi değiştirir; diğerleri yalnızca durumu ve listedeki tikleri.
 const isCreator = t => t.createdUid ? t.createdUid === authUser?.id : !!(me && t.createdBy && lower(t.createdBy) === lower(me.name));
@@ -568,7 +567,7 @@ const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.
 const canEdit = t => !readOnly && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
 const inDept = t => !readOnly && (!profileMode || !!(me && me.dept && t.dept === me.dept));
-const canVerify = t => canStatus(t) || !!(me && me.dept && t.createdDept === me.dept);
+const canVerify = t => canStatus(t);
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
