@@ -219,6 +219,9 @@ button{font:inherit;color:inherit}
 .check input:disabled + span{opacity:.45}
 .section-t .muted{font-family:var(--font-body);font-size:13px;font-weight:500;letter-spacing:0;margin-left:6px}
 .pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+/* son tarih: diğer alanlarla aynı genişlikte (yarım satır) */
+.field input[type=datetime-local].half{width:calc(50% - 5px);min-width:0;box-sizing:border-box;padding-inline:8px 6px;letter-spacing:-.01em}
+.field input[type=datetime-local].half::-webkit-calendar-picker-indicator{margin-left:0;padding:0;width:16px;height:16px}
 .pair .field{min-width:0}
 .pair .sel select{padding-right:32px}
 .pair .sel::after{right:13px}
@@ -392,7 +395,7 @@ img{max-width:100%}
       <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
       <div class="field"><label class="lbl" for="fPrio">Aciliyet</label><div class="sel" id="prioWrap"><select id="fPrio"></select></div></div>
     </div>
-    <div class="field"><label class="lbl" for="fDue">Son tarih</label><input type="datetime-local" id="fDue"><span class="hint" id="dueHint">Aciliyete göre dolduruldu, değiştirebilirsin.</span></div>
+    <div class="field"><label class="lbl" for="fDue">Son tarih</label><input type="datetime-local" id="fDue" class="half"><span class="hint" id="dueHint">Aciliyete göre dolduruldu, değiştirebilirsin.</span></div>
     <div class="field"><label class="lbl" for="fDesc">Açıklama</label><textarea id="fDesc" placeholder="ör. Klima soğutmuyor, kumanda ekranı yanıp sönüyor"></textarea></div>
     <div class="field"><label class="lbl" for="fItem">Liste (isteğe bağlı)</label>
       <div class="inline"><input type="text" id="fItem" maxlength="120" placeholder="Kalem yaz, ör. 20 adet şampuan" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" id="fItemAdd">Ekle</button></div>
