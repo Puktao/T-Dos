@@ -51,7 +51,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - "Bugün yapılacaklar" ve "Bitmemiş işler" adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
    - "Acil yapılacaklar" listesi, kırmızı kutular.
    - "Takvimi yaklaşan" listesi, son tarihe göre sıralı, aciliyet rengine boyanmış kutular, en fazla 12 iş. Acil işler bu listede görünmez (yalnızca "Acil yapılacaklar"da).
-4. Kartlar aciliyet rengiyle boyanır, her kartta son tarih ve kalan süre ya da gecikme yazar.
+4. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
    - Üstte arama alanı, sağında Filtre düğmesi.
    - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
@@ -71,7 +71,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
 10. **İş detayı yalnızca görüntüleme ekranıdır.** Hiçbir alan detayda düzenlenmez.
-   - Ayrı kutu yok: detay ekranının zemini aciliyet renginden (acil kırmızı, orta sarı, süreli mavi) aşağı doğru beyaza (koyu temada zemin rengine) geçişlidir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (kalan süre/gecikme ile), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
+   - Ayrı kutu yok: detay ekranının zemini aciliyet renginden (acil kırmızı, orta sarı, süreli mavi) aşağı doğru beyaza (koyu temada zemin rengine) geçişlidir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (yalnızca tarih; geçmişse kırmızı), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
    - İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici: başlıkta ✕ yanında **Güncelle** (`canEdit(t)`). Basınca iş, verileriyle **Yapılacak İş formunda** açılır (başlık "Yapılacak İşi Güncelle", düğme "Güncelle"); kayıtta yalnızca değişen alanlar yazılır, geçmişe "Güncelledi: …" düşer. Tamamlanmış işte formda "Kaydı sil" çıkar.
    - İşin atandığı departman (`inDept(t)`): Güncelle yok. Yalnızca "Durumu değiştir" açılır listesi ve liste maddelerini onaylama; ikisi de anında kaydedilir. Kartlardaki durum düğmeleri (Üstlen, Tamamlandı, Beklemeye al…) da yalnızca bu departmanda çıkar; diğerlerinde yalnızca "Detay".
    - "Kontrol edildi" / "Yeniden aç" ayrıca işi açan kişi ve departmanında (`canVerify(t)`).

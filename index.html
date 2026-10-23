@@ -142,7 +142,8 @@ button{font:inherit;color:inherit}
 .due{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
 .due svg{flex:none;color:var(--muted)}
 .due .rem{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-.due.over .rem{color:var(--acil-ink);font-weight:600}
+.due.over{color:var(--acil-ink)}
+.due.over svg{color:var(--acil-ink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted)}
 .dept{font-weight:600;font-size:11.5px;padding:1px 7px;border-radius:4px;border:1px solid var(--line);color:var(--ink)}
 .st{font-weight:600}
@@ -320,7 +321,7 @@ button{font:inherit;color:inherit}
 .dcard .dc-row .k{color:var(--muted);font-size:12.5px;font-weight:600}
 .dcard .dc-row .v{min-width:0;overflow-wrap:anywhere}
 .dcard .dc-row .rem{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
-.dcard .dc-row .rem.over{color:var(--acil-ink);font-weight:600}
+.dcard .dc-row .over{color:var(--acil-ink);font-weight:700}
 .dcard .dc-row .sel select{padding-block:8px}
 .dcard .ddesc{background:color-mix(in srgb,var(--surface) 75%,transparent)}
 .dcard .section-t{margin-top:14px;font-size:16px}
@@ -627,12 +628,11 @@ function plate(room, dept){
 }
 function dueLine(t){
   if (!isOpen(t)){
-    const late = t.dueAt && t.doneAt > t.dueAt;
-    return `<div class="due">${clockSvg}<span>Bitti ${esc(dueLabel(t.doneAt))}</span><span class="rem">${t.dueAt ? (late ? dur(t.doneAt - t.dueAt) + " gecikmeli" : "zamanında") : ""}</span></div>`;
+    return `<div class="due">${clockSvg}<span>Bitti ${esc(dueLabel(t.doneAt))}</span></div>`;
   }
   if (!t.dueAt) return `<div class="due">${clockSvg}<span>Son tarih yok</span></div>`;
   const diff = t.dueAt - Date.now();
-  return `<div class="due ${diff < 0 ? "over" : ""}">${clockSvg}<span>Son: ${esc(dueLabel(t.dueAt))}</span><span class="rem">${diff < 0 ? "Gecikti " + dur(-diff) : dur(diff) + " kaldı"}</span></div>`;
+  return `<div class="due ${diff < 0 ? "over" : ""}">${clockSvg}<span>Son: ${esc(dueLabel(t.dueAt))}</span></div>`;
 }
 function actionsFor(t){
   if (readOnly) return "";
@@ -963,7 +963,7 @@ function renderDetail(){
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time>${esc(l.by)}: ${esc(l.msg)}</li>`).join("");
   const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
   const diff = t.dueAt ? t.dueAt - Date.now() : 0;
-  const due = !t.dueAt ? "—" : `${esc(fmt(t.dueAt))}${isOpen(t) ? ` <span class="rem ${diff < 0 ? "over" : ""}">${diff < 0 ? "Gecikti " + dur(-diff) : dur(diff) + " kaldı"}</span>` : ""}`;
+  const due = !t.dueAt ? "—" : `<span class="${isOpen(t) && diff < 0 ? "over" : ""}">${esc(fmt(t.dueAt))}</span>`;
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
     : `<b>${esc(STATUS[t.status] || "")}</b>`;
