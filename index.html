@@ -1110,22 +1110,22 @@ function renderUsers(){
 }
 function openUsers(){ usersMsg = ""; closeOv("#ovWho"); renderUsers(); openOv("#ovUsers"); loadProfiles(); }
 $("#usersBtn").addEventListener("click", () => { if (isAdmin()) openUsers(); });
-async function fnError(error){
-  try { const j = await error.context.json(); if (j && j.error) return j.error; } catch(e){}
+function createError(error){
   const m = (error && error.message) || "";
-  if (/failed to send|not found|404|fetch/i.test(m)) return "Kullanıcı ekleme servisi (fdos-admin) kurulmamış ya da internet yok.";
+  if (/could not find the function|PGRST202/i.test(m + (error && error.code))) return "Veritabanı güncel değil. schema.sql dosyasını Supabase'de yeniden çalıştır.";
+  if (/fetch|network|load failed/i.test(m)) return "İnternet bağlantısı yok.";
   return m || "bilinmeyen hata";
 }
 $("#users").addEventListener("submit", async e => {
   if (e.target.id !== "uForm") return;
   e.preventDefault();
-  const body = {action: "create", name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null, role: $("#uRole").value};
+  const body = {name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null, role: $("#uRole").value};
   const bad = !body.name ? "Adı yaz." : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email) ? "Geçerli bir e-posta yaz." : body.password.length < 6 ? "Şifre en az 6 karakter olmalı." : "";
   if (bad){ usersMsg = bad; renderUsers(); return; }
   $("#uAdd").disabled = true;
   try {
-    const {error} = await sb.functions.invoke("fdos-admin", {body});
-    if (error){ usersMsg = "Eklenemedi: " + await fnError(error); renderUsers(); return; }
+    const {error} = await sb.rpc("fdos_admin_create_user", {p_email: body.email, p_password: body.password, p_name: body.name, p_dept: body.dept, p_role: body.role});
+    if (error){ usersMsg = "Eklenemedi: " + createError(error); renderUsers(); return; }
     usersMsg = `✓ ${body.name} eklendi. Giriş: ${body.email}`;
     ["#uName", "#uEmail", "#uPass"].forEach(id => $(id).value = "");
     await loadProfiles(); renderUsers();

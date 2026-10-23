@@ -22,7 +22,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Giriş:** Supabase Auth, e-posta ve şifre. Kayıt (sign-up) kapalı, kullanıcıları yönetici panelden ekler. "Şifremi unuttum" → `resetPasswordForEmail` → `PASSWORD_RECOVERY` olayında "Yeni şifre" ekranı açılır.
 - **Kimlik:** Ad, departman ve rol `public.fdos_profiles` tablosundan gelir (hesaba bağlı). Personel kendi kaydını değiştiremez; yönetici atar. Kayıtlarda kullanıcı id'si değil ad yazılır (`createdBy`, `log.by`). Profil tablosu yoksa eski düzen çalışır: ad ve departman cihazda `localStorage["oia.me"]`.
 - **Yönetici (admin):** `tuncer@feronya.com`, ad "Tuncer" (`schema.sql` bunu kendisi ayarlar). Hesabım → **Kullanıcılar** ekranından yeni kullanıcı ekler, ad/departman/yetki değiştirir. Rapor'da yalnızca yöneticiye görünen **Kişiler** tablosu var. Kendi yönetici yetkisini kaldıramaz (veritabanı tetikleyicisi engeller).
-- **Kullanıcı ekleme:** Tarayıcıdan yapılamaz (service_role gerekir). Edge Function `fdos-admin` (`supabase/functions/fdos-admin/index.ts`) çağrılır; çağıranın yönetici olduğunu kendisi kontrol eder. Supabase panelinde "Verify JWT" kapalı olmalı. Profil satırı `auth.users` tetikleyicisiyle kendiliğinden oluşur.
+- **Kullanıcı ekleme:** `fdos_admin_create_user(p_email, p_password, p_name, p_dept, p_role)` SQL fonksiyonu (security definer, yalnızca yönetici). `auth.users` ve `auth.identities` satırlarını doğrudan ekler, kullanıcı onaylı açılır. Bu Supabase'in iç tablolarına yazdığı için resmî yol değildir; Supabase Auth şeması değişirse güncellenmesi gerekebilir. Edge Function kullanılmıyor (kullanıcı panelden yükleyemedi). Profil satırı `auth.users` tetikleyicisiyle kendiliğinden oluşur.
 - **PWA:** `manifest.webmanifest`, `sw.js` (aynı köken için önce ağ, CDN için önce önbellek), `icons/`. **Her yayında `sw.js` içindeki `CACHE` sürümünü artır.**
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
@@ -76,8 +76,9 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] GitHub Pages açık (main / root). Adres: https://puktao.github.io/T-Dos/
 - [x] Supabase'de `schema.sql` çalıştırıldı (tablo ve fonksiyon var, `anon` erişimi kapalı).
 - [x] Sign-up kapatıldı.
-- [ ] `tuncer@feronya.com` Supabase'de eklenecek (Authentication → Users → Add user, Auto Confirm), sonra `schema.sql` yeniden çalıştırılacak.
-- [ ] Edge Function `fdos-admin` panelden yüklenecek, "Verify JWT" kapatılacak. Diğer kullanıcıları yönetici uygulamadan ekler.
+- [x] Profil tablosu kuruldu (`schema.sql` 5. bölüm).
+- [ ] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) için dosya yeniden çalıştırılacak.
+- [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
