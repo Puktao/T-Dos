@@ -538,7 +538,7 @@ const DEF = {
   done: {q:"", check:"kontrol", dept:"all", prio:"all", period:"all"}
 };
 const ui = {
-  tab: ({"#ana":"ana","#yapilacak":"yapilacak","#tamamlanan":"tamamlanan","#rapor":"rapor"})[location.hash] || "ana",
+  tab: "ana",   // uygulama her açılışta Anasayfa ile başlar
   todo: {...DEF.todo},
   done: {...DEF.done},
   rep: "7"
@@ -1407,7 +1407,18 @@ function startLive(){
   refetch();
 }
 function stopLive(){ if (channel && sb){ try { sb.removeChannel(channel); } catch(e){} } channel = null; }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refetch(); });
+// Telefonda uygulama arka plandan yeniden açılınca (1 dakikadan uzun ayrı kalındıysa) Anasayfa'ya dön.
+// Yazılmakta olan bir form (iş ya da kullanıcı) açıksa dokunulmaz.
+let hiddenAt = 0;
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden"){ hiddenAt = Date.now(); return; }
+  refetch();
+  if (hiddenAt && Date.now() - hiddenAt > 60000 && $("#ovNew").hidden && $("#ovUsers").hidden){
+    ["#ovDetail", "#ovFilter", "#ovWho"].forEach(id => { if (!$(id).hidden) closeOv(id); });
+    ui.tab = "ana"; window.scrollTo(0, 0); renderAll();
+  }
+  hiddenAt = 0;
+});
 addEventListener("online", () => refetch());
 
 /* ---------- writes (Supabase) ---------- */
