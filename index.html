@@ -975,7 +975,7 @@ function renderDetail(){
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
-    <div class="card ${p} dcard">
+    <div class="card ${!isOpen(t) && t.verified ? "done verified" : p} dcard">
       <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
       ${row("Departman", `<b>${esc(DEPTS[t.dept]?.label || "")}</b>`)}
       ${row("Son tarih", due)}
