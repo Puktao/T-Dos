@@ -442,7 +442,6 @@ img{max-width:100%}
 
 <!-- Kullanıcılar (yalnızca yönetici) -->
 <div class="overlay" id="ovUsers" hidden><div class="sheet" id="users"></div></div>
-<datalist id="people"></datalist>
 
 <script>
 document.documentElement.lang = "tr";
@@ -510,7 +509,7 @@ let tasks = new Map();
 let me = loadMe();
 let profiles = [], profileMode = false, authUser = null, usersMsg = "";
 const DEF = {
-  todo: {q:"", dept:"all", prio:"all", time:"all", status:"all", asg:"all", sort:"due"},
+  todo: {q:"", dept:"all", prio:"all", time:"all", status:"all", sort:"due"},
   done: {q:"", check:"kontrol", dept:"all", prio:"all", period:"all"}
 };
 const ui = {
@@ -639,7 +638,6 @@ function card(t, opts = {}){
       <div class="meta">
         ${opts.hideDept ? "" : `<span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>`}
         <span class="st">${STATUS[t.status] || ""}</span>
-        <span>${t.assignee ? esc(t.assignee) : "Atanmadı"}</span>
         ${flags}
       </div>
       <div class="actions">${actionsFor(t)}</div>
@@ -705,15 +703,13 @@ const FILTERS = {
   ]
 };
 const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
-const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.assignee, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
+const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.doneBy, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
 function applyTodo(f){
   const now = Date.now(), tEnd = dayStart(now) + 86400000;
   let arr = visTasks().filter(isOpen);
   if (f.dept !== "all") arr = arr.filter(t => t.dept === f.dept);
   if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
   if (f.status !== "all") arr = arr.filter(t => t.status === f.status);
-  if (f.asg === "me") arr = arr.filter(t => me && t.assignee && lower(t.assignee) === lower(me.name));
-  if (f.asg === "none") arr = arr.filter(t => !t.assignee);
   if (f.time === "over") arr = arr.filter(isOver);
   if (f.time === "today") arr = arr.filter(t => t.dueAt && t.dueAt < tEnd);
   arr = arr.filter(matchQ(f.q));
@@ -850,19 +846,19 @@ function peoplePanel(created, done, open){
   const same = (a, b) => a && b && lower(a) === lower(b);
   const names = new Map();
   profiles.forEach(p => names.set(lower(p.name), {name: p.name, dept: p.dept}));
-  [...created, ...done, ...open].forEach(t => [t.createdBy, t.assignee].forEach(n => { if (n && !names.has(lower(n))) names.set(lower(n), {name: n, dept: null}); }));
+  const finisher = t => t.doneBy || t.assignee;
+  [...created, ...done].forEach(t => [t.createdBy, finisher(t)].forEach(n => { if (n && !names.has(lower(n))) names.set(lower(n), {name: n, dept: null}); }));
   const rows = [...names.values()].map(p => {
     const c = created.filter(t => same(t.createdBy, p.name)).length;
-    const o = open.filter(t => same(t.assignee, p.name)), ov = o.filter(isOver).length;
-    const d = done.filter(t => same(t.assignee, p.name)), ot = d.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
-    return {p, c, o: o.length, ov, d: d.length, pct: d.length ? Math.round(ot / d.length * 100) + "%" : "—"};
-  }).filter(r => r.c || r.o || r.d || profiles.some(x => x.name === r.p.name))
-    .sort((a, b) => (b.o + b.d + b.c) - (a.o + a.d + a.c) || a.p.name.localeCompare(b.p.name, "tr"));
-  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.o}</td><td class="${r.ov ? "over" : ""}">${r.ov}</td><td>${r.d}</td><td>${r.pct}</td></tr>`).join("");
+    const d = done.filter(t => same(finisher(t), p.name)), ot = d.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
+    return {p, c, d: d.length, pct: d.length ? Math.round(ot / d.length * 100) + "%" : "—"};
+  }).filter(r => r.c || r.d || profiles.some(x => x.name === r.p.name))
+    .sort((a, b) => (b.d + b.c) - (a.d + a.c) || a.p.name.localeCompare(b.p.name, "tr"));
+  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.d}</td><td>${r.pct}</td></tr>`).join("");
   return `<div class="panel"><h3>Kişiler</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Üzerinde</th><th>Geciken</th><th>Bitirdiği</th><th>Zamanında</th></tr></thead>
-      <tbody>${body || `<tr><td colspan="6">Kayıt yok.</td></tr>`}</tbody></table></div>
-      <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Üzerinde ve geciken: şu an atanmış açık işler. Açtığı ve bitirdiği: seçili dönem.</p></div>`;
+      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Bitirdiği</th><th>Zamanında</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="4">Kayıt yok.</td></tr>`}</tbody></table></div>
+      <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Açtığı ve bitirdiği (Tamamlandı yapan): seçili dönem.</p></div>`;
 }
 function renderWho(){
   $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">${profileMode ? "Hesabım" : "Kimsin? Seç"}</span>`;
@@ -884,14 +880,7 @@ function renderScreen(){
   $("#screen").innerHTML = html;
   if (keepFocus && $("#q")){ $("#q").focus(); try { $("#q").setSelectionRange(caret, caret); } catch(e){} }
 }
-function renderPeople(){
-  const names = new Set();
-  tasks.forEach(t => { if (t.assignee) names.add(t.assignee); if (t.createdBy) names.add(t.createdBy); });
-  if (me) names.add(me.name);
-  profiles.forEach(p => names.add(p.name));
-  $("#people").innerHTML = [...names].sort((a, b) => a.localeCompare(b, "tr")).map(n => `<option value="${esc(n)}"></option>`).join("");
-}
-function renderAll(){ renderWho(); renderTabs(); renderScreen(); renderPeople(); if (detailId) renderDetail(); if (!$("#ovFilter").hidden) renderFilter(); }
+function renderAll(){ renderWho(); renderTabs(); renderScreen(); if (detailId) renderDetail(); if (!$("#ovFilter").hidden) renderFilter(); }
 
 /* ---------- navigation & filters ---------- */
 $("#tabbar").addEventListener("click", e => {
@@ -925,15 +914,15 @@ $("#screen").addEventListener("click", e => {
   const a = b.dataset.act;
   if (a === "verify" || a === "reopen" ? !canVerify(t) : !canStatus(t)) return;
   requireMe(() => {
-    if (a === "take") patch(id, {status: "devam", assignee: me.name}, "Üstlendi, çalışmaya başladı");
+    if (a === "take") patch(id, {status: "devam"}, "Üstlendi, çalışmaya başladı");
     if (a === "done"){
       if (openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); openDetail(id); return; }
-      patch(id, {status: "tamam", doneAt: Date.now()}, "Tamamlandı olarak işaretledi");
+      patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name}, "Tamamlandı olarak işaretledi");
     }
     if (a === "hold") patch(id, {status: "beklemede"}, "Beklemeye aldı");
     if (a === "resume") patch(id, {status: "devam"}, "Çalışmaya devam ediyor");
     if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
-    if (a === "reopen") patch(id, {status: "yeni", doneAt: null, verified: false, verifiedBy: null}, "Yeniden açtı");
+    if (a === "reopen") patch(id, {status: "yeni", doneAt: null, doneBy: null, verified: false, verifiedBy: null}, "Yeniden açtı");
   });
 });
 let qTimer;
@@ -948,7 +937,7 @@ $("#screen").addEventListener("input", e => {
 function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
-  const keep = {note: $("#dNote")?.value || "", item: $("#dItem")?.value || "", focus: document.activeElement?.id, asg: $("#dAsg")?.value, due: $("#dDue")?.value};
+  const keep = {note: $("#dNote")?.value || "", item: $("#dItem")?.value || "", focus: document.activeElement?.id, due: $("#dDue")?.value};
   const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
   const chips = (act, entries, cur, cls = () => "") => entries.map(([k,l]) =>
     `<button type="button" class="chip ${cls(k)}" data-dact="${act}" data-v="${k}" aria-pressed="${cur === k}">${cls(k) ? "<i></i>" : ""}${esc(l)}</button>`).join("");
@@ -965,8 +954,7 @@ function renderDetail(){
       <dt>Bildiren</dt><dd>${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}</dd>
       <dt>Açılış</dt><dd>${esc(fmt(t.createdAt))} (${ago(t.createdAt)})</dd>
       <dt>Son tarih</dt><dd>${esc(fmt(t.dueAt) || "—")}</dd>
-      <dt>Atanan</dt><dd>${esc(t.assignee || "Atanmadı")}</dd>
-      ${t.doneAt ? `<dt>Bitiş</dt><dd>${esc(fmt(t.doneAt))}</dd>` : ""}
+      ${t.doneAt ? `<dt>Bitiş</dt><dd>${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}</dd>` : ""}
       ${t.verified ? `<dt>Kontrol</dt><dd>${esc(t.verifiedBy || "")}</dd>` : ""}
       ${t.ooo || t.guest ? `<dt>Oda</dt><dd>${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}</dd>` : ""}
     </dl>
@@ -977,7 +965,6 @@ function renderDetail(){
     </div>`}
     ${readOnly || viewOnly(t) ? "" : `
     <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
-    <div class="field"><label class="lbl" for="dAsg">Kişiye ata</label><div class="inline"><input type="text" id="dAsg" list="people" placeholder="İsim yaz veya seç" value="${esc(t.assignee || "")}" autocomplete="off"><button type="button" class="btn" data-dact="assign">Ata</button></div></div>
     <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), t.dept)}</div></div>
     <div class="field"><span class="lbl">Oda durumu</span><div class="chips wrap">
       <button type="button" class="chip" data-dact="ooo" aria-pressed="${!!t.ooo}">Satışa kapalı</button>
@@ -989,7 +976,6 @@ function renderDetail(){
     ${!readOnly && !viewOnly(t) && t.status === "tamam" ? `<div class="sheet-foot"><button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-dact="delete">${deleteArmed ? "Eminim, kaydı sil" : "Kaydı sil"}</button></div>` : ""}`;
   if ($("#dNote")) $("#dNote").value = keep.note;
   if ($("#dItem")) $("#dItem").value = keep.item;
-  if (keep.focus === "dAsg" && $("#dAsg")) $("#dAsg").value = keep.asg;
   if (keep.focus === "dDue" && $("#dDue")) $("#dDue").value = keep.due;
   if (keep.focus && document.getElementById(keep.focus)) document.getElementById(keep.focus).focus();
 }
@@ -1006,12 +992,7 @@ $("#detail").addEventListener("click", e => {
       if (ms === t.dueAt) return;
       patch(t.id, {dueAt: ms}, `Son tarihi ${fmt(ms)} yaptı`);
     }
-    if (a === "dept" && v !== t.dept) patch(t.id, {dept: v, assignee: ""}, `${DEPTS[v].label} departmanına aktardı`);
-    if (a === "assign"){
-      const n = ($("#dAsg").value || "").trim().slice(0, 40);
-      if (n === (t.assignee || "")) return;
-      patch(t.id, {assignee: n}, n ? `${n} kişisine atadı` : "Atamayı kaldırdı");
-    }
+    if (a === "dept" && v !== t.dept) patch(t.id, {dept: v}, `${DEPTS[v].label} departmanına aktardı`);
     if (a === "ooo") patch(t.id, {ooo: !t.ooo}, t.ooo ? "Odayı satışa açtı" : "Odayı satışa kapattı");
     if (a === "guest") patch(t.id, {guest: !t.guest}, t.guest ? "“Misafir odada” işaretini kaldırdı" : "“Misafir odada” olarak işaretledi");
     if (a === "note"){
@@ -1037,8 +1018,7 @@ function setStatus(t, v){
   if (v === t.status) return;
   if (v === "tamam" && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); renderDetail(); return; }
   const f = {status: v};
-  if (v === "tamam") f.doneAt = Date.now(); else { f.doneAt = null; f.verified = false; f.verifiedBy = null; }
-  if (v === "devam" && !t.assignee) f.assignee = me.name;
+  if (v === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
   patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
 }
 $("#detail").addEventListener("change", e => {
@@ -1274,12 +1254,12 @@ $("#newForm").addEventListener("submit", async e => {
     : due < Date.now() - 5 * 60000 ? "Son tarih geçmişte olamaz." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
-  const assignee = "", now = Date.now();
+  const now = Date.now();
   const doc = {
     type, cat, dept, prio: PRIO[prio] ? prio : "orta", dueAt: due, room,
     desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked,
     items: draftItems.map(x => x.done ? {...x, by: who(), at: now} : {...x}),
-    status: "yeni", assignee, createdAt: now, updatedAt: now, doneAt: null, verified: false, verifiedBy: null,
+    status: "yeni", createdAt: now, updatedAt: now, doneAt: null, verified: false, verifiedBy: null,
     createdBy: me ? me.name : "İsimsiz", createdDept: me ? me.dept : null, createdUid: authUser?.id || null,
     log: [{t: now, by: who(), msg: `İşi açtı (${PRIO[prio]?.label || "Orta"}, son tarih ${fmt(due)})` + (draftItems.length ? `, ${draftItems.length} kalemlik liste` : "")}]
   };

@@ -27,7 +27,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
 ## İş kaydı (`data` alanı)
-`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, assignee, createdAt, updatedAt, doneAt, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
+`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
 - `prio`: `acil` (kırmızı) · `orta` (sarı) · `sureli` (mavi). Eski kayıtlardaki `normal` ve `dusuk` değerleri `prioOf()` ile `orta` ve `sureli`ye eşlenir.
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
 - Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
@@ -66,10 +66,10 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Liste.
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
-   - Formda **"Kişiye ata" yok**; atama iş detayından işi açan kişi ya da yönetici yapar (diğerlerinde durum "Devam ediyor" olunca kendiliğinden).
+   - **Kişiye atama yok.** İş yalnızca departmana atanır ("Departman" = atanan departman). Departman aktarma iş detayından işi açan kişi ya da yönetici yapar.
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Personel yalnızca departmanına atanan işleri, departmanının açtığı işleri ve kendi açtığı işleri görür (`canSee()`, ekran düzeyinde; veritabanı hepsini gönderir). Yönetici her şeyi görür.
-10. **İş detayı:** Durum ve Aciliyet yan yana açılır liste (select). İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici her şeyi düzenler. **Durum** ve liste tikleri ayrıca işin atandığı departmanda açıktır (`canStatus(t)`); diğerlerinde kilitli görünür. "Kontrol edildi" / "Yeniden aç" işi açan departmanda da açıktır (`canVerify(t)`). Liste boşsa bölüm kimseye görünmez (sonradan madde eklenemez); doluysa madde silme yalnızca açan kişi ve yöneticide. "Devam ediyor" yapan kişi işe kendiliğinden atanır.
+10. **İş detayı:** Durum ve Aciliyet yan yana açılır liste (select). İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici her şeyi düzenler. **Durum** ve liste tikleri ayrıca işin atandığı departmanda açıktır (`canStatus(t)`); diğerlerinde kilitli görünür. "Kontrol edildi" / "Yeniden aç" işi açan departmanda da açıktır (`canVerify(t)`). Liste boşsa bölüm kimseye görünmez (sonradan madde eklenemez); doluysa madde silme yalnızca açan kişi ve yöneticide. "Tamamlandı" yapan kişi `doneBy` alanına yazılır (Rapor → Kişiler "Bitirdiği"; eski kayıtlarda `assignee`).
 8. **Liste (checklist):**
    - Ekle'ye basınca altta tik kutulu satır çıkar.
    - Tik atılan kalemin üstü tek çizgiyle çizilir.
