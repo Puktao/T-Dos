@@ -450,7 +450,7 @@ const DEPTS = {
   teknik:{label:"Teknik", short:"TEK", name:"Teknik"},
   kat:{label:"Kat Hizmetleri", short:"HK", name:"Kat"},
   resepsiyon:{label:"Resepsiyon", short:"ÖN", name:"Resepsiyon"},
-  satinalma:{label:"Satınalma", short:"SAT", name:"Satınalma"},
+  satinalma:{label:"Satınalma", short:"SAT", name:"Satınalma", noArea:true},
   mutfak:{label:"Mutfak", short:"MUT", name:"Mutfak"}
 };
 const TYPES = {
@@ -678,7 +678,7 @@ function screenHome(){
 }
 const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
-const deptOpts = () => [["all","Tümü"], ...Object.entries(DEPTS).map(([k,v]) => [k, v.label])];
+const deptOpts = () => [["all","Tümü"], ...deptList().map(([k,v]) => [k, v.label])];
 const prioOpts = () => [["all","Tümü"], ...Object.entries(PRIO).map(([k,v]) => [k, v.label])];
 const FILTERS = {
   todo: [
@@ -801,7 +801,7 @@ function screenReport(){
   const stack = created.length
     ? `<div class="stack">${["acil","orta","sureli"].map(k => `<div style="width:${pc(k) / tot * 100}%;background:var(--${k})"></div>`).join("")}</div>`
     : `<div class="stack"></div>`;
-  const rows = Object.entries(DEPTS).map(([k,v]) => {
+  const rows = Object.entries(DEPTS).filter(([k, v]) => v.active !== false || all.some(t => t.dept === k)).map(([k,v]) => {
     const o = open.filter(t => t.dept === k), ov = o.filter(isOver), dn = done.filter(t => t.dept === k);
     const ot = dn.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
     return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td class="${ov.length ? "over" : ""}">${ov.length}</td><td>${dn.length}</td><td>${dn.length ? Math.round(ot / dn.length * 100) + "%" : "—"}</td><td>${avg(dn)}</td></tr>`;
@@ -961,7 +961,7 @@ function renderDetail(){
     <div class="field"><span class="lbl">Aciliyet</span><div class="chips wrap">${chips("prio", Object.entries(PRIO).map(([k,v]) => [k, v.label]), p, k => "c-" + k)}</div></div>
     <div class="field"><label class="lbl" for="dDue">Son tarih</label><div class="inline"><input type="datetime-local" id="dDue" value="${t.dueAt ? toInput(t.dueAt) : ""}"><button type="button" class="btn" data-dact="due">Güncelle</button></div></div>
     <div class="field"><label class="lbl" for="dAsg">Kişiye ata</label><div class="inline"><input type="text" id="dAsg" list="people" placeholder="İsim yaz veya seç" value="${esc(t.assignee || "")}" autocomplete="off"><button type="button" class="btn" data-dact="assign">Ata</button></div></div>
-    <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", Object.entries(DEPTS).map(([k,v]) => [k, v.label]), t.dept)}</div></div>
+    <div class="field"><span class="lbl">Departman</span><div class="chips wrap">${chips("dept", deptList().map(([k,v]) => [k, v.label]), t.dept)}</div></div>
     <div class="field"><span class="lbl">Oda durumu</span><div class="chips wrap">
       <button type="button" class="chip" data-dact="ooo" aria-pressed="${!!t.ooo}">Satışa kapalı</button>
       <button type="button" class="chip" data-dact="guest" aria-pressed="${!!t.guest}">Misafir odada</button></div></div>
@@ -1057,7 +1057,7 @@ function openWho(){
   }
   $("#wName").value = me?.name || ""; whoDept = me?.dept || null; renderWhoDept(); openOv("#ovWho"); setTimeout(() => $("#wName").focus(), 50);
 }
-function renderWhoDept(){ $("#wDept").innerHTML = Object.entries(DEPTS).map(([k,v]) => `<button type="button" class="chip" data-v="${k}" aria-pressed="${whoDept === k}">${esc(v.label)}</button>`).join(""); }
+function renderWhoDept(){ $("#wDept").innerHTML = deptList().map(([k,v]) => `<button type="button" class="chip" data-v="${k}" aria-pressed="${whoDept === k}">${esc(v.label)}</button>`).join(""); }
 $("#wDept").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; whoDept = b.dataset.v; renderWhoDept(); });
 $("#whoBtn").addEventListener("click", openWho);
 $("#whoForm").addEventListener("submit", e => {
@@ -1068,6 +1068,29 @@ $("#whoForm").addEventListener("submit", e => {
   const fn = pendingAfterWho; pendingAfterWho = null; if (fn) fn();
 });
 
+/* ---------- listeler (Supabase tabloları; yoksa yukarıdaki sabitler) ---------- */
+const deptList = () => Object.entries(DEPTS).filter(([, v]) => v.active !== false);
+async function loadLists(){
+  if (!sb || !signedIn) return;
+  try {
+    const q = (t, cols) => sb.from(t).select(cols).order("sira").order("ad");
+    const [d, ty, c, a] = await Promise.all([
+      q("fdos_departmanlar", "kod,ad,kisa_ad,rozet,alan_gerekli,aktif"),
+      q("fdos_turler", "kod,ad,departman,aktif"),
+      q("fdos_kategoriler", "tur,ad,aktif"),
+      q("fdos_alanlar", "ad,aktif")
+    ]);
+    if (d.error || ty.error || c.error || a.error || !(d.data || []).length || !(ty.data || []).length) return;
+    Object.keys(DEPTS).forEach(k => delete DEPTS[k]);
+    d.data.forEach(r => DEPTS[r.kod] = {label: r.ad, short: r.rozet, name: r.kisa_ad, noArea: !r.alan_gerekli, active: r.aktif});
+    Object.keys(TYPES).forEach(k => delete TYPES[k]);
+    ty.data.forEach(r => TYPES[r.kod] = {label: r.ad, dept: r.departman, active: r.aktif, cats: []});
+    (c.data || []).forEach(r => { if (r.aktif && TYPES[r.tur]) TYPES[r.tur].cats.push(r.ad); });
+    AREAS.length = 0; (a.data || []).forEach(r => { if (r.aktif) AREAS.push(r.ad); });
+    renderAll();
+  } catch(e){}
+}
+
 /* ---------- profiles & users (yönetici) ---------- */
 async function loadProfiles(){
   if (!sb || !signedIn) return;
@@ -1076,14 +1099,14 @@ async function loadProfiles(){
     if (error){ profileMode = false; return; }   // tablo kurulmamışsa eski düzen (cihazda ad/departman)
     profiles = data || []; profileMode = true;
     const mine = profiles.find(p => p.user_id === authUser?.id);
-    me = mine ? {name: mine.name, dept: DEPTS[mine.dept] ? mine.dept : null, role: mine.role}
+    me = mine ? {name: mine.name, dept: mine.dept || null, role: mine.role}
               : {name: (authUser?.email || "").split("@")[0] || "İsimsiz", dept: null, role: "user"};
     if (!$("#ovWho").hidden) openWho();
     if (!$("#ovUsers").hidden) renderUsers();
     renderAll();
   } catch(e){}
 }
-const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
+const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => v.active !== false || k === cur).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
 const roleSel = (id, cur, dis) => `<div class="sel"><select id="${id}"${dis ? " disabled" : ""}>${opt("user", "Personel", cur !== "admin")}${opt("admin", "Yönetici", cur === "admin")}</select></div>`;
 function renderUsers(){
   const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || "", r: $("#uRole")?.value || "user"};
@@ -1147,7 +1170,7 @@ $("#users").addEventListener("click", async e => {
 
 /* ---------- new task (Yapılacak İş) ---------- */
 const opt = (v, l, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(l)}</option>`;
-const typesFor = d => Object.entries(TYPES).filter(([, v]) => v.dept === d);
+const typesFor = d => Object.entries(TYPES).filter(([, v]) => v.dept === d && v.active !== false);
 let dueTouched = false;
 function fillType(){
   const d = $("#fDept").value, list = d ? typesFor(d) : [];
@@ -1174,7 +1197,7 @@ function syncPrio(){
   if (!dueTouched) $("#fDue").value = toInput(defaultDue(p));
   $("#dueHint").hidden = dueTouched;
 }
-const noArea = () => $("#fDept").value === "satinalma";
+const noArea = () => !!DEPTS[$("#fDept").value]?.noArea;
 function syncDeptArea(){
   const na = noArea();
   $("#fArea").disabled = na;
@@ -1208,7 +1231,7 @@ $("#fArea").addEventListener("change", () => syncArea(true));
 $("#fPrio").addEventListener("change", syncPrio);
 $("#fDue").addEventListener("input", () => { dueTouched = true; $("#dueHint").hidden = true; });
 function openNew(){
-  $("#fDept").innerHTML = opt("", "Departman seç", true) + Object.entries(DEPTS).map(([k, v]) => opt(k, v.label)).join("");
+  $("#fDept").innerHTML = opt("", "Departman seç", true) + deptList().filter(([k]) => typesFor(k).length).map(([k, v]) => opt(k, v.label)).join("");
   $("#fArea").innerHTML = opt("", "Alan seç", true) + AREAS.map(a => opt(a, a)).join("") + opt("oda", "Oda No");
   $("#fPrio").innerHTML = Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === "orta")).join("");
   ["#fRoom", "#fDesc"].forEach(s => $(s).value = "");
@@ -1222,10 +1245,10 @@ $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
   const roomNo = $("#fRoom").value.trim().slice(0, 10);
-  const room = dept === "satinalma" ? "" : area === "oda" ? roomNo : area;
+  const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area;
   const due = fromInput($("#fDue").value);
   if ($("#fItem").value.trim()) addDraftItem();
-  const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && dept !== "satinalma" ? "Alanı seç."
+  const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && !DEPTS[dept]?.noArea ? "Alanı seç."
     : area === "oda" && !roomNo ? "Oda numarasını yaz." : !cat ? "Kategoriyi seç." : !due ? "Son tarihi seç."
     : due < Date.now() - 5 * 60000 ? "Son tarih geçmişte olamaz." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
@@ -1291,7 +1314,7 @@ function refetch(){
       const err = a.error || b.error;
       if (err){ listenErr(err); return; }
       tasks = new Map([...(b.data || []), ...(a.data || [])].map(r => [r.id, {id: r.id, ...r.data}]));
-      loaded = true; banner(""); renderAll(); loadProfiles();
+      loaded = true; banner(""); renderAll(); loadLists(); loadProfiles();
     } catch(e){ listenErr(e); }
   })().finally(() => { fetching = null; });
   return fetching;
@@ -1400,7 +1423,7 @@ function onSession(session){
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ startLive(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
+    if (!was){ startLive(); loadLists(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
   } else {
     stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
     if (profileMode){ profileMode = false; profiles = []; me = loadMe(); }

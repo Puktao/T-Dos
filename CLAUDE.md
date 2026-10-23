@@ -32,7 +32,14 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
 - Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
 
-## Sabitler (index.html içinde)
+## Listeler (Supabase tabloları)
+- `fdos_departmanlar(kod, ad, kisa_ad, rozet, alan_gerekli, sira, aktif)`, `fdos_turler(kod, ad, departman, sira, aktif)`, `fdos_kategoriler(tur, ad, sira, aktif)`, `fdos_alanlar(ad, sira, aktif)`. Kullanıcı bunları Supabase Table Editor'dan düzenler.
+- Uygulama girişte ve `refetch()` sırasında `loadLists()` ile okur, `DEPTS`/`TYPES`/`AREAS` nesnelerinin içini değiştirir. Tablolar yoksa ya da boşsa aşağıdaki sabitler kullanılır.
+- `aktif = false` olan kayıt seçim listelerinde görünmez, eski işlerde adı görünmeye devam eder. Silme yerine pasif yapılır; `kod` değiştirilmez (işlerde kodla kayıtlı).
+- `alan_gerekli = false` olan departmanda (Satınalma) iş açarken alan/oda sorulmaz. Eskiden koddaki `"satinalma"` kontrolüydü, artık `DEPTS[k].noArea`.
+- Okuma: giriş yapan herkes. Yazma: yalnızca yönetici (`fdos_is_admin()`); Supabase paneli bu kurala takılmaz.
+
+## Sabitler (index.html içinde, tablolar yoksa yedek)
 - `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak.
 - `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak. Kategoriler türün içinde tanımlı.
 - `AREAS`: Lobi, Restoran, Bar, Mutfak, Toplantı Odası, Koridor. Bunlara ek olarak "Oda No" seçeneği var; seçilince yanındaki oda numarası alanı açılır.
@@ -77,7 +84,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase'de `schema.sql` çalıştırıldı (tablo ve fonksiyon var, `anon` erişimi kapalı).
 - [x] Sign-up kapatıldı.
 - [x] Profil tablosu kuruldu (`schema.sql` 5. bölüm).
-- [ ] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) için dosya yeniden çalıştırılacak.
+- [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
+- [ ] `schema.sql` 7. bölüm (liste tabloları) için dosya yeniden çalıştırılacak.
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.

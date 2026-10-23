@@ -78,6 +78,22 @@ Yönetici hesabı `tuncer@feronya.com` (ad: Tuncer). Yönetici herkesin işlerin
 
 Personel artık adını ve departmanını kendisi seçmez; girişte yöneticinin atadığı bilgiler gelir. Ortak cihaz kullanılıyorsa her personel kendi hesabıyla girip çıkmalı.
 
+### 10. Departman, bildirim türü, kategori ve alan ekleme
+Bu listeler Supabase'deki tablolarda durur. Değişiklik, uygulama yeniden açılınca ya da ekrana dönülünce görünür.
+- **Supabase → Table Editor** → tabloyu seç → **Insert → Insert row** → alanları doldur → **Save**.
+
+| Tablo | Ne var | Doldurulacaklar |
+|---|---|---|
+| `fdos_departmanlar` | Departmanlar | `kod` (küçük harf, boşluksuz, ör. `spa`), `ad` (Spa & Wellness), `kisa_ad` (Spa), `rozet` (SPA), `alan_gerekli` (iş açarken alan/oda sorulsun mu) |
+| `fdos_turler` | Bildirim türleri | `kod` (ör. `spa_talep`), `ad` (Spa Talebi), `departman` (bağlı departmanın kodu, ör. `spa`) |
+| `fdos_kategoriler` | Her türün kategorileri | `tur` (türün kodu, ör. `spa_talep`), `ad` (Masaj randevusu) |
+| `fdos_alanlar` | Alan listesi (Lobi, Restoran…) | `ad` (ör. Havuz) |
+
+- **Sıralama:** `sira` sütunu. Küçük sayı önce gelir (mevcutlar 10, 20, 30… diye gider).
+- **Kaldırmak için silme:** `aktif` kutusunun işaretini kaldır. Silersen o kayda bağlı eski işlerde ad görünmez, türe bağlı kategoriler yüzünden silme de reddedilebilir.
+- **`kod` değerlerini sonradan değiştirme.** Eski işler bu kodla kayıtlı.
+- Yeni bir departman en az bir aktif bildirim türü eklenene kadar iş açma formunda görünmez.
+
 ---
 
 ## Güncelleme

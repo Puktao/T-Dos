@@ -148,7 +148,7 @@ declare
   v_id    uuid := gen_random_uuid();
   v_email text := lower(trim(p_email));
   v_name  text := left(trim(coalesce(p_name, '')), 40);
-  v_dept  text := case when p_dept in ('teknik','kat','resepsiyon','satinalma','mutfak') then p_dept else null end;
+  v_dept  text := case when exists (select 1 from public.fdos_departmanlar where kod = p_dept) then p_dept else null end;
   v_role  text := case when p_role = 'admin' then 'admin' else 'user' end;
 begin
   if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
@@ -178,3 +178,132 @@ begin
 end $$;
 revoke all on function public.fdos_admin_create_user(text, text, text, text, text) from public, anon;
 grant execute on function public.fdos_admin_create_user(text, text, text, text, text) to authenticated;
+
+-- 7) Listeler: departmanlar, bildirim türleri, kategoriler, alanlar
+--    Supabase → Table Editor'dan satır ekleyip değiştirebilirsin. Uygulama girişte bu tabloları okur.
+--    Kural: bir satırı SİLME, "aktif" kutusunu kapat (eski işlerde adı görünmeye devam eder).
+--    "kod" sütunlarını sonradan DEĞİŞTİRME; eski işler bu kodla kayıtlı.
+create table if not exists public.fdos_departmanlar (
+  kod          text primary key check (kod ~ '^[a-z0-9_]+$'),
+  ad           text not null,
+  kisa_ad      text not null,
+  rozet        text not null,
+  alan_gerekli boolean not null default true,
+  sira         int not null default 100,
+  aktif        boolean not null default true
+);
+create table if not exists public.fdos_turler (
+  kod       text primary key check (kod ~ '^[a-z0-9_]+$'),
+  ad        text not null,
+  departman text not null references public.fdos_departmanlar(kod),
+  sira      int not null default 100,
+  aktif     boolean not null default true
+);
+create table if not exists public.fdos_kategoriler (
+  id    bigint generated always as identity primary key,
+  tur   text not null references public.fdos_turler(kod),
+  ad    text not null,
+  sira  int not null default 100,
+  aktif boolean not null default true,
+  unique (tur, ad)
+);
+create table if not exists public.fdos_alanlar (
+  id    bigint generated always as identity primary key,
+  ad    text not null unique,
+  sira  int not null default 100,
+  aktif boolean not null default true
+);
+comment on column public.fdos_departmanlar.kod is 'Küçük harf, boşluksuz (ör. spa). Sonradan değiştirme.';
+comment on column public.fdos_departmanlar.ad is 'Uygulamada görünen tam ad (ör. Kat Hizmetleri)';
+comment on column public.fdos_departmanlar.kisa_ad is 'Kısa ad (ör. Kat)';
+comment on column public.fdos_departmanlar.rozet is 'En fazla 3-4 harf (ör. HK)';
+comment on column public.fdos_departmanlar.alan_gerekli is 'Kapalıysa iş açarken alan/oda sorulmaz (Satınalma gibi)';
+comment on column public.fdos_turler.kod is 'Küçük harf, boşluksuz. Sonradan değiştirme.';
+comment on column public.fdos_turler.departman is 'Bu türün gideceği departmanın kodu';
+comment on column public.fdos_kategoriler.tur is 'Bağlı olduğu bildirim türünün kodu';
+comment on column public.fdos_departmanlar.sira is 'Küçük sayı önce gelir';
+
+do $$
+declare t text;
+begin
+  foreach t in array array['fdos_departmanlar','fdos_turler','fdos_kategoriler','fdos_alanlar'] loop
+    execute format('alter table public.%I enable row level security', t);
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format('drop policy if exists "liste okuma" on public.%I', t);
+    execute format('drop policy if exists "liste yonetici" on public.%I', t);
+    execute format('create policy "liste okuma" on public.%I for select to authenticated using (true)', t);
+    execute format('create policy "liste yonetici" on public.%I for all to authenticated using (public.fdos_is_admin()) with check (public.fdos_is_admin())', t);
+  end loop;
+end $$;
+
+-- Başlangıç değerleri (var olanlara dokunmaz)
+insert into public.fdos_departmanlar (kod, ad, kisa_ad, rozet, alan_gerekli, sira) values
+  ('teknik', 'Teknik', 'Teknik', 'TEK', true, 10),
+  ('kat', 'Kat Hizmetleri', 'Kat', 'HK', true, 20),
+  ('resepsiyon', 'Resepsiyon', 'Resepsiyon', 'ÖN', true, 30),
+  ('satinalma', 'Satınalma', 'Satınalma', 'SAT', false, 40),
+  ('mutfak', 'Mutfak', 'Mutfak', 'MUT', true, 50)
+on conflict (kod) do nothing;
+insert into public.fdos_turler (kod, ad, departman, sira) values
+  ('ariza', 'Arıza', 'teknik', 10),
+  ('temizlik', 'Temizlik Talebi', 'kat', 20),
+  ('istek', 'Müşteri Talebi', 'kat', 30),
+  ('satinalma', 'Satınalma Talebi', 'satinalma', 40),
+  ('resepsiyon', 'Resepsiyon Talebi', 'resepsiyon', 50),
+  ('mutfak', 'Mutfak Talebi', 'mutfak', 60)
+on conflict (kod) do nothing;
+insert into public.fdos_kategoriler (tur, ad, sira) values
+  ('ariza', 'Klima / ısıtma', 10),
+  ('ariza', 'Elektrik / aydınlatma', 20),
+  ('ariza', 'Su / tesisat', 30),
+  ('ariza', 'TV / internet', 40),
+  ('ariza', 'Kapı / kilit / kasa', 50),
+  ('ariza', 'Mobilya', 60),
+  ('ariza', 'Minibar / buzdolabı', 70),
+  ('ariza', 'Diğer', 80),
+  ('temizlik', 'Banyo', 10),
+  ('temizlik', 'Yatak / çarşaf', 20),
+  ('temizlik', 'Havlu / buklet eksik', 30),
+  ('temizlik', 'Toz / zemin', 40),
+  ('temizlik', 'Minibar dolumu', 50),
+  ('temizlik', 'Koku', 60),
+  ('temizlik', 'Çöp', 70),
+  ('temizlik', 'Diğer', 80),
+  ('istek', 'Ekstra havlu', 10),
+  ('istek', 'Yastık / battaniye', 20),
+  ('istek', 'Bebek yatağı', 30),
+  ('istek', 'Ütü / ütü masası', 40),
+  ('istek', 'Diş / tıraş seti', 50),
+  ('istek', 'Diğer', 60),
+  ('satinalma', 'Yedek parça', 10),
+  ('satinalma', 'Temizlik malzemesi', 20),
+  ('satinalma', 'Buklet / amenity', 30),
+  ('satinalma', 'Tekstil (havlu, çarşaf)', 40),
+  ('satinalma', 'Mutfak malzemesi', 50),
+  ('satinalma', 'Kırtasiye', 60),
+  ('satinalma', 'Demirbaş', 70),
+  ('satinalma', 'Diğer', 80),
+  ('resepsiyon', 'Misafir şikayeti', 10),
+  ('resepsiyon', 'Oda değişikliği', 20),
+  ('resepsiyon', 'Geç çıkış / erken giriş', 30),
+  ('resepsiyon', 'Uyandırma', 40),
+  ('resepsiyon', 'Kayıp eşya', 50),
+  ('resepsiyon', 'Bagaj / transfer', 60),
+  ('resepsiyon', 'Diğer', 70),
+  ('mutfak', 'Oda servisi', 10),
+  ('mutfak', 'Alerji / özel diyet', 20),
+  ('mutfak', 'Pasta / sürpriz', 30),
+  ('mutfak', 'Kahvaltı paketi', 40),
+  ('mutfak', 'Minibar ürünü', 50),
+  ('mutfak', 'Hijyen / temizlik', 60),
+  ('mutfak', 'Diğer', 70)
+on conflict (tur, ad) do nothing;
+insert into public.fdos_alanlar (ad, sira) values
+  ('Lobi', 10),
+  ('Restoran', 20),
+  ('Bar', 30),
+  ('Mutfak', 40),
+  ('Toplantı Odası', 50),
+  ('Koridor', 60)
+on conflict (ad) do nothing;
