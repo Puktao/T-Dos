@@ -284,7 +284,7 @@ button{font:inherit;color:inherit}
 .sheet-head .hact{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
 .sheet-head .hact .x{margin-left:0}
 .sheet-head .hact .btn{height:38px}
-#detail .sheet-head{position:sticky;top:-18px;z-index:3;background:var(--surface);padding-block:14px 10px;margin-top:-14px;box-shadow:0 1px 0 var(--line)}
+#detail .sheet-head{position:sticky;top:-18px;z-index:3;padding-block:14px 10px;margin-top:-14px;box-shadow:0 1px 0 var(--line)}
 .sheet-sub{margin:4px 0 0;color:var(--muted);font-size:13px}
 .field{display:flex;flex-direction:column;gap:7px;margin-top:16px}
 .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
@@ -310,14 +310,19 @@ button{font:inherit;color:inherit}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
-.dcard{display:block;cursor:default;margin-top:12px;padding:12px 14px 10px 18px}
+/* iş detayı: kutu yok; ekranın kendisi aciliyet renginden beyaza (koyu temada zemine) yukarıdan aşağı geçişli */
+#detail.acil{--c:var(--acil)} #detail.orta{--c:var(--orta)} #detail.sureli{--c:var(--sureli)} #detail.done{--c:var(--ok)}
+#detail{--top:color-mix(in srgb,var(--c,var(--surface)) 38%,var(--surface));background:linear-gradient(180deg,var(--top) 0,var(--top) 120px,var(--surface) 100%) var(--surface);background-attachment:local}
+#detail .sheet-head{background:var(--top)}
+.dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
+.dcard::before{display:none}
 .dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
 .dcard .dc-row .k{color:var(--muted);font-size:12.5px;font-weight:600}
 .dcard .dc-row .v{min-width:0;overflow-wrap:anywhere}
 .dcard .dc-row .rem{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
 .dcard .dc-row .rem.over{color:var(--acil-ink);font-weight:600}
 .dcard .dc-row .sel select{padding-block:8px}
-.dcard .ddesc{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.dcard .ddesc{background:color-mix(in srgb,var(--surface) 75%,transparent)}
 .dcard .section-t{margin-top:14px;font-size:16px}
 .dcard .clist li{border-color:color-mix(in srgb,var(--c) 30%,var(--line))}
 .dcard .dc-foot{margin-top:12px;text-align:right;font-size:11.5px;line-height:1.45;color:var(--muted)}
@@ -962,6 +967,7 @@ function renderDetail(){
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
     : `<b>${esc(STATUS[t.status] || "")}</b>`;
+  el.className = "sheet " + p;
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
