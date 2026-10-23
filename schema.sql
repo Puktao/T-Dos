@@ -364,3 +364,22 @@ create trigger fdos_profiles_guard before insert or update on public.fdos_profil
   for each row execute function public.fdos_profiles_guard();
 
 update public.fdos_profiles set role = role;   -- kuralı mevcut kayıtlara uygula
+
+-- 10) Yönetici bir kullanıcıyı siler (girişi kapanır, profili silinir; açtığı işler ve geçmiş kayıtları kalır).
+create or replace function public.fdos_admin_delete_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
+  if p_user_id = auth.uid() then raise exception 'Kendi hesabını silemezsin'; end if;
+  if exists (select 1 from public.fdos_profiles where user_id = p_user_id and role = 'admin') then
+    raise exception 'Yönetici hesabı silinemez';
+  end if;
+  delete from auth.identities where user_id = p_user_id;
+  delete from auth.users where id = p_user_id;   -- profil satırı da silinir (on delete cascade)
+end $$;
+revoke all on function public.fdos_admin_delete_user(uuid) from public, anon;
+grant execute on function public.fdos_admin_delete_user(uuid) to authenticated;

@@ -353,19 +353,21 @@ img{max-width:100%}
 .login-t{margin:0;font:800 28px/1.1 var(--font-display)}
 .err.ok{color:var(--ok)}
 /* kullanıcılar (yönetici) */
-.ulist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
-.ulist li{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
-.ulist .uh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.ulist .uh b{font-size:15px}
-.ulist .uh small{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.ulist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ulist .uitem{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.ulist .uact{position:absolute;inset:0 auto 0 0;width:168px;display:flex}
+.ulist .ua{flex:1;border:0;font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:#fff}
+.ulist .ua.edit{background:var(--sureli)}
+.ulist .ua.del{background:var(--acil)}
+.ulist .ua.del.armed{background:var(--acil-ink)}
+.ulist .ua:only-child{flex:0 0 100%}
+.ulist .ufront{position:relative;background:var(--surface);padding:12px 14px;transition:transform .2s ease;cursor:pointer}
+.ulist .uh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ulist .uh b{font-size:15.5px}
+.ulist .um{display:flex;justify-content:space-between;gap:10px;margin-top:3px;font-size:13px;color:var(--muted)}
+.ulist .um span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ulist .um .ud{flex:none;font-weight:600;color:var(--ink)}
 .ulist .badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--orta-soft);color:var(--orta-ink)}
-.ulist .urow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
-.ulist .urow .field{margin-top:0;min-width:0;gap:5px}
-.ulist .urow input[type=text]{padding:10px 8px}
-.ulist .urow .sel select{padding:11px 22px 11px 8px;text-overflow:ellipsis}
-.ulist .urow .sel::after{right:9px;width:6px;height:6px}
-.ulist .uf{display:flex;justify-content:flex-end;margin-top:10px}
-.newuser{border:1px dashed var(--line);border-radius:12px;padding:0 12px 12px;margin-top:14px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
@@ -1082,31 +1084,50 @@ async function loadProfiles(){
 }
 const ADMIN_DEPT = "yonetici";   // yalnızca Tuncer'in departmanı; başkasına atanamaz
 const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === cur)).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
+// Kullanıcılar: önce liste. Satırı sağa kaydırınca "Düzenle" ve "Sil" çıkar. Sağ üstteki + kayıt formunu açar.
+let usersView = "list", userEdit = null, userDelArmed = null;
 function renderUsers(){
-  const keep = {n: $("#uName")?.value || "", e: $("#uEmail")?.value || "", p: $("#uPass")?.value || "", d: $("#uDept")?.value || ""};
-  const rows = profiles.map((u, i) => `<li data-uid="${esc(u.user_id)}">
-      <div class="uh"><b>${esc(u.name)}</b>${u.role === "admin" ? `<span class="badge">YÖNETİCİ</span>` : ""}<small>${esc(u.email)}</small></div>
-      <div class="urow">
-        <div class="field"><label class="lbl" for="un${i}">Ad</label><input type="text" id="un${i}" maxlength="40" value="${esc(u.name)}" autocomplete="off"></div>
-        <div class="field"><label class="lbl" for="ud${i}">Departman</label>${u.role === "admin"
-          ? `<div class="sel"><select id="ud${i}" disabled>${opt(ADMIN_DEPT, "Yönetici", true)}</select></div>` : deptSel("ud" + i, u.dept, true)}</div>
+  if (usersView === "form") return renderUserForm();
+  const plus = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
+  const rows = profiles.map(u => {
+    const me0 = u.role === "admin";
+    return `<li class="uitem" data-uid="${esc(u.user_id)}">
+      <div class="uact">
+        <button type="button" class="ua edit" data-uedit="${esc(u.user_id)}">Düzenle</button>
+        ${me0 ? "" : `<button type="button" class="ua del ${userDelArmed === u.user_id ? "armed" : ""}" data-udel="${esc(u.user_id)}">${userDelArmed === u.user_id ? "Eminim" : "Sil"}</button>`}
       </div>
-      <div class="uf"><button type="button" class="btn" data-usave="${i}">Kaydet</button></div></li>`).join("");
+      <div class="ufront">
+        <div class="uh"><b>${esc(u.name)}</b>${me0 ? `<span class="badge">YÖNETİCİ</span>` : ""}</div>
+        <div class="um"><span>${esc(u.email)}</span><span class="ud">${esc(me0 ? "Yönetici" : DEPTS[u.dept]?.label || "Departman yok")}</span></div>
+      </div></li>`;
+  }).join("");
   $("#users").innerHTML = `
-    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Yeni kullanıcı ekle, departman ata.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
-    <form class="newuser" id="uForm" novalidate>
-      <div class="field"><label class="lbl" for="uName">Ad</label><input type="text" id="uName" maxlength="40" placeholder="ör. Ayşe K." autocomplete="off"></div>
-      <div class="field"><label class="lbl" for="uEmail">E-posta</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
-      <div class="field"><label class="lbl" for="uPass">Geçici şifre</label><input type="text" id="uPass" autocomplete="off" placeholder="En az 6 karakter"><span class="hint">Kullanıcıya bu şifreyi ilet. Sonra "Şifremi unuttum" ile değiştirebilir.</span></div>
-      <div class="field"><label class="lbl" for="uDept">Departman</label>${deptSel("uDept", keep.d)}</div>
-      <p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" id="uErr" ${usersMsg ? "" : "hidden"}>${esc(usersMsg.replace(/^✓ /, ""))}</p>
-      <div class="sheet-foot" style="margin-top:12px"><button type="submit" class="btn primary" id="uAdd">Kullanıcı ekle</button></div>
-    </form>
+    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Satırı sağa kaydır: düzenle ya da sil.</p></div>
+      <div class="hact"><button type="button" class="iconbtn" id="uNew" aria-label="Kullanıcı ekle" title="Kullanıcı ekle">${plus}</button><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
+    ${usersMsg ? `<p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" style="margin-top:12px">${esc(usersMsg.replace(/^✓ /, ""))}</p>` : ""}
     <h3 class="section-t">Kayıtlı kullanıcılar (${profiles.length})</h3>
     <ul class="ulist">${rows || "<li>Kullanıcı yok</li>"}</ul>`;
-  $("#uName").value = keep.n; $("#uEmail").value = keep.e; $("#uPass").value = keep.p;
 }
-function openUsers(){ usersMsg = ""; closeOv("#ovWho"); renderUsers(); openOv("#ovUsers"); loadProfiles(); }
+function renderUserForm(){
+  const u = userEdit && profiles.find(x => x.user_id === userEdit), admin = u && u.role === "admin";
+  const keep = {n: $("#uName")?.value, e: $("#uEmail")?.value, p: $("#uPass")?.value, d: $("#uDept")?.value};
+  $("#users").innerHTML = `
+    <div class="sheet-head"><div><h2>${u ? "Kullanıcıyı Güncelle" : "Yeni Kullanıcı"}</h2><p class="sheet-sub">${u ? esc(u.email) : "Kullanıcı bu e-posta ve şifreyle giriş yapar."}</p></div>
+      <button type="button" class="iconbtn x" id="uBack" aria-label="Listeye dön">✕</button></div>
+    <form id="uForm" novalidate>
+      <div class="field"><label class="lbl" for="uName">Ad</label><input type="text" id="uName" maxlength="40" placeholder="ör. Ayşe K." autocomplete="off"></div>
+      ${u ? "" : `<div class="field"><label class="lbl" for="uEmail">E-posta</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
+      <div class="field"><label class="lbl" for="uPass">Geçici şifre</label><input type="text" id="uPass" autocomplete="off" placeholder="En az 6 karakter"><span class="hint">Kullanıcıya bu şifreyi ilet. Sonra "Şifremi unuttum" ile değiştirebilir.</span></div>`}
+      <div class="field"><label class="lbl" for="uDept">Departman</label>${admin ? `<div class="sel"><select id="uDept" disabled>${opt(ADMIN_DEPT, "Yönetici", true)}</select></div>` : deptSel("uDept", keep.d ?? (u ? u.dept : ""))}</div>
+      <p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" id="uErr" ${usersMsg ? "" : "hidden"}>${esc(usersMsg.replace(/^✓ /, ""))}</p>
+      <div class="sheet-foot"><button type="button" class="btn ghost" id="uCancel">Vazgeç</button><button type="submit" class="btn primary" id="uAdd">${u ? "Güncelle" : "Kaydet"}</button></div>
+    </form>`;
+  $("#uName").value = keep.n ?? (u ? u.name : "");
+  if ($("#uEmail")) $("#uEmail").value = keep.e || ""; if ($("#uPass")) $("#uPass").value = keep.p || "";
+}
+const usersList = () => { usersView = "list"; userEdit = null; userDelArmed = null; renderUsers(); };
+const usersForm = uid => { usersView = "form"; userEdit = uid || null; usersMsg = ""; $("#users").innerHTML = ""; renderUsers(); };
+function openUsers(){ usersMsg = ""; closeOv("#ovWho"); usersView = "list"; userEdit = null; userDelArmed = null; renderUsers(); openOv("#ovUsers"); loadProfiles(); }
 $("#usersBtn").addEventListener("click", () => { if (isAdmin()) openUsers(); });
 function createError(error){
   const m = (error && error.message) || "";
@@ -1117,28 +1138,74 @@ function createError(error){
 $("#users").addEventListener("submit", async e => {
   if (e.target.id !== "uForm") return;
   e.preventDefault();
-  const body = {name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, dept: $("#uDept").value || null};
-  const bad = !body.name ? "Adı yaz." : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email) ? "Geçerli bir e-posta yaz." : body.password.length < 6 ? "Şifre en az 6 karakter olmalı." : "";
-  if (bad){ usersMsg = bad; renderUsers(); return; }
+  const showErr = m => { usersMsg = m; renderUsers(); };
+  const name = $("#uName").value.trim().slice(0, 40), dept = $("#uDept").value || null;
+  if (!name) return showErr("Adı yaz.");
   $("#uAdd").disabled = true;
   try {
-    const {error} = await sb.rpc("fdos_admin_create_user", {p_email: body.email, p_password: body.password, p_name: body.name, p_dept: body.dept, p_role: "user"});
-    if (error){ usersMsg = "Eklenemedi: " + createError(error); renderUsers(); return; }
-    usersMsg = `✓ ${body.name} eklendi. Giriş: ${body.email}`;
-    ["#uName", "#uEmail", "#uPass"].forEach(id => $(id).value = "");
-    await loadProfiles(); renderUsers();
-  } catch(err){ usersMsg = "Eklenemedi: " + ((err && err.message) || "bilinmeyen hata"); renderUsers(); }
+    if (userEdit){
+      const u = profiles.find(x => x.user_id === userEdit); if (!u) return usersList();
+      const fields = {name}; if (u.role !== "admin") fields.dept = dept;
+      const {error} = await sb.from("fdos_profiles").update(fields).eq("user_id", u.user_id);
+      if (error) return showErr("Kaydedilemedi: " + createError(error));
+      usersMsg = `✓ ${name} güncellendi.`;
+    } else {
+      const email = $("#uEmail").value.trim(), password = $("#uPass").value;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Geçerli bir e-posta yaz.");
+      if (password.length < 6) return showErr("Şifre en az 6 karakter olmalı.");
+      const {error} = await sb.rpc("fdos_admin_create_user", {p_email: email, p_password: password, p_name: name, p_dept: dept, p_role: "user"});
+      if (error) return showErr("Eklenemedi: " + createError(error));
+      usersMsg = `✓ ${name} eklendi. Giriş: ${email}`;
+    }
+    await loadProfiles(); usersView = "list"; userEdit = null; renderUsers();
+  } catch(err){ showErr("Kaydedilemedi: " + ((err && err.message) || "bilinmeyen hata")); }
 });
 $("#users").addEventListener("click", async e => {
-  const b = e.target.closest("[data-usave]"); if (!b) return;
-  const i = b.dataset.usave, u = profiles[i]; if (!u) return;
-  const fields = {name: $("#un" + i).value.trim().slice(0, 40) || u.name};
-  if (u.role !== "admin") fields.dept = $("#ud" + i).value || null;
-  b.disabled = true;
-  const {error} = await sb.from("fdos_profiles").update(fields).eq("user_id", u.user_id);
-  if (error){ b.disabled = false; toast("Kaydedilemedi: " + (/yetkini/i.test(error.message) ? "Kendi yönetici yetkini kaldıramazsın." : error.message)); return; }
-  toast(`${fields.name} güncellendi.`); await loadProfiles();
+  if (e.target.closest("#uNew")) return usersForm(null);
+  if (e.target.closest("#uBack, #uCancel")){ usersMsg = ""; return usersList(); }
+  const ed = e.target.closest("[data-uedit]"); if (ed) return usersForm(ed.dataset.uedit);
+  const del = e.target.closest("[data-udel]");
+  if (del){
+    const uid = del.dataset.udel, u = profiles.find(x => x.user_id === uid); if (!u) return;
+    if (userDelArmed !== uid){ userDelArmed = uid; renderUsers(); openSwipe(uid); return; }
+    userDelArmed = null;
+    const {error} = await sb.rpc("fdos_admin_delete_user", {p_user_id: uid});
+    if (error){ usersMsg = "Silinemedi: " + createError(error); renderUsers(); return; }
+    usersMsg = `✓ ${u.name} silindi.`; await loadProfiles(); renderUsers(); return;
+  }
+  // kapalı satıra dokunmak satırı açar/kapatır
+  const li = e.target.closest(".uitem");
+  if (li && !e.target.closest(".uact")){
+    if (li._moved){ li._moved = false; return; }   // kaydırmanın ardından gelen dokunma
+    const open = li.classList.contains("open"); closeSwipes(); if (!open) openSwipe(li.dataset.uid);
+  }
 });
+// kaydırma (sağa çekince eylemler soldan görünür)
+const SWIPE = 168;
+function closeSwipes(){ document.querySelectorAll("#users .uitem.open").forEach(li => { li.classList.remove("open"); li.querySelector(".ufront").style.transform = ""; }); }
+function openSwipe(uid){ const li = document.querySelector(`#users .uitem[data-uid="${CSS.escape(uid)}"]`); if (!li) return; li.classList.add("open"); li.querySelector(".ufront").style.transform = `translateX(${SWIPE}px)`; }
+let sw = null;
+$("#users").addEventListener("pointerdown", e => {
+  const li = e.target.closest(".uitem"); if (!li || e.target.closest(".uact")) return;
+  sw = {li, x: e.clientX, y: e.clientY, base: li.classList.contains("open") ? SWIPE : 0, dx: 0, lock: null};
+});
+$("#users").addEventListener("pointermove", e => {
+  if (!sw) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (sw.lock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) sw.lock = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+  if (sw.lock !== "x") return;
+  sw.dx = dx; sw.li._moved = true;
+  const v = Math.max(0, Math.min(SWIPE, sw.base + dx));
+  const f = sw.li.querySelector(".ufront"); f.style.transition = "none"; f.style.transform = `translateX(${v}px)`;
+});
+const swipeEnd = () => {
+  if (!sw) return;
+  const f = sw.li.querySelector(".ufront"); f.style.transition = "";
+  if (sw.lock === "x"){ const open = sw.base + sw.dx > SWIPE / 2; const uid = sw.li.dataset.uid; closeSwipes(); if (open) openSwipe(uid); else if (userDelArmed){ userDelArmed = null; renderUsers(); } }
+  sw = null;
+};
+$("#users").addEventListener("pointerup", swipeEnd);
+$("#users").addEventListener("pointercancel", swipeEnd);
 
 /* ---------- new task (Yapılacak İş) ---------- */
 const opt = (v, l, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(l)}</option>`;
