@@ -638,9 +638,9 @@ function dueLine(t){
 function actionsFor(t){
   if (readOnly) return "";
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
-  if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return b("open","Detay","ghost");
+  if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
-    case "yeni": return b("take","Üstlen","primary") + b("open","Detay","ghost");
+    case "yeni": return b("take","Üstlen","primary");
     case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
     case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
     case "tamam": return (t.verified ? "" : b("verify","Kontrol edildi","primary")) + b("reopen","Yeniden aç","ghost");
@@ -666,7 +666,7 @@ function card(t, opts = {}){
         <span class="st">${STATUS[t.status] || ""}</span>
         ${flags}
       </div>
-      <div class="actions">${actionsFor(t)}</div>
+      ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
     </div>
   </article>`;
 }
