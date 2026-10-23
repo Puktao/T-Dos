@@ -572,9 +572,11 @@ const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
 const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
 // Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
 // Detay ekranı yalnızca görüntüleme. İşi açan kişi ve yönetici "Güncelle" ile işi Yapılacak İş formunda açar.
-const canEdit = t => !readOnly && !viewOnly(t);
+// Kontrolü onaylanmış iş sabittir: Güncelle, durum değiştirme ve liste onayı kapanır (yalnızca "Yeniden aç" kalır).
+const locked = t => !isOpen(t) && !!t.verified;
+const canEdit = t => !readOnly && !locked(t) && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
-const inDept = t => !readOnly && (!profileMode || !!(me && me.dept && t.dept === me.dept));
+const inDept = t => !readOnly && !locked(t) && (!profileMode || !!(me && me.dept && t.dept === me.dept));
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
 const canCheck = t => !profileMode || isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
