@@ -1,11 +1,11 @@
 // F-Do’s service worker: uygulamayı telefonda hızlı ve çevrimdışı açar.
 // Uygulamayı güncellediğinde aşağıdaki sürüm numarasını bir artır (v1 -> v2).
-const CACHE = "fdos-v16";
+const CACHE = "fdos-v17";
 const SHELL = ["./", "./index.html", "./supabase-config.js", "./manifest.webmanifest", "./icons/icon-192.png"];
 const CDN = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, {cache: "reload"})))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys()
@@ -23,8 +23,9 @@ self.addEventListener("fetch", e => {
     return;
   }
   if (url.origin !== location.origin) return; // veritabanı trafiğine dokunma
-  // Uygulama dosyaları: önce internet (güncel sürüm), yoksa önbellek
-  e.respondWith(fetch(e.request).then(res => {
+  // Uygulama dosyaları: önce internet (güncel sürüm, tarayıcı önbelleği atlanır), yoksa önbellek
+  const fresh = e.request.mode === "navigate" ? new Request(url.href, {cache: "no-cache"}) : new Request(e.request, {cache: "no-cache"});
+  e.respondWith(fetch(fresh).then(res => {
     const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res;
   }).catch(() => caches.match(e.request).then(hit => hit || caches.match("./index.html"))));
 });
