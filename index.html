@@ -311,6 +311,7 @@ button{font:inherit;color:inherit}
 .check small{display:block;color:var(--muted);font-size:12.5px}
 .sheet-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
 .err{color:var(--acil-ink);font-size:13px;margin:8px 0 0}
+.field input.bad{border-color:var(--acil);box-shadow:0 0 0 2px color-mix(in srgb,var(--acil) 25%,transparent)}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:14px 0 0;font-size:14px}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
 .facts dd{margin:0;overflow-wrap:anywhere}
@@ -414,7 +415,7 @@ img{max-width:100%}
       <div class="field"><label class="lbl" for="fType">Bildirim türü</label><div class="sel"><select id="fType"></select></div></div>
     </div>
     <div class="field"><label class="lbl" for="fArea">Alan</label>
-      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div></div>
+      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
     <div class="pair">
       <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
       <div class="field"><label class="lbl" for="fPrio">Aciliyet</label><div class="sel" id="prioWrap"><select id="fPrio"></select></div></div>
@@ -1291,7 +1292,15 @@ $("#fDept").addEventListener("change", () => { fillType(); syncDeptArea(); });
 $("#fType").addEventListener("change", fillCat);
 $("#fArea").addEventListener("change", () => syncArea(true));
 // Oda No / Kat No yalnızca rakam kabul eder (yapıştırılan yazıdaki harfler de atılır)
-$("#fRoom").addEventListener("input", e => { const v = e.target.value.replace(/\D/g, ""); if (v !== e.target.value) e.target.value = v; });
+let roomErrTimer;
+$("#fRoom").addEventListener("input", e => {
+  const raw = e.target.value, v = raw.replace(/\D/g, ""); if (v === raw) return;
+  e.target.value = v;
+  const el = $("#roomErr"), what = $("#fArea").value === FLOOR_AREA ? "Kat numarası" : "Oda numarası";
+  el.textContent = /[.,]/.test(raw) ? `${what} tam sayı olmalı; nokta ya da virgül kullanılamaz.` : `${what} yalnızca rakamdan oluşmalı.`;
+  el.hidden = false; e.target.classList.add("bad");
+  clearTimeout(roomErrTimer); roomErrTimer = setTimeout(() => { el.hidden = true; e.target.classList.remove("bad"); }, 3500);
+});
 $("#fPrio").addEventListener("change", syncPrio);
 $("#fDue").addEventListener("input", () => { dueTouched = true; $("#dueHint").hidden = true; });
 let editId = null;   // doluysa form var olan işi güncelliyor
