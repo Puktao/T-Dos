@@ -62,7 +62,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - "Son tarih" filtresi panelde yok; yalnızca Anasayfa kutusundan gelir.
 6. **"Yapılacak İş" formu** sırası:
    - [Sorumlu departman | Bildirim türü] yan yana. Tür listesi seçilen departmana göre daralır.
-   - Alan açılır listesi ve sağında oda no alanı.
+   - Alan açılır listesi ve sağında oda no alanı. Alan **Koridor** seçilince aynı kutu **"Kat No"** olarak açılır ve zorunludur; kayıtta `room = "Koridor Kat 3"`, kartta plaka "KORİDOR / 3 / KAT".
    - [Kategori | Aciliyet] yan yana.
    - Son tarih (aciliyete göre otomatik dolar, hızlı süre düğmesi yok).
    - Açıklama.

@@ -618,7 +618,8 @@ $("#soundBtn").addEventListener("click", () => {
 const clockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
 function plate(room, dept){
   if (!room) return `<div class="plate"><small>TALEP</small><b>${esc(DEPTS[dept]?.short || "—")}</b></div>`;
-  const r = String(room), num = /^\d{1,5}[A-Za-z]?$/.test(r);
+  const r = String(room), num = /^\d{1,5}[A-Za-z]?$/.test(r), fl = floorOf(r);
+  if (fl) return `<div class="plate"><small>KORİDOR</small><b class="${fl.length > 3 ? "long" : ""}">${esc(fl)}</b><small>KAT</small></div>`;
   return `<div class="plate"><small>${num ? "ODA" : "ALAN"}</small><b class="${r.length > 4 ? "long" : ""}">${esc(r)}</b></div>`;
 }
 function dueLine(t, extra = ""){
@@ -1239,11 +1240,18 @@ function fillCat(){
   $("#fCat").innerHTML = t ? opt("", "Kategori seç", true) + TYPES[t].cats.map(c => opt(c, c)).join("") : opt("", "Önce tür seç", true);
   $("#fCat").disabled = !t;
 }
+// "Oda No" seçilince oda numarası, "Koridor" seçilince kat numarası alanı açılır.
+const FLOOR_AREA = "Koridor";
+const floorRoom = n => `${FLOOR_AREA} Kat ${n}`;                       // kayıtta: "Koridor Kat 3"
+const floorOf = r => (String(r || "").match(/^Koridor Kat (.+)$/) || [])[1] || null;
 function syncArea(focus){
-  const isRoom = $("#fArea").value === "oda";
-  $("#fRoom").disabled = !isRoom;
-  if (!isRoom) $("#fRoom").value = "";
-  else if (focus) $("#fRoom").focus();
+  const a = $("#fArea").value, isRoom = a === "oda", isFloor = a === FLOOR_AREA;
+  const f = $("#fRoom");
+  f.disabled = !(isRoom || isFloor);
+  f.placeholder = isFloor ? "Kat No" : "Oda no";
+  f.setAttribute("aria-label", isFloor ? "Kat numarası" : "Oda numarası");
+  if (f.disabled) f.value = "";
+  else if (focus) f.focus();
 }
 function syncPrio(){
   const p = $("#fPrio").value;
@@ -1302,7 +1310,8 @@ function openNew(t){
     fillType(); ensureOpt("#fType", t.type, TYPES[t.type]?.label); $("#fType").value = t.type || ""; fillCat();
     ensureOpt("#fCat", t.cat); $("#fCat").value = t.cat || "";
     syncDeptArea();
-    if (t.room && AREAS.includes(t.room)) $("#fArea").value = t.room;
+    if (floorOf(t.room)){ $("#fArea").value = FLOOR_AREA; syncArea(false); $("#fRoom").value = floorOf(t.room); }
+    else if (t.room && AREAS.includes(t.room)) $("#fArea").value = t.room;
     else if (t.room){ $("#fArea").value = "oda"; syncArea(false); $("#fRoom").value = t.room; }
     $("#fDesc").value = t.desc || "";
     $("#fOoo").checked = !!t.ooo; $("#fGuest").checked = !!t.guest;
@@ -1323,13 +1332,13 @@ $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
   const roomNo = $("#fRoom").value.trim().slice(0, 10);
-  const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area;
+  const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area === FLOOR_AREA && roomNo ? floorRoom(roomNo) : area;
   const editT = editId && tasks.get(editId);
   // düzenlemede son tarihe dokunulmadıysa kayıttaki değer aynen kalır (dakika yuvarlaması değişiklik sayılmaz)
   const due = editT && editT.dueAt && $("#fDue").value === toInput(editT.dueAt) ? editT.dueAt : fromInput($("#fDue").value);
   if ($("#fItem").value.trim()) addDraftItem();
   const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && !DEPTS[dept]?.noArea ? "Alanı seç."
-    : area === "oda" && !roomNo ? "Oda numarasını yaz." : !cat ? "Kategoriyi seç." : !due ? "Son tarihi seç."
+    : area === "oda" && !roomNo ? "Oda numarasını yaz." : area === FLOOR_AREA && !roomNo && !DEPTS[dept]?.noArea ? "Kat numarasını yaz." : !cat ? "Kategoriyi seç." : !due ? "Son tarihi seç."
     : due < Date.now() - 5 * 60000 && !(editT && due === editT.dueAt) ? "Son tarih geçmişte olamaz." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
