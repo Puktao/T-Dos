@@ -77,28 +77,9 @@ button{font:inherit;color:inherit}
 
 /* screens */
 .screen{padding-block:14px 8px}
-.screen-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 0 12px}
-.screen-title h2{margin:0;font:800 30px/1 var(--font-display)}
-.screen-title span{font-size:13px;color:var(--muted)}
 
-/* priority legend / counters */
-.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.lg{border-radius:12px;padding:10px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:2px;cursor:pointer;text-align:left}
-.lg b{font:800 28px/1 var(--font-display);font-variant-numeric:tabular-nums}
-.lg span{font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
-.lg i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
-.lg.acil{--c:var(--acil)} .lg.acil b{color:var(--acil-ink)}
-.lg.orta{--c:var(--orta)} .lg.orta b{color:var(--orta-ink)}
-.lg.sureli{--c:var(--sureli)} .lg.sureli b{color:var(--sureli-ink)}
-.lg.gec{--c:var(--ink)}
-@media (max-width:360px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* department groups */
-.dgroup{margin-top:18px}
-.dhead{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
-.dhead h3{margin:0;font:800 21px/1.1 var(--font-display);letter-spacing:.01em}
-.dhead .cnt{font:600 12px var(--font-mono);background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 8px}
-.dhead .sub{font-size:12.5px;color:var(--muted);margin-left:auto}
 .none{font-size:13.5px;color:var(--muted);padding:12px;border:1px dashed var(--line);border-radius:10px}
 
 /* cards */
@@ -153,7 +134,6 @@ button{font:inherit;color:inherit}
 .desc{margin:0;font-size:14px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .due{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
 .due svg{flex:none;color:var(--muted)}
-.due .rem{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .due.over{color:var(--acil-ink)}
 .due.over svg{color:var(--acil-ink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted)}
@@ -208,9 +188,6 @@ button{font:inherit;color:inherit}
 .achip .x{width:18px;height:18px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:10px}
 .achip.clear{border-color:var(--line);color:var(--muted);padding-right:11px}
 .resmeta{margin:2px 0 10px}
-.sticky-foot{position:sticky;bottom:0;background:var(--surface);padding-block:12px 0;flex-wrap:nowrap}
-.sticky-foot .btn{padding:11px 16px;font-size:14.5px}
-.sticky-foot .primary{flex:1}
 
 /* form selects */
 .sel{position:relative;min-width:0}
@@ -328,15 +305,6 @@ button{font:inherit;color:inherit}
 .field input[type=text],.field input[type=datetime-local],.field textarea{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
 .field textarea{min-height:72px;resize:vertical}
 .hint{font-size:12.5px;color:var(--muted)}
-.prioPick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.pp{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}
-.pp b{font-size:14px;display:flex;align-items:center;gap:6px}
-.pp b i{width:10px;height:10px;border-radius:50%;background:var(--c)}
-.pp span{font-size:11.5px;color:var(--muted);line-height:1.3}
-.pp.acil{--c:var(--acil);--cs:var(--acil-soft)} .pp.orta{--c:var(--orta);--cs:var(--orta-soft)} .pp.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
-.pp[aria-pressed="true"]{border-color:var(--c);background:var(--cs)}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media (max-width:480px){.row2{grid-template-columns:1fr}}
 .checks{display:flex;flex-direction:column;gap:8px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
 .check input{width:18px;height:18px;margin-top:1px;accent-color:var(--ink)}
@@ -356,7 +324,6 @@ button{font:inherit;color:inherit}
 .dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
 .dcard .dc-row .k{color:var(--muted);font-size:12.5px;font-weight:600}
 .dcard .dc-row .v{min-width:0;overflow-wrap:anywhere}
-.dcard .dc-row .rem{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
 .dcard .dc-row .over{color:var(--acil-ink);font-weight:700}
 .dcard .dc-row .sel select{padding-block:8px}
 .dcard .ddesc{background:color-mix(in srgb,var(--surface) 75%,transparent)}
@@ -495,12 +462,9 @@ img{max-width:100%}
 
 <div class="overlay" id="ovWho" hidden>
   <form class="sheet" id="whoForm" novalidate>
-    <div class="sheet-head"><div><h2>Kim olarak çalışıyorsun?</h2><p class="sheet-sub">Bu cihazda hatırlanır. Ortak cihazda vardiya değişince güncelle.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
-    <dl class="facts" id="wInfo" hidden></dl>
-    <div class="field" id="wNameF"><label class="lbl" for="wName">Adın</label><input type="text" id="wName" placeholder="ör. Ayşe K." autocomplete="off" maxlength="40"></div>
-    <div class="field" id="wDeptF"><span class="lbl">Departmanın</span><div class="chips wrap" id="wDept"></div></div>
-    <p class="err" id="wErr" hidden></p>
-    <div class="sheet-foot"><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button><button type="submit" class="btn primary" id="wSave">Kaydet</button></div>
+    <div class="sheet-head"><div><h2>Hesabım</h2><p class="sheet-sub">Ad ve departmanı yönetici belirler.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+    <dl class="facts" id="wInfo"></dl>
+    <div class="sheet-foot"><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button></div>
   </form>
 </div>
 
@@ -552,7 +516,6 @@ function dur(ms){
   if (h < 24) return h + " sa" + (m % 60 ? " " + (m % 60) + " dk" : "");
   const d = Math.floor(h / 24); return d + " gün" + (h % 24 ? " " + (h % 24) + " sa" : "");
 }
-const ago = ms => Date.now() - ms < 60000 ? "şimdi" : dur(Date.now() - ms) + " önce";
 const pad = n => String(n).padStart(2, "0");
 const toInput = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const fromInput = s => { const v = new Date(s).getTime(); return isNaN(v) ? null : v; };
@@ -564,13 +527,13 @@ function defaultDue(p){
   const t = new Date(now); t.setDate(t.getDate() + 1); t.setHours(12, 0, 0, 0); return t.getTime();
 }
 
-let db = null, col = null, readOnly = false, loaded = false, dbFailed = false;
+let loaded = false, dbFailed = false;
 let tasks = new Map();
-let me = loadMe();
-let profiles = [], profileMode = false, authUser = null, usersMsg = "";
+let me = null;   // giriş yapan kişinin profili (fdos_profiles)
+let profiles = [], authUser = null, usersMsg = "";
 const DEF = {
-  todo: {q:"", dept:"all", prio:"all", time:"all", status:"all", sort:"due"},
-  done: {q:"", check:"kontrol", dept:"all", prio:"all", period:"all"}
+  todo: {q:"", prio:"all", time:"all", status:"all"},
+  done: {q:"", check:"kontrol", prio:"all"}
 };
 const ui = {
   tab: "ana",   // uygulama her açılışta Anasayfa ile başlar
@@ -578,35 +541,33 @@ const ui = {
   done: {...DEF.done},
   rep: "7"
 };
-let detailId = null, pendingAfterWho = null, deleteArmed = false, delArmed = null;
+let detailId = null, delArmed = null;
 const myCreated = new Set(), fresh = new Set();
-let firstSnap = true, audioCtx = null;
+let audioCtx = null;
 
-function loadMe(){ try { const v = JSON.parse(localStorage.getItem("oia.me") || "null"); if (v && v.name && DEPTS[v.dept]) return v; } catch(e){} return null; }
-function saveMe(v){ me = v; try { localStorage.setItem("oia.me", JSON.stringify(v)); } catch(e){} }
-const isAdmin = () => !!(profileMode && me && me.role === "admin");
+const isAdmin = () => !!(me && me.role === "admin");
 const deptOf = m => m && DEPTS[m.dept] ? DEPTS[m.dept] : null;
 const who = () => me ? `${me.name} (${deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Departmansız")})` : "İsimsiz";
 const isOpen = t => t.status !== "tamam";
 // Bir işi yalnızca atandığı departman ve işi açan kişi görür; yönetici hepsini (veritabanında da aynı kural: fdos_can_see).
-const canSee = t => !profileMode || !me || isAdmin() || (!!me.dept && t.dept === me.dept) || isCreator(t);
+const canSee = t => !!me && (isAdmin() || (!!me.dept && t.dept === me.dept) || isCreator(t));
 const visTasks = () => [...tasks.values()].filter(canSee);
 // Detay ekranı: işi açan kişi ve yönetici her şeyi değiştirir; diğerleri yalnızca durumu ve listedeki tikleri.
 const isCreator = t => t.createdUid ? t.createdUid === authUser?.id : !!(me && t.createdBy && lower(t.createdBy) === lower(me.name));
-const viewOnly = t => profileMode && !isAdmin() && !isCreator(t);
+const viewOnly = t => !isAdmin() && !isCreator(t);
 // Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
-const canStatus = t => !profileMode || isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
+const canStatus = t => isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
 // Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
 // Detay ekranı yalnızca görüntüleme. İşi açan kişi ve yönetici "Güncelle" ile işi Yapılacak İş formunda açar.
 // Kontrolü onaylanmış iş sabittir: Güncelle, durum değiştirme ve liste onayı kapanır (yalnızca "Yeniden aç" kalır).
 const locked = t => !isOpen(t) && !!t.verified;
-const canEdit = t => !readOnly && !locked(t) && !viewOnly(t);
+const canEdit = t => !!me && !locked(t) && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
-const inDept = t => !readOnly && !locked(t) && (!profileMode || !!(me && me.dept && t.dept === me.dept));
+const inDept = t => !locked(t) && !!(me && me.dept && t.dept === me.dept);
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
 // Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
-const canDelete = t => !readOnly && (!profileMode || isAdmin() || (isCreator(t) && !locked(t)));
-const canCheck = t => !profileMode || isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
+const canDelete = t => isAdmin() || (isCreator(t) && !locked(t));
+const canCheck = t => isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
 const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -629,16 +590,11 @@ let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3600); }
 function banner(msg){ const b = $("#banner"); if (!msg){ b.hidden = true; return; } b.textContent = msg; b.hidden = false; }
 function openOv(id){ $(id).hidden = false; }
-function closeOv(id){ $(id).hidden = true; if (id === "#ovDetail"){ detailId = null; deleteArmed = false; } }
+function closeOv(id){ $(id).hidden = true; if (id === "#ovDetail") detailId = null; }
 document.querySelectorAll(".overlay:not(.login)").forEach(ov => ov.addEventListener("click", e => {
   if (e.target === ov || e.target.closest("[data-close]")) closeOv("#" + ov.id);
 }));
 document.addEventListener("keydown", e => { if (e.key === "Escape") ["#ovNew","#ovDetail","#ovWho","#ovFilter","#ovUsers"].forEach(id => { if (!$(id).hidden) closeOv(id); }); });
-function setReadOnly(v){
-  readOnly = v;
-  if (v) banner("Bu uygulamada yalnızca görüntüleme iznin var. İş açmak ve güncellemek için sayfa sahibinin seni Düzenleyici olarak eklemesi gerekiyor.");
-  renderAll();
-}
 function beep(){
   if (!audioCtx) return;
   try {
@@ -674,7 +630,6 @@ function dueLine(t, extra = ""){
   return `<div class="due ${diff < 0 ? "over" : ""}">${clockSvg}<span>Son: ${esc(dueLabel(t.dueAt))}</span></div>`;
 }
 function actionsFor(t){
-  if (readOnly) return "";
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
   if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
@@ -685,7 +640,7 @@ function actionsFor(t){
   }
   return "";
 }
-function card(t, opts = {}){
+function card(t){
   const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
   const flags = [
     t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
@@ -699,10 +654,10 @@ function card(t, opts = {}){
       ${t.desc ? `<p class="desc">${esc(t.desc)}</p>` : ""}
       ${itemsProg(t)}
       <div class="meta">
-        ${opts.hideDept ? "" : `<span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>`}
+        <span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>
         <span class="st">${STATUS[t.status] || ""}</span>
         ${flags}
-        ${!isOpen(t) && !readOnly && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
+        ${!isOpen(t) && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
       </div>
       ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
     </div>
@@ -711,11 +666,10 @@ function card(t, opts = {}){
   const armed = delArmed === t.id;
   return `<div class="swc" data-sid="${esc(t.id)}"><div class="swc-act"><button type="button" class="swc-del ${armed ? "armed" : ""}" data-cdel="${esc(t.id)}">${armed ? "Eminim" : "Sil"}</button></div>${art}</div>`;
 }
-const byPrioDue = (a, b) => PRIO[prioOf(a)].rank - PRIO[prioOf(b)].rank || (a.dueAt || 9e15) - (b.dueAt || 9e15);
 const byDue = (a, b) => (a.dueAt || 9e15) - (b.dueAt || 9e15) || PRIO[prioOf(a)].rank - PRIO[prioOf(b)].rank;
 
 function stateScreen(){
-  if (!loaded) return `<div class="empty"><h3>İşler yükleniyor</h3><p>${sb && !signedIn ? "Devam etmek için giriş yap." : "Ortak liste bağlanıyor."}</p></div>`;
+  if (!loaded || (signedIn && !me)) return `<div class="empty"><h3>İşler yükleniyor</h3><p>${sb && !signedIn ? "Devam etmek için giriş yap." : "Ortak liste bağlanıyor."}</p></div>`;
   if (dbFailed) return `<div class="empty"><h3>Kurulum tamamlanmadı</h3><p>supabase-config.js dosyasına Supabase bilgilerini yaz. Kurulum rehberinin 2. adımına bak.</p></div>`;
   return null;
 }
@@ -759,7 +713,6 @@ function screenHome(){
 }
 const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
-const deptOpts = () => [["all","Tümü"], ...deptList().map(([k,v]) => [k, v.label])];
 const prioOpts = () => [["all","Tümü"], ...Object.entries(PRIO).map(([k,v]) => [k, v.label])];
 const FILTERS = {
   todo: [
@@ -777,28 +730,24 @@ const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.ro
 function applyTodo(f){
   const now = Date.now(), tEnd = dayStart(now) + 86400000;
   let arr = visTasks().filter(isOpen);
-  if (f.dept !== "all") arr = arr.filter(t => t.dept === f.dept);
   if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
   if (f.status !== "all") arr = arr.filter(t => t.status === f.status);
   if (f.time === "over") arr = arr.filter(isOver);
   if (f.time === "today") arr = arr.filter(t => t.dueAt && t.dueAt < tEnd);
   arr = arr.filter(matchQ(f.q));
-  arr.sort(f.sort === "prio" ? byPrioDue : f.sort === "new" ? (a, b) => (b.createdAt || 0) - (a.createdAt || 0) : byDue);
+  arr.sort(byDue);
   return arr;
 }
 function applyDone(f){
-  const now = Date.now();
   let arr = visTasks().filter(t => !isOpen(t));
   if (f.check === "kontrol") arr = arr.filter(t => !t.verified);
   if (f.check === "ok") arr = arr.filter(t => t.verified);
-  if (f.dept !== "all") arr = arr.filter(t => t.dept === f.dept);
   if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
-  if (f.period !== "all"){ const from = f.period === "0" ? dayStart(now) : now - Number(f.period) * 86400000; arr = arr.filter(t => (t.doneAt || 0) >= from); }
   arr = arr.filter(matchQ(f.q));
   arr.sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
   return arr.slice(0, 150);
 }
-const activeDefs = (kind, f) => FILTERS[kind].filter(d => !d.noChip && f[d.key] !== "all");
+const activeDefs = (kind, f) => FILTERS[kind].filter(d => f[d.key] !== "all");
 function toolbar(kind){
   const f = ui[kind], n = activeDefs(kind, f).length;
   return `<div class="toolbar">
@@ -818,13 +767,13 @@ function activeChips(kind){
 }
 function clearFilters(kind, keepQ = true){
   const f = ui[kind];
-  FILTERS[kind].forEach(d => { if (!d.noChip) f[d.key] = "all"; });
+  FILTERS[kind].forEach(d => f[d.key] = "all");
   if (!keepQ) f.q = "";
 }
 function results(kind){
   const f = ui[kind];
   const arr = kind === "todo" ? applyTodo(f) : applyDone(f);
-  const sortLab = kind === "todo" ? {due:"son tarihi yakın olan önce", prio:"acil olan önce", new:"en yeni önce"}[f.sort] : "en son biten önce";
+  const sortLab = kind === "todo" ? "son tarihi yakın olan önce" : "en son biten önce";
   if (arr.length) return `<p class="muted resmeta">${arr.length} iş · ${sortLab}</p><div class="list">${arr.map(t => card(t)).join("")}</div>`;
   const narrowed = f.q || activeDefs(kind, f).length;
   if (kind === "todo" && !tasks.size) return `<div class="empty"><h3>Henüz iş yok</h3><p>Sağ alttaki + ile ilk işi kaydet.</p></div>`;
@@ -864,7 +813,7 @@ function screenReport(){
   const now = Date.now();
   const from = ui.rep === "0" ? dayStart(now) : now - Number(ui.rep) * 86400000;
   // Rapor: personel yalnızca kendi departmanının işlerini görür; yönetici hepsini.
-  const ownDept = profileMode && !isAdmin() && me ? me.dept || "__yok" : null;
+  const ownDept = me && !isAdmin() ? me.dept || "__yok" : null;
   const all = visTasks().filter(t => !ownDept || t.dept === ownDept);
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
@@ -930,7 +879,7 @@ function peoplePanel(created, done, open){
       <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Açtığı ve bitirdiği (Tamamlandı yapan): seçili dönem.</p></div>`;
 }
 function renderWho(){
-  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">${profileMode ? "Hesabım" : "Kimsin? Seç"}</span>`;
+  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">Hesabım</span>`;
 }
 function renderTabs(){
   document.querySelectorAll(".tb").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -940,7 +889,7 @@ function renderTabs(){
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
   $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
   $("#hTitle").textContent = TITLES[ui.tab]; document.body.dataset.tab = ui.tab;
-  $("#newBtn").hidden = readOnly || dbFailed || !(ui.tab === "ana" || ui.tab === "yapilacak");
+  $("#newBtn").hidden = dbFailed || !(ui.tab === "ana" || ui.tab === "yapilacak");
 }
 function renderScreen(){
   const keepFocus = document.activeElement?.id === "q";
@@ -1071,7 +1020,7 @@ function renderDetail(){
     <h3 class="section-t">Geçmiş</h3>
     <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>`;
 }
-function openDetail(id){ detailId = id; deleteArmed = false; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
+function openDetail(id){ detailId = id; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
 $("#detail").addEventListener("click", e => {
   const t = detailId && tasks.get(detailId); if (!t) return;
   if (e.target.closest("#dEdit") && canEdit(t)){ requireMe(() => { closeOv("#ovDetail"); openNew(t); }); }
@@ -1097,34 +1046,18 @@ $("#detail").addEventListener("change", e => {
   });
 });
 
-function requireMe(fn){ if (me) return fn(); pendingAfterWho = fn; openWho(); }
+function requireMe(fn){ if (me) return fn(); toast("Profil yükleniyor, birkaç saniye sonra tekrar dene."); loadProfiles(); }
 
-/* ---------- identity ---------- */
-let whoDept = null;
+/* ---------- hesabım ---------- */
 function openWho(){
-  $("#wErr").hidden = true;
-  const acct = profileMode && me;
-  ["#wNameF", "#wDeptF", "#wSave"].forEach(id => $(id).hidden = !!acct);
-  $("#wInfo").hidden = !acct; $("#usersBtn").hidden = !isAdmin();
-  $("#ovWho h2").textContent = acct ? "Hesabım" : "Kim olarak çalışıyorsun?";
-  $("#ovWho .sheet-sub").textContent = acct ? "Ad ve departmanı yönetici belirler." : "Bu cihazda hatırlanır. Ortak cihazda vardiya değişince güncelle.";
-  if (acct){
-    $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
-      <dt>Departman</dt><dd>${esc(deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Atanmadı"))}</dd>`;
-    openOv("#ovWho"); return;
-  }
-  $("#wName").value = me?.name || ""; whoDept = me?.dept || null; renderWhoDept(); openOv("#ovWho"); setTimeout(() => $("#wName").focus(), 50);
+  if (!me) return;
+  $("#usersBtn").hidden = !isAdmin();
+  $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
+    <dt>Departman</dt><dd>${esc(deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Atanmadı"))}</dd>`;
+  openOv("#ovWho");
 }
-function renderWhoDept(){ $("#wDept").innerHTML = deptList().map(([k,v]) => `<button type="button" class="chip" data-v="${k}" aria-pressed="${whoDept === k}">${esc(v.label)}</button>`).join(""); }
-$("#wDept").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; whoDept = b.dataset.v; renderWhoDept(); });
 $("#whoBtn").addEventListener("click", openWho);
-$("#whoForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const n = $("#wName").value.trim().slice(0, 40);
-  if (!n || !whoDept){ $("#wErr").textContent = !n ? "Adını yaz." : "Departmanını seç."; $("#wErr").hidden = false; return; }
-  saveMe({name: n, dept: whoDept}); closeOv("#ovWho"); renderAll();
-  const fn = pendingAfterWho; pendingAfterWho = null; if (fn) fn();
-});
+$("#whoForm").addEventListener("submit", e => e.preventDefault());
 
 /* ---------- listeler (Supabase tabloları; yoksa yukarıdaki sabitler) ---------- */
 const deptList = () => Object.entries(DEPTS).filter(([, v]) => v.active !== false);
@@ -1154,8 +1087,8 @@ async function loadProfiles(){
   if (!sb || !signedIn) return;
   try {
     const {data, error} = await sb.from("fdos_profiles").select("user_id,email,name,dept,role").order("name");
-    if (error){ profileMode = false; return; }   // tablo kurulmamışsa eski düzen (cihazda ad/departman)
-    profiles = data || []; profileMode = true;
+    if (error) return;
+    profiles = data || [];
     const mine = profiles.find(p => p.user_id === authUser?.id);
     me = mine ? {name: mine.name, dept: mine.dept || null, role: mine.role}
               : {name: (authUser?.email || "").split("@")[0] || "İsimsiz", dept: null, role: "user"};
@@ -1596,10 +1529,10 @@ function onSession(session){
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles().then(() => { if (!profileMode && !me) setTimeout(openWho, 300); }); }
+    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); }
   } else {
     stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
-    if (profileMode){ profileMode = false; profiles = []; me = loadMe(); }
+    profiles = []; me = null;
     closeOv("#ovUsers"); renderAll(); openLogin();
   }
 }
