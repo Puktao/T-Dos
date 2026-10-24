@@ -414,7 +414,7 @@ img{max-width:100%}
       <div class="field"><label class="lbl" for="fType">Bildirim türü</label><div class="sel"><select id="fType"></select></div></div>
     </div>
     <div class="field"><label class="lbl" for="fArea">Alan</label>
-      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" maxlength="10" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div></div>
+      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div></div>
     <div class="pair">
       <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
       <div class="field"><label class="lbl" for="fPrio">Aciliyet</label><div class="sel" id="prioWrap"><select id="fPrio"></select></div></div>
@@ -1290,6 +1290,8 @@ $("#fItems").addEventListener("click", e => { const b = e.target.closest(".rm");
 $("#fDept").addEventListener("change", () => { fillType(); syncDeptArea(); });
 $("#fType").addEventListener("change", fillCat);
 $("#fArea").addEventListener("change", () => syncArea(true));
+// Oda No / Kat No yalnızca rakam kabul eder (yapıştırılan yazıdaki harfler de atılır)
+$("#fRoom").addEventListener("input", e => { const v = e.target.value.replace(/\D/g, ""); if (v !== e.target.value) e.target.value = v; });
 $("#fPrio").addEventListener("change", syncPrio);
 $("#fDue").addEventListener("input", () => { dueTouched = true; $("#dueHint").hidden = true; });
 let editId = null;   // doluysa form var olan işi güncelliyor
@@ -1331,7 +1333,7 @@ $("#fDel").addEventListener("click", () => {
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
-  const roomNo = $("#fRoom").value.trim().slice(0, 10);
+  const roomNo = $("#fRoom").value.replace(/\D/g, "").slice(0, 6);
   const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area === FLOOR_AREA && roomNo ? floorRoom(roomNo) : area;
   const editT = editId && tasks.get(editId);
   // düzenlemede son tarihe dokunulmadıysa kayıttaki değer aynen kalır (dakika yuvarlaması değişiklik sayılmaz)

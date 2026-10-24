@@ -62,7 +62,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - "Son tarih" filtresi panelde yok; yalnızca Anasayfa kutusundan gelir.
 6. **"Yapılacak İş" formu** sırası:
    - [Sorumlu departman | Bildirim türü] yan yana. Tür listesi seçilen departmana göre daralır.
-   - Alan açılır listesi ve sağında oda no alanı. Alan **Koridor** seçilince aynı kutu **"Kat No"** olarak açılır ve zorunludur; kayıtta `room = "Koridor Kat 3"`, kartta plaka "KORİDOR / 3 / KAT".
+   - Alan açılır listesi ve sağında oda no alanı. Alan **Koridor** seçilince aynı kutu **"Kat No"** olarak açılır ve zorunludur; kayıtta `room = "Koridor Kat 3"`, kartta plaka "KORİDOR / 3 / KAT". Oda No ve Kat No **yalnızca rakam** kabul eder (en fazla 6 hane; harfler yazılamaz, yapıştırılırsa atılır).
    - [Kategori | Aciliyet] yan yana.
    - Son tarih (aciliyete göre otomatik dolar, hızlı süre düğmesi yok).
    - Açıklama.
@@ -90,7 +90,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 11. **Rapor:** Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
 ## Açık konular
-- Telefon kilitliyken bildirim yok (Web Push yapılmadı).
+- Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **şimdilik kenara alındı**: önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
 
 ## Kurulum durumu
 - [x] Dosyalar GitHub'a yüklendi.
