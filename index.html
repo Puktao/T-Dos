@@ -13,6 +13,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://tkfyiunfcclwczvpbdha.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -1080,7 +1082,7 @@ async function loadLists(){
     ty.data.forEach(r => TYPES[r.kod] = {label: r.ad, dept: r.departman, active: r.aktif, cats: []});
     (c.data || []).forEach(r => { if (r.aktif && TYPES[r.tur]) TYPES[r.tur].cats.push(r.ad); });
     AREAS.length = 0; (a.data || []).forEach(r => { if (r.aktif) AREAS.push(r.ad); });
-    renderAll();
+    renderAll(); saveSnap();
   } catch(e){}
 }
 
@@ -1096,7 +1098,7 @@ async function loadProfiles(){
               : {name: (authUser?.email || "").split("@")[0] || "İsimsiz", dept: null, role: "user"};
     if (!$("#ovWho").hidden) openWho();
     if (!$("#ovUsers").hidden) renderUsers();
-    renderAll();
+    renderAll(); saveSnap();
   } catch(e){}
 }
 const ADMIN_DEPT = "yonetici";   // yalnızca Tuncer'in departmanı; başkasına atanamaz
@@ -1407,7 +1409,7 @@ function applyRow(row, silent){
   const d = {id: row.id, ...row.data}, prev = tasks.get(d.id);
   if (!silent) notify(prev, d);
   if (keepRow(d)) tasks.set(d.id, d); else tasks.delete(d.id);
-  renderAll();
+  renderAll(); saveSnap();
 }
 function listenErr(e){
   const c = (e && e.code) || "", m = (e && e.message) || "";
@@ -1428,7 +1430,7 @@ function refetch(){
       const err = a.error || b.error;
       if (err){ listenErr(err); return; }
       tasks = new Map([...(b.data || []), ...(a.data || [])].map(r => [r.id, {id: r.id, ...r.data}]));
-      loaded = true; banner(""); renderAll(); loadLists(); loadProfiles();
+      loaded = true; banner(""); renderAll(); saveSnap(); loadLists(); loadProfiles();
     } catch(e){ listenErr(e); }
   })().finally(() => { fetching = null; });
   return fetching;
@@ -1437,7 +1439,7 @@ function startLive(){
   stopLive();
   channel = sb.channel("fdos-tasks")
     .on("postgres_changes", {event: "*", schema: "public", table: TABLE}, p => {
-      if (p.eventType === "DELETE"){ const id = p.old && p.old.id; if (id && tasks.has(id)){ tasks.delete(id); renderAll(); } }
+      if (p.eventType === "DELETE"){ const id = p.old && p.old.id; if (id && tasks.has(id)){ tasks.delete(id); renderAll(); saveSnap(); } }
       else applyRow(p.new);
     })
     .subscribe(status => {
@@ -1470,6 +1472,7 @@ function writeError(e){
   else toast("Kaydedilemedi: " + (m || "bilinmeyen hata"));
 }
 function guard(){
+  if (sb && !signedIn && !authReady){ toast("Bağlanıyor, birkaç saniye sonra tekrar dene."); return false; }
   if (!sb || !signedIn){ openLogin(); return false; }
   return true;
 }
@@ -1487,7 +1490,7 @@ async function patch(id, fields, msg){
 }
 async function remove(id){
   if (!guard()) return;
-  tasks.delete(id); closeOv("#ovDetail"); renderAll();
+  tasks.delete(id); closeOv("#ovDetail"); renderAll(); saveSnap();
   try {
     const {data, error} = await sb.from(TABLE).delete().eq("id", id).select("id");
     if (error){ writeError(error); refetch(); }
@@ -1546,14 +1549,45 @@ $("#passForm").addEventListener("submit", async e => {
 });
 
 /* ---------- start ---------- */
+// Açılışı hızlandırmak için son görülen işler, profil ve listeler cihazda saklanır.
+// Uygulama açılınca önce bunlar gösterilir, sunucudan gelen güncel veri hemen ardından yerine geçer.
+// Oturum kapanınca ya da başka hesapla girilince silinir.
+const SNAP = "fdos.snap";
+let authReady = false, snapTimer = null;
+function saveSnap(){
+  clearTimeout(snapTimer);
+  snapTimer = setTimeout(() => {
+    if (!signedIn || !me || !loaded || !authUser) return;
+    const snap = {v: 1, uid: authUser.id, email: authUser.email || "", me, depts: DEPTS, types: TYPES, areas: AREAS, tasks: [...tasks.values()]};
+    try { localStorage.setItem(SNAP, JSON.stringify(snap)); }
+    catch(e){
+      // yer yetmezse geçmiş kayıtları olmadan dene
+      try { snap.tasks = snap.tasks.map(t => ({...t, log: []})); localStorage.setItem(SNAP, JSON.stringify(snap)); }
+      catch(e2){ dropSnap(); }
+    }
+  }, 400);
+}
+function dropSnap(){ clearTimeout(snapTimer); try { localStorage.removeItem(SNAP); } catch(e){} }
+function loadSnap(){
+  let snap = null;
+  try { snap = JSON.parse(localStorage.getItem(SNAP) || "null"); } catch(e){}
+  if (!snap || snap.v !== 1 || !snap.uid || !snap.me || !Array.isArray(snap.tasks)) return;
+  const fill = (dst, src) => { if (src && Object.keys(src).length){ Object.keys(dst).forEach(k => delete dst[k]); Object.assign(dst, src); } };
+  fill(DEPTS, snap.depts); fill(TYPES, snap.types);
+  if (Array.isArray(snap.areas) && snap.areas.length){ AREAS.length = 0; AREAS.push(...snap.areas); }
+  authUser = {id: snap.uid, email: snap.email}; me = snap.me;
+  tasks = new Map(snap.tasks.map(t => [t.id, t])); loaded = true;
+}
 function onSession(session){
+  authReady = true;
+  if (session && authUser && authUser.id !== session.user.id && !signedIn){ tasks = new Map(); me = null; loaded = false; dropSnap(); }
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
     if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); }
   } else {
     stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
-    profiles = []; me = null;
+    profiles = []; me = null; dropSnap();
     closeOv("#ovUsers"); renderAll(); openLogin();
   }
 }
@@ -1562,6 +1596,7 @@ function boot(){
   if (!window.supabase || !cfg || !cfg.url || !cfg.anonKey || /BURAYA|PROJE-ID/.test(cfg.url + cfg.anonKey)){
     setupMissing = true; dbFailed = true; loaded = true; renderAll(); return;
   }
+  loadSnap(); renderAll();
   sb = window.supabase.createClient(cfg.url, cfg.anonKey, {auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}});
   sb.auth.onAuthStateChange((event, session) => {
     setTimeout(() => {
