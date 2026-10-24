@@ -415,7 +415,7 @@ img{max-width:100%}
       <div class="field"><label class="lbl" for="fType">Bildirim türü</label><div class="sel"><select id="fType"></select></div></div>
     </div>
     <div class="field"><label class="lbl" for="fArea">Alan</label>
-      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
+      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
     <div class="pair">
       <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
       <div class="field"><label class="lbl" for="fPrio">Aciliyet</label><div class="sel" id="prioWrap"><select id="fPrio"></select></div></div>
@@ -1294,10 +1294,11 @@ $("#fArea").addEventListener("change", () => syncArea(true));
 // Oda No / Kat No yalnızca rakam kabul eder (yapıştırılan yazıdaki harfler de atılır)
 let roomErrTimer;
 $("#fRoom").addEventListener("input", e => {
-  const raw = e.target.value, v = raw.replace(/\D/g, ""); if (v === raw) return;
+  const raw = e.target.value, digits = raw.replace(/\D/g, ""), v = digits.slice(0, 4); if (v === raw) return;
   e.target.value = v;
   const el = $("#roomErr"), what = $("#fArea").value === FLOOR_AREA ? "Kat numarası" : "Oda numarası";
-  el.textContent = /[.,]/.test(raw) ? `${what} tam sayı olmalı; nokta ya da virgül kullanılamaz.` : `${what} yalnızca rakamdan oluşmalı.`;
+  el.textContent = /[.,]/.test(raw) ? `${what} tam sayı olmalı; nokta ya da virgül kullanılamaz.`
+    : digits !== raw ? `${what} yalnızca rakamdan oluşmalı.` : `${what} en fazla 4 haneli olabilir.`;
   el.hidden = false; e.target.classList.add("bad");
   clearTimeout(roomErrTimer); roomErrTimer = setTimeout(() => { el.hidden = true; e.target.classList.remove("bad"); }, 3500);
 });
@@ -1342,7 +1343,7 @@ $("#fDel").addEventListener("click", () => {
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
-  const roomNo = $("#fRoom").value.replace(/\D/g, "").slice(0, 6);
+  const roomNo = $("#fRoom").value.replace(/\D/g, "").slice(0, 4);
   const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area === FLOOR_AREA && roomNo ? floorRoom(roomNo) : area;
   const editT = editId && tasks.get(editId);
   // düzenlemede son tarihe dokunulmadıysa kayıttaki değer aynen kalır (dakika yuvarlaması değişiklik sayılmaz)
