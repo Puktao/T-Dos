@@ -142,7 +142,7 @@ button{font:inherit;color:inherit}
 .dept{font-weight:600;font-size:11.5px;padding:1px 7px;border-radius:4px;border:1px solid var(--line);color:var(--ink)}
 .st{font-weight:600}
 .flag{font:600 10px/1.6 var(--font-mono);letter-spacing:.05em;border:1px solid currentColor;border-radius:3px;padding:0 5px}
-.flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)}
+.flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)} .flag.rep{color:var(--ink)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
 .meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
 .card.done .actions{justify-content:flex-end}   /* "Kontrol edildi" sağda, "Yeniden aç"ın altında */
@@ -313,6 +313,8 @@ button{font:inherit;color:inherit}
 .check small{display:block;color:var(--muted);font-size:12.5px}
 .sheet-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
 .err{color:var(--acil-ink);font-size:13px;margin:8px 0 0}
+.dupwarn{margin:8px 0 0;padding:10px 12px;border:1px solid var(--orta);border-left-width:4px;border-radius:6px;font-size:13px;line-height:1.45;background:color-mix(in srgb,var(--orta) 12%,transparent)}
+.dupwarn b{font-weight:700}
 .field input.bad{border-color:var(--acil);box-shadow:0 0 0 2px color-mix(in srgb,var(--acil) 25%,transparent)}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:14px 0 0;font-size:14px}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
@@ -433,6 +435,7 @@ img{max-width:100%}
       <label class="check"><input type="checkbox" id="fGuest"><span>Misafir odada<small>Girişten önce kapı çalınmalı ya da misafirle saat ayarlanmalı.</small></span></label>
     </div>
     <p class="err" id="fErr" hidden></p>
+    <div class="dupwarn" id="fDup" role="alert" hidden></div>
     <div class="sheet-foot"><button type="button" class="btn danger" id="fDel" hidden>Kaydı sil</button><button type="button" class="btn ghost" data-close>Vazgeç</button><button type="submit" class="btn primary" id="fSubmit">İşi kaydet</button></div>
   </form>
 </div>
@@ -644,9 +647,19 @@ function actionsFor(t){
   }
   return "";
 }
+// Tekrarlayan arıza: aynı oda/alanda, aynı tür ve kategoride son 30 gün içinde açılan kaçıncı iş (2 ve üstü gösterilir).
+const REPEAT_DAYS = 30;
+function repeatNo(t){
+  if (!t.room || !t.cat || !t.createdAt) return 0;
+  const from = t.createdAt - REPEAT_DAYS * 86400000;
+  let n = 0;
+  tasks.forEach(x => { if (x.room === t.room && x.type === t.type && x.cat === t.cat && x.createdAt >= from && x.createdAt <= t.createdAt) n++; });
+  return n;
+}
 function card(t){
-  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
+  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"}, rn = repeatNo(t);
   const flags = [
+    rn > 1 ? `<span class="flag rep" title="Aynı yerde, aynı sorun için son ${REPEAT_DAYS} günde açılan ${rn}. iş">${REPEAT_DAYS} GÜNDE ${rn}. KEZ</span>` : "",
     t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
     t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
   ].join("");
@@ -861,9 +874,22 @@ function screenReport(){
       <div class="keys"><span style="--c:var(--acil)"><i></i>Acil ${pc("acil")}</span><span style="--c:var(--orta)"><i></i>Orta ${pc("orta")}</span><span style="--c:var(--sureli)"><i></i>Süreli ${pc("sureli")}</span></div></div>
     ${isAdmin() ? peoplePanel(created, done, open) : ""}
     <div class="panel"><h3>En sık sorunlar</h3>${top(t => `${TYPES[t.type]?.label || ""} · ${t.cat || ""}`)}</div>
-    <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>`;
+    <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>
+    <div class="panel"><h3>Tekrarlayan arızalar (son ${REPEAT_DAYS} gün)</h3>${repeats(all)}</div>`;
 }
 
+// Aynı yer + aynı tür/kategori için son 30 günde 2 ve üstü iş.
+function repeats(list){
+  const from = Date.now() - REPEAT_DAYS * 86400000, m = new Map();
+  list.forEach(t => { if (!t.room || !t.cat || (t.createdAt || 0) < from) return;
+    const k = t.room + "\u0000" + t.type + "\u0000" + t.cat; m.set(k, (m.get(k) || 0) + 1); });
+  const arr = [...m.entries()].filter(x => x[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  if (!arr.length) return `<p class="muted" style="margin:0">Aynı yerde tekrarlayan sorun yok.</p>`;
+  const max = arr[0][1];
+  return `<div class="bars">${arr.map(([k, c]) => { const [room, type, cat] = k.split("\u0000");
+    return `<div class="bar"><span>${esc(placeOf(room))} · ${esc(cat)}</span><b>${c}</b><div class="tr"><div style="width:${c / max * 100}%"></div></div></div>`; }).join("")}</div>
+    <p class="muted" style="margin:8px 0 0">Aynı oda ya da alanda, aynı sorun için açılan işler.</p>`;
+}
 function peoplePanel(created, done, open){
   const same = (a, b) => a && b && lower(a) === lower(b);
   const names = new Map();
@@ -1019,6 +1045,7 @@ function renderDetail(){
       ${t.doneAt ? row("Bitiş", `${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}`) : ""}
       ${t.verified ? row("Kontrol", esc(t.verifiedBy || "")) : ""}
       ${t.ooo || t.guest ? row("Oda", `${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}`) : ""}
+      ${(n => n > 1 ? row("Tekrar", `Son ${REPEAT_DAYS} günde ${/^\d{1,5}[A-Za-z]?$/.test(t.room) ? "bu odada" : "bu alanda"} açılan <b>${n}.</b> ${esc(t.cat)} işi`) : "")(repeatNo(t))}
       <div class="dc-foot">Bildiren: ${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}<br>Açılış: ${esc(fmt(t.createdAt))}</div>
     </div>
     <h3 class="section-t">Geçmiş</h3>
@@ -1315,6 +1342,7 @@ function openNew(t){
   $("#fPrio").innerHTML = Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === (t ? prioOf(t) : "orta"))).join("");
   ["#fRoom", "#fDesc"].forEach(s => $(s).value = "");
   $("#fOoo").checked = false; $("#fGuest").checked = false; $("#fErr").hidden = true; $("#fSubmit").disabled = false;
+  $("#fDup").hidden = true; dupOk = "";
   $("#fItem").value = ""; draftItems = []; dueTouched = false;
   $("#ovNew h2").textContent = t ? "Yapılacak İşi Güncelle" : "Yapılacak İş";
   $("#fSubmit").textContent = t ? "Güncelle" : "İşi kaydet";
@@ -1342,6 +1370,21 @@ $("#fDel").addEventListener("click", () => {
   if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Eminim, kaydı sil"; return; }
   const id = editId; editId = null; closeOv("#ovNew"); remove(id);
 });
+let dupOk = "";   // kullanıcının "Yine de kaydet" dediği yer|departman|kategori
+// Açık benzer işler: veritabanı fonksiyonu (başka departmanların açtığı işleri de bulur); yoksa görülebilen işler.
+async function findDupes(room, dept, cat){
+  try {
+    const {data, error} = await sb.rpc("fdos_open_dupes", {p_room: room, p_dept: dept, p_cat: cat});
+    if (!error && Array.isArray(data)) return data.map(r => ({by: r.created_by, at: Number(r.created_at), status: r.status}));
+  } catch(e){}
+  return [...tasks.values()].filter(t => isOpen(t) && t.room === room && t.dept === dept && t.cat === cat)
+    .sort((a, b) => b.createdAt - a.createdAt).map(t => ({by: t.createdBy, at: t.createdAt, status: t.status}));
+}
+// seçim değişince uyarı kalkar
+["#fDept", "#fType", "#fArea", "#fRoom", "#fCat"].forEach(id => $(id).addEventListener("input", () => {
+  if ($("#fDup").hidden) return;
+  $("#fDup").hidden = true; dupOk = ""; $("#fSubmit").textContent = editId ? "Güncelle" : "İşi kaydet";
+}));
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
   const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
@@ -1356,6 +1399,22 @@ $("#newForm").addEventListener("submit", async e => {
     : due < Date.now() - 5 * 60000 && !(editT && due === editT.dueAt) ? "Son tarih geçmişte olamaz." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
+  // Aynı yer, departman ve kategori için açık iş varsa önce uyar; aynı seçimle ikinci basışta kaydet.
+  const dupKey = [room, dept, cat].join("|");
+  if (!editId && room && dupOk !== dupKey){
+    $("#fSubmit").disabled = true;
+    const d = await findDupes(room, dept, cat);
+    $("#fSubmit").disabled = false;
+    if (d.length){
+      const x = d[0], more = d.length > 1 ? ` (toplam ${d.length} açık iş)` : "";
+      $("#fDup").innerHTML = `<b>${esc(placeOf(room))} için açık bir ${esc(DEPTS[dept]?.label || "")} · ${esc(cat)} işi var${more}.</b><br>`
+        + `${esc(x.by || "İsimsiz")} · ${esc(fmt(x.at))} · ${esc(STATUS[x.status] || "")}<br>Aynı işse kaydetme. Farklı bir işse "Yine de kaydet"e bas.`;
+      $("#fDup").hidden = false; $("#fErr").hidden = true;
+      $("#fSubmit").textContent = "Yine de kaydet"; dupOk = dupKey;
+      $("#fDup").scrollIntoView({block: "nearest", behavior: "smooth"});
+      return;
+    }
+  }
   const now = Date.now();
   if (editId){
     const t = tasks.get(editId); if (!t){ closeOv("#ovNew"); return; }
@@ -1387,6 +1446,7 @@ $("#newForm").addEventListener("submit", async e => {
 const TABLE = "fdos_tasks", DONE_DAYS = 30;
 let sb = null, channel = null, signedIn = false, setupMissing = false, fetching = null;
 const whereOf = d => d.room || TYPES[d.type]?.label || "";
+const placeOf = room => /^\d{1,5}[A-Za-z]?$/.test(String(room || "")) ? `Oda ${room}` : String(room || "");
 const sinceMs = () => Date.now() - DONE_DAYS * 86400000;
 const newUuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : newId() + newId();
 const keepRow = d => isOpen(d) || (d.doneAt && d.doneAt >= sinceMs());

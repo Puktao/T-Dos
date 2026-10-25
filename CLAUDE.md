@@ -71,11 +71,12 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Liste.
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
+   - **Tekrar kayıt uyarısı:** Yeni işte (güncellemede değil) Kaydet'e basınca aynı oda/alan + departman + kategori için açık iş varsa formda sarı uyarı çıkar (kim, ne zaman, durum), düğme "Yine de kaydet" olur; ikinci basışta kaydeder. Seçim değişince uyarı kalkar. Veritabanında `fdos_open_dupes(p_room, p_dept, p_cat)` (`schema.sql` 14. bölüm, security definer: kişinin göremediği işleri de bulur, yalnızca kim/ne zaman/durum döner); fonksiyon yoksa görülebilen işlere bakılır. Satınalma (oda yok) kontrol edilmez.
    - **Kişiye atama yok.** İş yalnızca departmana atanır ("Departman" = atanan departman). Departmanı değiştirmek için işi açan kişi ya da yönetici detaydaki Güncelle ile formu açar.
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Bir iş yalnızca **atandığı departmana** ve **işi açan kişiye** görünür; başka departman göremez. Yönetici her şeyi görür. Hem ekranda (`canSee()`) hem veritabanında (`fdos_can_see(data)` RLS kuralı, `schema.sql` 8. bölüm: okuma, güncelleme, silme) uygulanır. İşi açan kişi `createdUid` ile, eski kayıtlarda `createdBy` adıyla tanınır.
 10. **İş detayı yalnızca görüntüleme ekranıdır.** Hiçbir alan detayda düzenlenmez.
-   - Ayrı kutu yok: detay ekranının zemini aciliyet kutularının (kartların) rengiyle aynıdır (geçiş yok); kartlardaki soldaki renkli çentik burada ekranın tepesinde yatay şerittir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (yalnızca tarih; geçmişse kırmızı), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
+   - Ayrı kutu yok: detay ekranının zemini aciliyet kutularının (kartların) rengiyle aynıdır (geçiş yok); kartlardaki soldaki renkli çentik burada ekranın tepesinde yatay şerittir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (yalnızca tarih; geçmişse kırmızı), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Aynı yerde tekrarlıyorsa **Tekrar** satırı ("Son 30 günde bu odada açılan 3. Klima / ısıtma işi"). Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
    - İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici: başlıkta ✕ yanında **Güncelle** (`canEdit(t)`). Basınca iş, verileriyle **Yapılacak İş formunda** açılır (başlık "Yapılacak İşi Güncelle", düğme "Güncelle"); kayıtta yalnızca değişen alanlar yazılır, geçmişe "Güncelledi: …" düşer. Tamamlanmış işte formda "Kaydı sil" çıkar.
    - İşin atandığı departman (`inDept(t)`): Güncelle yok. Yalnızca "Durumu değiştir" açılır listesi ve liste maddelerini onaylama; ikisi de anında kaydedilir. Kartlardaki durum düğmeleri (Tamamlandı, Beklemeye al, Devam et; **"Üstlen" yok**, yeni işin kartında düğme yoktur) da yalnızca bu departmanda çıkar; "Detay" düğmesi yok (karta dokununca detay açılır); düğmesi olmayan kartta düğme satırı hiç görünmez.
    - **"Kontrol edildi" yalnızca işi atayan (açan) kişide ve yöneticide** (`canCheck(t)`; yönetici her işte kullanır, başkasında görünmez). Onaylanan iş kartı **yeşil** olur (`.card.done.verified`, detay ekranı da yeşil). **"Yeniden aç"** kartta "Tamamlandı" durum yazısıyla aynı satırda, en sağda durur ("KONTROL EDİLDİ" etiketi "Bitti" satırının sağında); "Kontrol edildi" düğmesi onun altında, sağda; işin atandığı departman, işi açan kişi ve yönetici kullanır (`canVerify(t)`).
@@ -88,6 +89,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - Sade satırlar: numara ve renkli kutu yok.
    - Satır sağında ✕ ile silme.
    - Tüm kalemler tiklenmeden iş "Tamamlandı" yapılamaz.
+
+12. **Tekrarlayan arıza uyarısı** (`repeatNo(t)`, `REPEAT_DAYS = 30`): aynı `room` + `type` + `cat` için son 30 günde açılan kaçıncı iş olduğu sayılır; 2 ve üstüyse kartta `30 GÜNDE 3. KEZ` etiketi (`.flag.rep`), detayda Tekrar satırı, Rapor'da "Tekrarlayan arızalar (son 30 gün)" paneli (en fazla 8 satır, raporun kapsamına göre). Yeni iş açmaz, yalnızca uyarır ("tekrarlayan işler" özelliği değildir). Sayım kişinin görebildiği işlerle yapılır.
 
 11. **Rapor:** Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
@@ -112,6 +115,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
 - [x] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırıldı.
 - [x] `schema.sql` 13. bölüm (iş kaydı koruması) çalıştırıldı; tetikleyici var, uygulamada deneme sorunsuz (kullanıcı doğruladı).
+- [ ] `schema.sql` 14. bölüm (`fdos_open_dupes`) Supabase'de çalıştırılacak.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları

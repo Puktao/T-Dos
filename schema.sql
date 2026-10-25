@@ -453,3 +453,26 @@ revoke all on function public.fdos_tasks_guard() from public, anon, authenticate
 drop trigger if exists fdos_tasks_guard on public.fdos_tasks;
 create trigger fdos_tasks_guard before insert or update on public.fdos_tasks
   for each row execute function public.fdos_tasks_guard();
+
+-- 14) Tekrar kayıt uyarısı: aynı oda/alan, departman ve kategori için açık iş var mı?
+--     Başka departmanın açtığı ve kişinin göremediği işleri de bulur; ayrıntı vermez, yalnızca kim, ne zaman, durum.
+create or replace function public.fdos_open_dupes(p_room text, p_dept text, p_cat text)
+returns table (created_by text, created_at bigint, status text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select t.data->>'createdBy', ((t.data->>'createdAt')::numeric)::bigint, t.status
+    from public.fdos_tasks t
+   where exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
+     and coalesce(p_room, '') <> ''
+     and t.status in ('yeni', 'devam', 'beklemede')
+     and t.data->>'room' = p_room
+     and t.data->>'dept' = p_dept
+     and t.data->>'cat'  = p_cat
+   order by 2 desc
+   limit 5;
+$$;
+revoke all on function public.fdos_open_dupes(text, text, text) from public, anon;
+grant execute on function public.fdos_open_dupes(text, text, text) to authenticated;
