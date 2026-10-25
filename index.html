@@ -1462,6 +1462,8 @@ document.addEventListener("visibilitychange", () => {
   hiddenAt = 0;
 });
 addEventListener("online", () => refetch());
+// Telefonda canlı bağlantı sessizce kopabilir; ekran açıkken 5 dakikada bir liste tazelenir.
+setInterval(() => { if (document.visibilityState === "visible") refetch(); }, 5 * 60000);
 
 /* ---------- writes (Supabase) ---------- */
 function writeError(e){
@@ -1484,8 +1486,9 @@ async function patch(id, fields, msg){
   const {id: _drop, ...rest} = {...t, ...body};
   applyRow({id, data: rest}, true);
   try {
-    const {error} = await sb.rpc("fdos_patch_task", {p_id: id, p_patch: body});
+    const {data, error} = await sb.rpc("fdos_patch_task", {p_id: id, p_patch: body});
     if (error){ writeError(error); refetch(); }
+    else if (data === false){ toast("Kaydedilemedi: bu iş başka departmana aktarılmış ya da silinmiş."); refetch(); }
   } catch(e){ writeError(e); refetch(); }
 }
 async function remove(id){

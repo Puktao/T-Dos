@@ -16,9 +16,9 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Veritabanı:** `schema.sql` (birden fazla çalıştırılabilir)
   - Tablo `public.fdos_tasks(id text pk, data jsonb, status gen., done_at gen. bigint, created_at, updated_at)`.
   - RLS: yalnızca `authenticated`. Okuma ve güncelleme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme herkes. Silme `fdos_can_delete(data)`: işi açan kişi (onaylanmamış işte) ve yönetici. `anon` erişimi yok.
-  - `fdos_patch_task(p_id, p_patch jsonb)` → `data = data || p_patch`. Üst düzey alanları birleştirir; güncellemeler bununla yapılır.
+  - `fdos_patch_task(p_id, p_patch jsonb)` → `data = data || p_patch`, **boolean döner** (iş görünmüyorsa `false`; uygulama "başka departmana aktarılmış ya da silinmiş" uyarısı verir). Üst düzey alanları birleştirir; güncellemeler bununla yapılır. Dönüş türü değiştiği için 3. bölüm fonksiyonu önce `drop` eder.
   - Realtime: tablo `supabase_realtime` yayınında.
-- **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda ve internet geri geldiğinde `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
+- **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda, internet geri geldiğinde ve ekran açıkken 5 dakikada bir `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
 - **Hızlı açılış:** Son görülen işler, profil (`me`) ve listeler cihazda `localStorage["fdos.snap"]` içinde saklanır (`saveSnap`, `loadSnap`). Açılışta önce bunlar gösterilir, sunucu verisi gelince yerine geçer. Oturum kapanınca ya da başka hesapla girilince silinir. Oturum doğrulanana kadar (`authReady = false`) yazma yapılmaz, "Bağlanıyor…" uyarısı çıkar.
 - **Giriş:** Supabase Auth, e-posta ve şifre. Kayıt (sign-up) kapalı, kullanıcıları yönetici panelden ekler. "Şifremi unuttum" → `resetPasswordForEmail` → `PASSWORD_RECOVERY` olayında "Yeni şifre" ekranı açılır.
 - **Kimlik:** Ad, departman ve rol `public.fdos_profiles` tablosundan gelir (hesaba bağlı). Personel kendi kaydını değiştiremez; yönetici atar. Kayıtlarda kullanıcı id'si değil ad yazılır (`createdBy`, `log.by`). Profil yüklenene kadar (`me = null`) hiçbir iş gösterilmez ve değiştirilemez ("İşler yükleniyor"). Eski "cihazda ad/departman seç" düzeni (`localStorage["oia.me"]`) ve salt okunur mod kaldırıldı.
@@ -102,7 +102,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 6. bölüm (kullanıcı ekleme fonksiyonu) kuruldu.
 - [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
 - [x] `schema.sql` 8. bölüm (görünürlük kuralı) kuruldu.
-- [ ] `schema.sql` 9. bölüm (yalnızca Tuncer yönetici), 10. bölüm (kullanıcı silme) ve 11. bölüm (iş silme kuralı) için dosya yeniden çalıştırılacak.
+- [x] `schema.sql` 9–11. bölümler kuruldu (25/10/26 dışarıdan doğrulandı: fonksiyonlar var, `anon` erişimi kapalı, sign-up kapalı).
+- [ ] `schema.sql` yeniden çalıştırılacak: `fdos_patch_task` artık boolean dönüyor (çalıştırılmazsa uygulama eskisi gibi çalışır, yalnızca bu uyarı çıkmaz).
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.

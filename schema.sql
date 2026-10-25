@@ -30,15 +30,21 @@ create policy "fdos silme"      on public.fdos_tasks for delete to authenticated
 
 -- 3) Bir işin yalnızca değişen alanlarını güncelleyen fonksiyon
 --    (iki kişi aynı işin farklı alanlarını değiştirirse ikisi de korunur)
-create or replace function public.fdos_patch_task(p_id text, p_patch jsonb)
-returns void
+--    Kayıt değiştiyse true döner; iş artık görünmüyorsa (başka departmana aktarılmış, silinmiş) false.
+drop function if exists public.fdos_patch_task(text, jsonb);
+create function public.fdos_patch_task(p_id text, p_patch jsonb)
+returns boolean
 language sql
 security invoker
 set search_path = public
 as $$
-  update public.fdos_tasks
-     set data = data || p_patch, updated_at = now()
-   where id = p_id;
+  with u as (
+    update public.fdos_tasks
+       set data = data || p_patch, updated_at = now()
+     where id = p_id
+    returning 1
+  )
+  select exists (select 1 from u);
 $$;
 revoke all on function public.fdos_patch_task(text, jsonb) from public, anon;
 grant execute on function public.fdos_patch_task(text, jsonb) to authenticated;
