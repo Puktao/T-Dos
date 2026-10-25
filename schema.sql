@@ -418,3 +418,38 @@ drop policy if exists "fdos ekleme" on public.fdos_tasks;
 create policy "fdos ekleme" on public.fdos_tasks for insert to authenticated
   with check ( exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
                and data->>'createdUid' = auth.uid()::text );
+
+-- 13) İş kaydının korunması
+--     a) "Bildiren" adı ve departmanı, işi açan kişinin profilinden yazılır (uygulamanın gönderdiği ada güvenilmez).
+--     b) İşi kimin açtığı sonradan değiştirilemez.
+--     c) Kontrolü onaylanmış iş sabittir: yalnızca "Yeniden aç" (onayın kaldırılması) yapılabilir.
+--     Supabase panelinden (SQL Editor, Table Editor) yapılan değişiklikler bu kurala takılmaz.
+create or replace function public.fdos_tasks_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare p public.fdos_profiles;
+begin
+  if auth.uid() is null then return new; end if;
+  if tg_op = 'INSERT' then
+    select * into p from public.fdos_profiles where user_id = auth.uid();
+    if found then
+      new.data := new.data || jsonb_build_object('createdBy', p.name, 'createdDept', p.dept, 'createdUid', auth.uid()::text);
+    end if;
+    return new;
+  end if;
+  if coalesce((old.data->>'verified')::boolean, false) and coalesce((new.data->>'verified')::boolean, false) then
+    raise exception 'Kontrolü onaylanmış iş değiştirilemez. Önce "Yeniden aç" de.';
+  end if;
+  new.data := jsonb_set(jsonb_set(jsonb_set(new.data,
+                '{createdBy}',   coalesce(old.data->'createdBy',   'null'::jsonb)),
+                '{createdDept}', coalesce(old.data->'createdDept', 'null'::jsonb)),
+                '{createdUid}',  coalesce(old.data->'createdUid',  'null'::jsonb));
+  return new;
+end $$;
+revoke all on function public.fdos_tasks_guard() from public, anon, authenticated;
+drop trigger if exists fdos_tasks_guard on public.fdos_tasks;
+create trigger fdos_tasks_guard before insert or update on public.fdos_tasks
+  for each row execute function public.fdos_tasks_guard();
