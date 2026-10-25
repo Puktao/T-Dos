@@ -107,7 +107,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `tuncer@feronya.com` Supabase'de var; profili Tuncer · yonetici · admin (kullanıcı doğruladı).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
-- [ ] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırılacak.
+- [x] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırıldı.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
