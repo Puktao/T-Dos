@@ -411,3 +411,10 @@ grant execute on function public.fdos_can_delete(jsonb) to authenticated;
 
 drop policy if exists "fdos silme" on public.fdos_tasks;
 create policy "fdos silme" on public.fdos_tasks for delete to authenticated using (public.fdos_can_delete(data));
+
+-- 12) Ekleme: yalnızca profili olan (silinmemiş) kullanıcı iş açar, iş kendi adına kaydedilir.
+--     (2. bölümdeki "herkes ekler" kuralının yerine geçer. Silinen kullanıcının telefonunda açık kalan oturum yeni iş açamaz.)
+drop policy if exists "fdos ekleme" on public.fdos_tasks;
+create policy "fdos ekleme" on public.fdos_tasks for insert to authenticated
+  with check ( exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
+               and data->>'createdUid' = auth.uid()::text );

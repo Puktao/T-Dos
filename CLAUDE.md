@@ -15,7 +15,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Bağlantı:** `supabase-config.js` → `window.FDOS_SUPABASE = {url, anonKey}`. Yalnızca anon / publishable anahtar. **service_role / secret anahtar asla depoya girmez.**
 - **Veritabanı:** `schema.sql` (birden fazla çalıştırılabilir)
   - Tablo `public.fdos_tasks(id text pk, data jsonb, status gen., done_at gen. bigint, created_at, updated_at)`.
-  - RLS: yalnızca `authenticated`. Okuma ve güncelleme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme herkes. Silme `fdos_can_delete(data)`: işi açan kişi (onaylanmamış işte) ve yönetici. `anon` erişimi yok.
+  - RLS: yalnızca `authenticated`. Okuma ve güncelleme `fdos_can_see(data)` ile sınırlı (atanan departman, işi açan, yönetici); ekleme yalnızca profili olan kullanıcı ve yalnızca kendi adına (`createdUid = auth.uid()`, `schema.sql` 12. bölüm; silinen kullanıcının açık kalan oturumu iş açamaz). Silme `fdos_can_delete(data)`: işi açan kişi (onaylanmamış işte) ve yönetici. `anon` erişimi yok.
   - `fdos_patch_task(p_id, p_patch jsonb)` → `data = data || p_patch`, **boolean döner** (iş görünmüyorsa `false`; uygulama "başka departmana aktarılmış ya da silinmiş" uyarısı verir). Üst düzey alanları birleştirir; güncellemeler bununla yapılır. Dönüş türü değiştiği için 3. bölüm fonksiyonu önce `drop` eder.
   - Realtime: tablo `supabase_realtime` yayınında.
 - **Veri akışı:** Açık işler (`status in (yeni,devam,beklemede)`) ve son 30 günde tamamlananlar (`done_at >= now-30g`) çekilir. Realtime kanalı `fdos-tasks` ile değişiklikler uygulanır. Kanal yeniden bağlandığında, sekme görünür olduğunda, internet geri geldiğinde ve ekran açıkken 5 dakikada bir `refetch()` çalışır. Yazmalar önce yerelde uygulanır (`applyRow(..., true)`), hata olursa `refetch()` ile geri alınır.
@@ -107,6 +107,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `tuncer@feronya.com` Supabase'de var; profili Tuncer · yonetici · admin (kullanıcı doğruladı).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
+- [ ] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırılacak.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
