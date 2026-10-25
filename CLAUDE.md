@@ -106,7 +106,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `fdos_patch_task` boolean sürümü kuruldu (kullanıcı doğruladı: `pg_get_function_result` → boolean).
 - [x] `tuncer@feronya.com` Supabase'de var; profili Tuncer · yonetici · admin (kullanıcı doğruladı).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
-- [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
+- [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
