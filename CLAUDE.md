@@ -92,6 +92,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 11. **Rapor:** Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
 ## Açık konular
+- **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler. İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
+- Satışa kapalı odalar listesi: konuşuldu, **karar verilmedi, yapılmayacak** (kullanıcı "sakın yapma" dedi). Önerilen yer Anasayfa'da iki kutunun altında ince şerit; engel: görünürlük kuralı yüzünden Resepsiyon başka departmana atanmış OOO işleri göremez, veritabanı istisnası gerekir.
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **şimdilik kenara alındı**: önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
 
 ## Kurulum durumu
