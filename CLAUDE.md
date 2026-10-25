@@ -115,7 +115,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
 - [x] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırıldı.
 - [x] `schema.sql` 13. bölüm (iş kaydı koruması) çalıştırıldı; tetikleyici var, uygulamada deneme sorunsuz (kullanıcı doğruladı).
-- [ ] `schema.sql` 14. bölüm (`fdos_open_dupes`) Supabase'de çalıştırılacak.
+- [x] `schema.sql` 14. bölüm (`fdos_open_dupes`) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
