@@ -103,7 +103,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 7. bölüm (liste tabloları) kuruldu.
 - [x] `schema.sql` 8. bölüm (görünürlük kuralı) kuruldu.
 - [x] `schema.sql` 9–11. bölümler kuruldu (25/10/26 dışarıdan doğrulandı: fonksiyonlar var, `anon` erişimi kapalı, sign-up kapalı).
-- [ ] `schema.sql` yeniden çalıştırılacak: `fdos_patch_task` artık boolean dönüyor (çalıştırılmazsa uygulama eskisi gibi çalışır, yalnızca bu uyarı çıkmaz).
+- [x] `fdos_patch_task` boolean sürümü kuruldu (kullanıcı doğruladı: `pg_get_function_result` → boolean).
 - [ ] `tuncer@feronya.com` Supabase'de var mı doğrulanacak (yoksa Add user, Auto Confirm; ardından `schema.sql` yeniden).
 - [x] `supabase-config.js` dolduruldu (proje `tkfyiunfcclwczvpbdha`, publishable anahtar).
 - [ ] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs alanlarına `https://puktao.github.io/T-Dos/` yazılacak. Dışarıdan doğrulanamıyor.
