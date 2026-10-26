@@ -1,6 +1,6 @@
 # F-Do’s – Proje rehberi (Claude Code için)
 
-Otel içi iş atama uygulaması. Resepsiyon, Kat Hizmetleri, Teknik, Satınalma ve Mutfak arasında arıza, temizlik, müşteri, satınalma ve mutfak taleplerini açma, atama ve takip etme.
+Otel içi iş atama uygulaması. Resepsiyon, Kat Hizmetleri, Teknik, Satınalma, Mutfak ve Servis arasında arıza, temizlik, müşteri, satınalma ve mutfak taleplerini açma, atama ve takip etme.
 Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'daki tasarım konuşmasında verilen kararların özetidir.
 
 ## Kullanıcıyla çalışma
@@ -42,8 +42,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - Okuma: giriş yapan herkes. Yazma: yalnızca yönetici (`fdos_is_admin()`); Supabase paneli bu kurala takılmaz.
 
 ## Sabitler (index.html içinde, tablolar yoksa yedek)
-- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak, yonetici (yalnızca Tuncer).
-- `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak. Kategoriler türün içinde tanımlı.
+- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak, servis (rozet SRV), yonetici (yalnızca Tuncer).
+- `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak · Servis Talebi→servis. "Oda servisi" (yemek hazırlığı) Mutfak'ta; Servis'te "Oda servisi teslim / tepsi toplama" var. Kategoriler türün içinde tanımlı.
 - `AREAS`: Lobi, Restoran, Bar, Mutfak, Toplantı Odası, Koridor. Bunlara ek olarak "Oda No" seçeneği var; seçilince yanındaki oda numarası alanı açılır.
 
 ## Kullanıcının kesinleştirdiği arayüz kararları
@@ -125,6 +125,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 13. bölüm (iş kaydı koruması) çalıştırıldı; tetikleyici var, uygulamada deneme sorunsuz (kullanıcı doğruladı).
 - [x] `schema.sql` 14. bölüm (`fdos_open_dupes`) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
 - [ ] `schema.sql` 15. bölüm (`fdos_sorumlular`) Supabase'de çalıştırılacak.
+- [ ] Servis departmanı Supabase tablolarına eklenecek (7. bölümdeki başlangıç değerleri; kullanıcıya kısa SQL verildi).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
