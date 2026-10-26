@@ -481,7 +481,7 @@ as $$
     from public.fdos_tasks t
    where exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
      and coalesce(p_room, '') <> ''
-     and t.status in ('yeni', 'devam', 'beklemede')
+     and t.status in ('yeni', 'beklemede', 'dnd', 'devam')
      and t.data->>'room' = p_room
      and t.data->>'dept' = p_dept
      and t.data->>'cat'  = p_cat
@@ -494,3 +494,7 @@ grant execute on function public.fdos_open_dupes(text, text, text) to authentica
 -- 15) Aciliyet ve son tarih kaldırıldı (26/10/26): işlerdeki "prio" ve "dueAt" alanları silinir.
 --     Geçmiş (log) yazılarına dokunulmaz.
 update public.fdos_tasks set data = data - 'prio' - 'dueAt' where data ?| array['prio', 'dueAt'];
+
+-- 16) Durumlar (26/10/26): Yeni, Beklemede, DND Kartlı (yalnızca oda), Tamamlandı. "Devam ediyor" kalktı;
+--     bu durumdaki işler "Yeni" yapılır. 14. bölümdeki açık iş kontrolü "dnd" durumunu da kapsar.
+update public.fdos_tasks set data = jsonb_set(data, '{status}', '"yeni"') where status = 'devam';

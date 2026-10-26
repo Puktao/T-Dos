@@ -135,6 +135,7 @@ button{font:inherit;color:inherit}
 .flag{font:600 10px/1.6 var(--font-mono);letter-spacing:.05em;border:1px solid currentColor;border-radius:3px;padding:0 5px}
 .flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)} .flag.rep{color:var(--ink)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.card .by{align-self:flex-end;font-size:11.5px;color:var(--muted);text-align:right;margin-top:-2px}   /* açık işte sağ altta bildirenin adı */
 .meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
 .card.done .actions{justify-content:flex-end}   /* "Kontrol edildi" sağda, "Yeniden aç"ın altında */
 .card.done .actions [data-act="verify"]{padding:6px 11px;font-size:13px}
@@ -469,7 +470,10 @@ const TYPES = {
   servis:{label:"Servis Talebi", dept:"servis", cats:["Masa / salon hazırlığı","Oda servisi teslim / tepsi toplama","Misafir talebi (restoran / bar)","Toplantı / etkinlik servisi","Ekipman / malzeme eksik","Diğer"]},
   muhasebe:{label:"Muhasebe Talebi", dept:"muhasebe", cats:["Fatura / hesap düzeltme","Ödeme","Avans / masraf","Diğer"]}
 };
-const STATUS = {yeni:"Yeni", devam:"Devam ediyor", beklemede:"Beklemede", tamam:"Tamamlandı"};
+const STATUS = {yeni:"Yeni", beklemede:"Beklemede", dnd:"DND Kartlı", tamam:"Tamamlandı", devam:"Devam ediyor"};   // "devam" yalnızca eski kayıtlar için, seçilemez
+const isRoomNo = r => /^\d{1,5}[A-Za-z]?$/.test(String(r || ""));
+// Seçilebilen durumlar: "DND Kartlı" yalnızca oda numarası olan işte
+const statusOpts = t => ["yeni", "beklemede", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"].concat(STATUS[t.status] && !["yeni","beklemede","dnd","tamam"].includes(t.status) ? [t.status] : []);
 const AREAS = ["Lobi","Restoran","Bar","Mutfak","Toplantı Odası","Koridor"];
 const TITLES = {ana:"Anasayfa", yapilacak:"Yapılacaklar", tamamlanan:"Tamamlananlar", rapor:"Rapor"};
 
@@ -578,7 +582,7 @@ $("#soundBtn").addEventListener("click", () => {
 const clockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
 function plate(room, dept){
   if (!room) return `<div class="plate"><small>TALEP</small><b>${esc(DEPTS[dept]?.short || "—")}</b></div>`;
-  const r = String(room), num = /^\d{1,5}[A-Za-z]?$/.test(r), fl = floorOf(r);
+  const r = String(room), num = isRoomNo(r), fl = floorOf(r);
   if (fl) return `<div class="plate"><small>KORİDOR</small><b class="${fl.length > 3 ? "long" : ""}">${esc(fl)}</b><small>KAT</small></div>`;
   return `<div class="plate"><small>${num ? "ODA" : "ALAN"}</small><b class="${r.length > 4 ? "long" : ""}">${esc(r)}</b></div>`;
 }
@@ -591,9 +595,9 @@ function actionsFor(t){
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
   if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
-    case "yeni": return "";   // "Üstlen" yok; durum detaydan ya da sonraki düğmelerden değişir
-    case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");
-    case "beklemede": return b("resume","Devam et") + b("done","Tamamlandı","primary");
+    case "yeni": return "";   // yeni işin kartında düğme yok; durum detaydan değişir
+    case "beklemede": case "dnd": return b("done","Tamamlandı","primary");
+    case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");   // eski kayıt
     case "tamam": return t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary");   // "Yeniden aç" durum satırında
   }
   return "";
@@ -628,6 +632,7 @@ function card(t){
         ${!isOpen(t) && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
       </div>
       ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
+      ${isOpen(t) ? `<div class="by">Bildiren: ${esc(t.createdBy || "İsimsiz")}</div>` : ""}
     </div>
   </article>`;
   if (!canDelete(t)) return art;
@@ -670,7 +675,7 @@ const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
 const FILTERS = {
   todo: [
-    {key:"status", label:"Durum", opts: () => [["all","Tümü"],["yeni","Yeni"],["devam","Devam ediyor"],["beklemede","Beklemede"]]}
+    {key:"status", label:"Durum", opts: () => [["all","Tümü"],["yeni","Yeni"],["beklemede","Beklemede"],["dnd","DND Kartlı"]]}
   ],
   done: [
     {key:"check", label:"Durum", opts: () => [["all","Tümü"],["kontrol","Kontrol bekleyen"],["ok","Kontrol edilen"]]}
@@ -912,13 +917,11 @@ $("#screen").addEventListener("click", e => {
   const a = b.dataset.act;
   if (a === "verify" ? !canCheck(t) : a === "reopen" ? !canVerify(t) : !inDept(t)) return;
   requireMe(() => {
-    if (a === "take") patch(id, {status: "devam"}, "Üstlendi, çalışmaya başladı");
     if (a === "done"){
       if (openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); openDetail(id); return; }
       patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name}, "Tamamlandı olarak işaretledi");
     }
     if (a === "hold") patch(id, {status: "beklemede"}, "Beklemeye aldı");
-    if (a === "resume") patch(id, {status: "devam"}, "Çalışmaya devam ediyor");
     if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
     if (a === "reopen"){
       // yeniden açılan işte listedeki onaylar da kalkar
@@ -943,7 +946,7 @@ function renderDetail(){
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time><b class="by">${esc(l.by)}</b>: ${esc(l.msg)}</li>`).join("");
   const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
   const status = inDept(t)
-    ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
+    ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${statusOpts(t).map(k => opt(k, STATUS[k], k === t.status)).join("")}</select></div>`
     : `<b>${esc(STATUS[t.status] || "")}</b>`;
   el.className = "sheet " + (isOpen(t) ? "open" : "done");
   el.innerHTML = `
@@ -1316,9 +1319,10 @@ $("#newForm").addEventListener("submit", async e => {
     const t = tasks.get(editId); if (!t){ closeOv("#ovNew"); return; }
     const items = draftItems.map(x => { const o = (t.items || []).find(y => y.id === x.id); return o && !!o.done === !!x.done ? x : {...x, by: x.done ? who() : null, at: x.done ? now : null}; });
     const next = {type, cat, dept, room, desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked, items};
-    const names = {type: "tür", cat: "kategori", dept: "departman", room: "alan/oda", desc: "açıklama", ooo: "satışa kapalı", guest: "misafir odada", items: "liste"};
+    const names = {type: "tür", cat: "kategori", dept: "departman", room: "alan/oda", desc: "açıklama", ooo: "satışa kapalı", guest: "misafir odada", items: "liste", status: "durum"};
     const cur = {...t, ooo: !!t.ooo, guest: !!t.guest, items: t.items || [], desc: t.desc || "", room: t.room || ""};
     const f = {}; Object.keys(next).forEach(k => { if (JSON.stringify(next[k]) !== JSON.stringify(cur[k])) f[k] = next[k]; });
+    if ("room" in f && t.status === "dnd" && !isRoomNo(room)) f.status = "yeni";   // "DND Kartlı" yalnızca odada geçerli
     if (!Object.keys(f).length){ closeOv("#ovNew"); toast("Değişiklik yok."); return; }
     if (t.status === "tamam" && items.some(x => !x.done)){ $("#fErr").textContent = "İş tamamlanmış; listedeki tüm kalemler onaylı kalmalı."; $("#fErr").hidden = false; return; }
     closeOv("#ovNew"); editId = null;
@@ -1380,7 +1384,7 @@ function refetch(){
   fetching = (async () => {
     try {
       const [a, b] = await Promise.all([
-        sb.from(TABLE).select("id,data").in("status", ["yeni", "devam", "beklemede"]).limit(1000),
+        sb.from(TABLE).select("id,data").in("status", ["yeni", "beklemede", "dnd", "devam"]).limit(1000),
         sb.from(TABLE).select("id,data").gte("done_at", sinceMs()).order("done_at", {ascending: false}).limit(1000)
       ]);
       const err = a.error || b.error;
