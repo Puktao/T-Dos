@@ -117,7 +117,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase'de Sorumlu kalıntısı silindi (dışarıdan doğrulandı: `fdos_sorumlular` tablosu yok).
 - [x] Servis departmanı Supabase tablolarına eklendi (kullanıcı doğruladı: Servis · SRV · Servis Talebi · 6 kategori).
 - [x] `schema.sql` 15. bölüm (aciliyet ve son tarih verisini silme) çalıştırıldı (kullanıcı bildirdi).
-- [ ] Muhasebe departmanı Supabase tablolarına eklenecek (kullanıcıya kısa SQL verildi).
+- [x] Muhasebe departmanı Supabase tablolarına eklendi (kullanıcı doğruladı).
 - [x] `schema.sql` 16. bölüm ("Devam ediyor" işleri "Yeni" yapma, `fdos_open_dupes` dnd ile) çalıştırıldı (kullanıcı bildirdi: Success).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
