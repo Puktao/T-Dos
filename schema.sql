@@ -484,9 +484,3 @@ as $$
 $$;
 revoke all on function public.fdos_open_dupes(text, text, text) from public, anon;
 grant execute on function public.fdos_open_dupes(text, text, text) to authenticated;
-
--- 15) Kaldırıldı: "Sorumlu" özelliği (yanlış anlaşılma; departman içinde kişi seçimi yapılmayacak).
---     Daha önce kurulduysa tablo ve fonksiyon silinir, işlerdeki "sorumlu" alanı temizlenir.
-drop table if exists public.fdos_sorumlular;
-drop function if exists public.fdos_my_dept();
-update public.fdos_tasks set data = data - 'sorumlu' where data ? 'sorumlu';

@@ -96,7 +96,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 
 ## Açık konular
 - Muhasebe departmanı: konuşuldu, **şimdilik eklenmedi** (kullanıcı ihtiyaca göre soracak). Önerilen: departman `muhasebe` (rozet MUH, `alan_gerekli = false`), tür "Muhasebe Talebi", kategoriler Fatura / hesap düzeltme, Ödeme, Avans / masraf, Diğer. Kod gerekmez, tablolara satır eklenir.
-- **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler, **departman içinde Sorumlu (kişi) seçimi** (yapıldı, yanlış anlaşıldığı için 26/10/26 kaldırıldı; `schema.sql` 15. bölüm artık tabloyu ve fonksiyonu siler). İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
+- **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler, **departman içinde Sorumlu (kişi) seçimi** (yapıldı, yanlış anlaşıldığı için 26/10/26 kaldırıldı; kod ve `schema.sql` bölümü tamamen silindi). İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
 - Satışa kapalı odalar listesi: konuşuldu, **karar verilmedi, yapılmayacak** (kullanıcı "sakın yapma" dedi). Önerilen yer Anasayfa'da iki kutunun altında ince şerit; engel: görünürlük kuralı yüzünden Resepsiyon başka departmana atanmış OOO işleri göremez, veritabanı istisnası gerekir.
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **şimdilik kenara alındı**: önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
 
@@ -117,7 +117,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırıldı.
 - [x] `schema.sql` 13. bölüm (iş kaydı koruması) çalıştırıldı; tetikleyici var, uygulamada deneme sorunsuz (kullanıcı doğruladı).
 - [x] `schema.sql` 14. bölüm (`fdos_open_dupes`) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
-- [ ] `schema.sql` 15. bölüm (Sorumlu kaldırma: `fdos_sorumlular` ve `fdos_my_dept` silinir) Supabase'de çalıştırılacak.
+- [ ] Supabase'de Sorumlu kalıntısı silinecek (kullanıcıya verilen kod: `drop table if exists public.fdos_sorumlular; drop function if exists public.fdos_my_dept(); update public.fdos_tasks set data = data - 'sorumlu' where data ? 'sorumlu';`).
 - [ ] Servis departmanı Supabase tablolarına eklenecek (7. bölümdeki başlangıç değerleri; kullanıcıya kısa SQL verildi).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
