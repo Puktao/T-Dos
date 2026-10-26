@@ -140,6 +140,8 @@ button{font:inherit;color:inherit}
 .due.over svg{color:var(--acil-ink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted)}
 .dept{font-weight:600;font-size:11.5px;padding:1px 7px;border-radius:4px;border:1px solid var(--line);color:var(--ink)}
+.meta .sor{color:var(--ink)} .meta .sor b{font-weight:700}
+.sadd{display:flex;gap:8px;margin-top:12px} .sadd input{flex:1;min-width:0}
 .st{font-weight:600}
 .flag{font:600 10px/1.6 var(--font-mono);letter-spacing:.05em;border:1px solid currentColor;border-radius:3px;padding:0 5px}
 .flag.ooo{color:var(--acil-ink)} .flag.ok{color:var(--ok)} .flag.rep{color:var(--ink)}
@@ -470,11 +472,11 @@ img{max-width:100%}
   <form class="sheet" id="whoForm" novalidate>
     <div class="sheet-head"><div><h2>Hesabım</h2><p class="sheet-sub">Ad ve departmanı yönetici belirler.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
     <dl class="facts" id="wInfo"></dl>
-    <div class="sheet-foot"><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button></div>
+    <div class="sheet-foot"><button type="button" class="btn" id="sorBtn" hidden>Sorumlular</button><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button></div>
   </form>
 </div>
 
-<!-- Kullanıcılar (yalnızca yönetici) -->
+<!-- Kullanıcılar (yalnızca yönetici) ve Sorumlular (departman ve yönetici) -->
 <div class="overlay" id="ovUsers" hidden><div class="sheet" id="users"></div></div>
 
 <script>
@@ -537,6 +539,7 @@ let loaded = false, dbFailed = false;
 let tasks = new Map();
 let me = null;   // giriş yapan kişinin profili (fdos_profiles)
 let profiles = [], authUser = null, usersMsg = "";
+let sorumlular = [], sorMissing = false;   // fdos_sorumlular: departman içinde işin verildiği kişiler (yalnızca ad)
 const DEF = {
   todo: {q:"", prio:"all", time:"all", status:"all"},
   done: {q:"", check:"kontrol", prio:"all"}
@@ -570,6 +573,9 @@ const locked = t => !isOpen(t) && !!t.verified;
 const canEdit = t => !!me && !locked(t) && !viewOnly(t);
 // İşin atandığı departman detayda yalnızca durumu değiştirir ve listeyi onaylar (anında kaydedilir).
 const inDept = t => !locked(t) && !!(me && me.dept && t.dept === me.dept);
+// Sorumlu adı yalnızca işin atandığı departmanda ve yöneticide görünür.
+const sorSee = t => !!me && (isAdmin() || (!!me.dept && t.dept === me.dept));
+const sorFor = d => sorumlular.filter(x => x.dept === d);
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
 // Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
 const canDelete = t => isAdmin() || (isCreator(t) && !locked(t));
@@ -672,6 +678,7 @@ function card(t){
       ${itemsProg(t)}
       <div class="meta">
         <span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>
+        ${t.sorumlu && sorSee(t) ? `<span class="sor">Sorumlu: <b>${esc(t.sorumlu)}</b></span>` : ""}
         <span class="st">${STATUS[t.status] || ""}</span>
         ${flags}
         ${!isOpen(t) && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
@@ -743,7 +750,7 @@ const FILTERS = {
   ]
 };
 const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
-const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.doneBy, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
+const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.doneBy, t.createdBy, sorSee(t) ? t.sorumlu : "", TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
 function applyTodo(f){
   const now = Date.now(), tEnd = dayStart(now) + 86400000;
   let arr = visTasks().filter(isOpen);
@@ -1041,6 +1048,15 @@ function renderDetail(){
       ${row("Son tarih", due)}
       ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
       ${checklistDetail(t)}
+      ${(() => {
+        // Sorumlu: departmanda tanımlı kişi varsa açılır liste; yoksa (ya da düzenleyemiyorsa) yalnızca ad
+        const list = sorFor(t.dept).map(x => x.ad);
+        if (inDept(t) && list.length){
+          const names = t.sorumlu && !list.includes(t.sorumlu) ? [t.sorumlu, ...list] : list;
+          return row("Sorumlu", `<div class="sel"><select id="dSor" aria-label="Sorumlu seç">${opt("", "Seçilmedi", !t.sorumlu)}${names.map(n => opt(n, n, n === t.sorumlu)).join("")}</select></div>`);
+        }
+        return t.sorumlu && sorSee(t) ? row("Sorumlu", `<b>${esc(t.sorumlu)}</b>`) : "";
+      })()}
       ${row("Durum", status)}
       ${t.doneAt ? row("Bitiş", `${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}`) : ""}
       ${t.verified ? row("Kontrol", esc(t.verifiedBy || "")) : ""}
@@ -1066,6 +1082,8 @@ function setStatus(t, v){
 $("#detail").addEventListener("change", e => {
   const t = detailId && tasks.get(detailId); if (!t || !inDept(t)) return;
   if (e.target.id === "dStatus"){ const v = e.target.value; requireMe(() => setStatus(t, v)); return; }
+  if (e.target.id === "dSor"){ const v = e.target.value || null; if (v === (t.sorumlu || null)) return;
+    requireMe(() => patch(t.id, {sorumlu: v}, v ? `Sorumlu: ${v}` : "Sorumluyu kaldırdı")); return; }
   const c = e.target.closest("[data-item]"); if (!c) return;
   const iid = c.dataset.item, on = c.checked;
   c.closest("li")?.classList.toggle("done", on);
@@ -1083,6 +1101,7 @@ function requireMe(fn){ if (me) return fn(); toast("Profil yükleniyor, birkaç 
 function openWho(){
   if (!me) return;
   $("#usersBtn").hidden = !isAdmin();
+  $("#sorBtn").hidden = !(isAdmin() || me.dept);
   $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
     <dt>Departman</dt><dd>${esc(deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Atanmadı"))}</dd>`;
   openOv("#ovWho");
@@ -1134,6 +1153,7 @@ const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("
 let usersView = "list", userEdit = null, userDelArmed = null;
 function renderUsers(){
   if (usersView === "form") return renderUserForm();
+  if (usersView === "sor") return renderSor();
   const plus = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
   const rows = profiles.map(u => {
     const me0 = u.role === "admin";
@@ -1252,6 +1272,73 @@ const swipeEnd = () => {
 };
 $("#users").addEventListener("pointerup", swipeEnd);
 $("#users").addEventListener("pointercancel", swipeEnd);
+
+/* ---------- sorumlular ---------- */
+// Departman kendi listesini, yönetici departman seçerek hepsini düzenler. Satırı sola kaydırınca "Sil" çıkar.
+let sorDept = "", sorMsg = "";
+async function loadSorumlular(){
+  if (!sb || !signedIn) return;
+  try {
+    const {data, error} = await sb.from("fdos_sorumlular").select("id,dept,ad,sira").order("sira").order("ad");
+    if (error){ sorMissing = /42P01|PGRST205/.test(error.code || "") || /does not exist|could not find the table/i.test(error.message || ""); return; }
+    sorMissing = false; sorumlular = data || [];
+    if (!$("#ovUsers").hidden && usersView === "sor") renderSor();
+    renderAll(); saveSnap();
+  } catch(e){}
+}
+function renderSor(){
+  const admin = isAdmin();
+  if (!admin) sorDept = me?.dept || "";
+  else if (!sorDept || !DEPTS[sorDept] || sorDept === ADMIN_DEPT) sorDept = Object.keys(DEPTS).find(k => k !== ADMIN_DEPT && DEPTS[k].active !== false) || "";
+  const list = sorFor(sorDept);
+  const rows = list.map(x => `<li class="uitem" data-uid="s${x.id}">
+      <div class="uact"><button type="button" class="ua del ${userDelArmed === "s" + x.id ? "armed" : ""}" data-sdel="${x.id}">${userDelArmed === "s" + x.id ? "Eminim" : "Sil"}</button></div>
+      <div class="ufront"><div class="uh"><b>${esc(x.ad)}</b></div></div></li>`).join("");
+  const keep = $("#sAd")?.value || "";
+  $("#users").innerHTML = `
+    <div class="sheet-head"><div><h2>Sorumlular</h2><p class="sheet-sub">Gelen işlerde "Sorumlu" listesinde çıkar. Satırı sola kaydır: sil.</p></div>
+      <button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+    ${admin ? `<div class="field" style="margin-top:12px"><label class="lbl" for="sDept">Departman</label><div class="sel"><select id="sDept">${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === sorDept)).map(([k, v]) => opt(k, v.label, k === sorDept)).join("")}</select></div></div>`
+      : `<p class="muted" style="margin:12px 0 0">${esc(DEPTS[sorDept]?.label || "")}</p>`}
+    ${sorMissing ? `<p class="err">Veritabanı güncel değil: sorumlu tablosu yok. schema.sql dosyasının 15. bölümünü Supabase'de çalıştır.</p>` : `
+    <form class="sadd" id="sForm" novalidate><input type="text" id="sAd" maxlength="40" placeholder="Ad, ör. Ali" autocomplete="off" enterkeyhint="done"><button type="submit" class="btn primary" id="sAdd">Ekle</button></form>`}
+    ${sorMsg ? `<p class="err ${sorMsg.startsWith("✓") ? "ok" : ""}">${esc(sorMsg.replace(/^✓ /, ""))}</p>` : ""}
+    <h3 class="section-t">Tanımlı sorumlular (${list.length})</h3>
+    <ul class="ulist">${rows || `<li class="muted" style="padding:4px 2px">Henüz sorumlu yok. Liste boşken gelen işlerde "Sorumlu" seçimi çıkmaz.</li>`}</ul>`;
+  if ($("#sAd")) $("#sAd").value = keep;
+}
+function openSor(){ sorMsg = ""; closeOv("#ovWho"); usersView = "sor"; userDelArmed = null; $("#users").innerHTML = ""; renderSor(); openOv("#ovUsers"); loadSorumlular(); }
+$("#sorBtn").addEventListener("click", () => { if (me && (isAdmin() || me.dept)) openSor(); });
+$("#users").addEventListener("change", e => { if (e.target.id === "sDept"){ sorDept = e.target.value; sorMsg = ""; userDelArmed = null; $("#sAd") && ($("#sAd").value = ""); renderSor(); } });
+$("#users").addEventListener("submit", async e => {
+  if (e.target.id !== "sForm") return;
+  e.preventDefault();
+  const ad = $("#sAd").value.trim().replace(/\s+/g, " ").slice(0, 40);
+  if (!ad){ sorMsg = "Adı yaz."; return renderSor(); }
+  if (sorFor(sorDept).some(x => lower(x.ad) === lower(ad))){ sorMsg = `${ad} zaten listede.`; return renderSor(); }
+  if (!guard()) return;
+  $("#sAdd").disabled = true;
+  try {
+    const sira = Math.max(0, ...sorFor(sorDept).map(x => x.sira || 0)) + 10;
+    const {error} = await sb.from("fdos_sorumlular").insert({dept: sorDept, ad, sira});
+    if (error){ sorMsg = error.code === "23505" ? `${ad} zaten listede.` : "Eklenemedi: " + createError(error); return renderSor(); }
+    sorMsg = `✓ ${ad} eklendi.`; $("#sAd").value = ""; await loadSorumlular(); renderSor();
+  } catch(err){ sorMsg = "Eklenemedi: " + ((err && err.message) || "bilinmeyen hata"); renderSor(); }
+});
+$("#users").addEventListener("click", async e => {
+  const del = e.target.closest("[data-sdel]"); if (!del) return;
+  const id = Number(del.dataset.sdel), x = sorumlular.find(y => y.id === id); if (!x) return;
+  if (userDelArmed !== "s" + id){ userDelArmed = "s" + id; renderSor(); openSwipe("s" + id); return; }
+  userDelArmed = null;
+  if (!guard()) return;
+  try {
+    const {data, error} = await sb.from("fdos_sorumlular").delete().eq("id", id).select("id");
+    if (error) sorMsg = "Silinemedi: " + createError(error);
+    else if (!data || !data.length) sorMsg = "Silinemedi: bu listeyi düzenleme yetkin yok.";
+    else { sorMsg = `✓ ${x.ad} silindi. Eski işlerde adı görünmeye devam eder.`; sorumlular = sorumlular.filter(y => y.id !== id); renderAll(); }
+  } catch(err){ sorMsg = "Silinemedi: " + ((err && err.message) || "bilinmeyen hata"); }
+  renderSor(); loadSorumlular();
+});
 
 /* ---------- new task (Yapılacak İş) ---------- */
 const opt = (v, l, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(l)}</option>`;
@@ -1490,7 +1577,7 @@ function refetch(){
       const err = a.error || b.error;
       if (err){ listenErr(err); return; }
       tasks = new Map([...(b.data || []), ...(a.data || [])].map(r => [r.id, {id: r.id, ...r.data}]));
-      loaded = true; banner(""); renderAll(); saveSnap(); loadLists(); loadProfiles();
+      loaded = true; banner(""); renderAll(); saveSnap(); loadLists(); loadProfiles(); loadSorumlular();
     } catch(e){ listenErr(e); }
   })().finally(() => { fetching = null; });
   return fetching;
@@ -1621,7 +1708,7 @@ function saveSnap(){
   clearTimeout(snapTimer);
   snapTimer = setTimeout(() => {
     if (!signedIn || !me || !loaded || !authUser) return;
-    const snap = {v: 1, uid: authUser.id, email: authUser.email || "", me, depts: DEPTS, types: TYPES, areas: AREAS, tasks: [...tasks.values()]};
+    const snap = {v: 1, uid: authUser.id, email: authUser.email || "", me, depts: DEPTS, types: TYPES, areas: AREAS, sor: sorumlular, tasks: [...tasks.values()]};
     try { localStorage.setItem(SNAP, JSON.stringify(snap)); }
     catch(e){
       // yer yetmezse geçmiş kayıtları olmadan dene
@@ -1639,18 +1726,19 @@ function loadSnap(){
   fill(DEPTS, snap.depts); fill(TYPES, snap.types);
   if (Array.isArray(snap.areas) && snap.areas.length){ AREAS.length = 0; AREAS.push(...snap.areas); }
   authUser = {id: snap.uid, email: snap.email}; me = snap.me;
+  if (Array.isArray(snap.sor)) sorumlular = snap.sor;
   tasks = new Map(snap.tasks.map(t => [t.id, t])); loaded = true;
 }
 function onSession(session){
   authReady = true;
-  if (session && authUser && authUser.id !== session.user.id && !signedIn){ tasks = new Map(); me = null; loaded = false; dropSnap(); }
+  if (session && authUser && authUser.id !== session.user.id && !signedIn){ tasks = new Map(); me = null; sorumlular = []; loaded = false; dropSnap(); }
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); }
+    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); loadSorumlular(); }
   } else {
     stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
-    profiles = []; me = null; dropSnap();
+    profiles = []; me = null; sorumlular = []; dropSnap();
     closeOv("#ovUsers"); renderAll(); openLogin();
   }
 }

@@ -476,3 +476,35 @@ as $$
 $$;
 revoke all on function public.fdos_open_dupes(text, text, text) from public, anon;
 grant execute on function public.fdos_open_dupes(text, text, text) to authenticated;
+
+-- 15) Sorumlular: departman içinde işin verildiği kişiler (yalnızca ad; kullanıcı hesabı değildir).
+--     Departman kendi listesini görür, ekler, siler. Yönetici tüm departmanların listesini yönetir.
+--     İşte "sorumlu" alanına ad olarak yazılır; listeden silinen ad eski işlerde görünmeye devam eder.
+create table if not exists public.fdos_sorumlular (
+  id         bigint generated always as identity primary key,
+  dept       text not null references public.fdos_departmanlar(kod),
+  ad         text not null check (length(trim(ad)) between 1 and 40),
+  sira       int not null default 100,
+  created_at timestamptz not null default now(),
+  unique (dept, ad)
+);
+create or replace function public.fdos_my_dept()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$ select dept from public.fdos_profiles where user_id = auth.uid(); $$;
+revoke all on function public.fdos_my_dept() from public, anon;
+grant execute on function public.fdos_my_dept() to authenticated;
+
+alter table public.fdos_sorumlular enable row level security;
+revoke all on public.fdos_sorumlular from anon;
+grant select, insert, update, delete on public.fdos_sorumlular to authenticated;
+drop policy if exists "sorumlu okuma"   on public.fdos_sorumlular;
+drop policy if exists "sorumlu yazma"   on public.fdos_sorumlular;
+create policy "sorumlu okuma" on public.fdos_sorumlular for select to authenticated
+  using (public.fdos_is_admin() or dept = public.fdos_my_dept());
+create policy "sorumlu yazma" on public.fdos_sorumlular for all to authenticated
+  using (public.fdos_is_admin() or dept = public.fdos_my_dept())
+  with check (public.fdos_is_admin() or dept = public.fdos_my_dept());
