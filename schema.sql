@@ -250,7 +250,8 @@ insert into public.fdos_departmanlar (kod, ad, kisa_ad, rozet, alan_gerekli, sir
   ('resepsiyon', 'Resepsiyon', 'Resepsiyon', 'ÖN', true, 30),
   ('satinalma', 'Satınalma', 'Satınalma', 'SAT', false, 40),
   ('mutfak', 'Mutfak', 'Mutfak', 'MUT', true, 50),
-  ('servis', 'Servis', 'Servis', 'SRV', true, 55)
+  ('servis', 'Servis', 'Servis', 'SRV', true, 55),
+  ('muhasebe', 'Muhasebe', 'Muhasebe', 'MUH', false, 60)
 on conflict (kod) do nothing;
 insert into public.fdos_turler (kod, ad, departman, sira) values
   ('ariza', 'Arıza', 'teknik', 10),
@@ -259,7 +260,8 @@ insert into public.fdos_turler (kod, ad, departman, sira) values
   ('satinalma', 'Satınalma Talebi', 'satinalma', 40),
   ('resepsiyon', 'Resepsiyon Talebi', 'resepsiyon', 50),
   ('mutfak', 'Mutfak Talebi', 'mutfak', 60),
-  ('servis', 'Servis Talebi', 'servis', 65)
+  ('servis', 'Servis Talebi', 'servis', 65),
+  ('muhasebe', 'Muhasebe Talebi', 'muhasebe', 70)
 on conflict (kod) do nothing;
 insert into public.fdos_kategoriler (tur, ad, sira) values
   ('ariza', 'Klima / ısıtma', 10),
@@ -311,7 +313,11 @@ insert into public.fdos_kategoriler (tur, ad, sira) values
   ('servis', 'Misafir talebi (restoran / bar)', 30),
   ('servis', 'Toplantı / etkinlik servisi', 40),
   ('servis', 'Ekipman / malzeme eksik', 50),
-  ('servis', 'Diğer', 60)
+  ('servis', 'Diğer', 60),
+  ('muhasebe', 'Fatura / hesap düzeltme', 10),
+  ('muhasebe', 'Ödeme', 20),
+  ('muhasebe', 'Avans / masraf', 30),
+  ('muhasebe', 'Diğer', 40)
 on conflict (tur, ad) do nothing;
 insert into public.fdos_alanlar (ad, sira) values
   ('Lobi', 10),

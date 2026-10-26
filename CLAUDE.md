@@ -1,6 +1,6 @@
 # F-Do’s – Proje rehberi (Claude Code için)
 
-Otel içi iş atama uygulaması. Resepsiyon, Kat Hizmetleri, Teknik, Satınalma, Mutfak ve Servis arasında arıza, temizlik, müşteri, satınalma ve mutfak taleplerini açma, atama ve takip etme.
+Otel içi iş atama uygulaması. Resepsiyon, Kat Hizmetleri, Teknik, Satınalma, Mutfak, Servis ve Muhasebe arasında arıza, temizlik, müşteri, satınalma ve mutfak taleplerini açma, atama ve takip etme.
 Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'daki tasarım konuşmasında verilen kararların özetidir.
 
 ## Kullanıcıyla çalışma
@@ -33,7 +33,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Aciliyet (`prio`) ve son tarih (`dueAt`) 26/10/26 kaldırıldı** (kullanıcı kararı): formda, kartta, detayda, filtrede, Rapor'da yok; veritabanından da silindi (`schema.sql` 15. bölüm). Eski geçmiş (log) yazılarında "Acil, son tarih …" kalabilir.
 - Renkler: **açık iş mavi** (`.card.open`, `--sureli` tokenları), **tamamlanan iş yeşil** (`.card.done`, `--ok` tokenları). Kırmızı yalnızca uyarı, silme ve SATIŞA KAPALI için.
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
-- Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
+- Satınalma ve Muhasebe işlerinde `room` boştur (`alan_gerekli = false`), kartta "TALEP / SAT" ya da "TALEP / MUH" görünür.
 
 ## Listeler (Supabase tabloları)
 - `fdos_departmanlar(kod, ad, kisa_ad, rozet, alan_gerekli, sira, aktif)`, `fdos_turler(kod, ad, departman, sira, aktif)`, `fdos_kategoriler(tur, ad, sira, aktif)`, `fdos_alanlar(ad, sira, aktif)`. Kullanıcı bunları Supabase Table Editor'dan düzenler.
@@ -43,8 +43,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - Okuma: giriş yapan herkes. Yazma: yalnızca yönetici (`fdos_is_admin()`); Supabase paneli bu kurala takılmaz.
 
 ## Sabitler (index.html içinde, tablolar yoksa yedek)
-- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak, servis (rozet SRV), yonetici (yalnızca Tuncer).
-- `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak · Servis Talebi→servis. "Oda servisi" (yemek hazırlığı) Mutfak'ta; Servis'te "Oda servisi teslim / tepsi toplama" var. Kategoriler türün içinde tanımlı.
+- `DEPTS`: teknik, kat (Kat Hizmetleri), resepsiyon, satinalma, mutfak, servis (rozet SRV), muhasebe (rozet MUH, alan sorulmaz), yonetici (yalnızca Tuncer).
+- `TYPES` (her tür tek departmana bağlı): Arıza→teknik · Temizlik Talebi→kat · Müşteri Talebi→kat · Resepsiyon Talebi→resepsiyon · Satınalma Talebi→satinalma · Mutfak Talebi→mutfak · Servis Talebi→servis · Muhasebe Talebi→muhasebe (Fatura / hesap düzeltme, Ödeme, Avans / masraf, Diğer). "Oda servisi" (yemek hazırlığı) Mutfak'ta; Servis'te "Oda servisi teslim / tepsi toplama" var. Kategoriler türün içinde tanımlı.
 - `AREAS`: Lobi, Restoran, Bar, Mutfak, Toplantı Odası, Koridor. Bunlara ek olarak "Oda No" seçeneği var; seçilince yanındaki oda numarası alanı açılır.
 
 ## Kullanıcının kesinleştirdiği arayüz kararları
@@ -93,7 +93,6 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 11. **Rapor:** Göstergeler: Açılan iş, Tamamlanan, Şu an açık, Ort. çözüm süresi. Departman tablosu: Açık, Biten, Ort. süre. Kişiler tablosu: Açtığı, Bitirdiği. "Zamanında", "Geciken", "Son tarihi geçen" ve "Aciliyet dağılımı" kaldırıldı. Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
 ## Açık konular
-- Muhasebe departmanı: konuşuldu, **şimdilik eklenmedi** (kullanıcı ihtiyaca göre soracak). Önerilen: departman `muhasebe` (rozet MUH, `alan_gerekli = false`), tür "Muhasebe Talebi", kategoriler Fatura / hesap düzeltme, Ödeme, Avans / masraf, Diğer. Kod gerekmez, tablolara satır eklenir.
 - **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler, **departman içinde Sorumlu (kişi) seçimi** (yapıldı, yanlış anlaşıldığı için 26/10/26 kaldırıldı; kod ve `schema.sql` bölümü tamamen silindi). İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
 - Satışa kapalı odalar listesi: konuşuldu, **karar verilmedi, yapılmayacak** (kullanıcı "sakın yapma" dedi). Önerilen yer Anasayfa'da iki kutunun altında ince şerit; engel: görünürlük kuralı yüzünden Resepsiyon başka departmana atanmış OOO işleri göremez, veritabanı istisnası gerekir.
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **istenmiyor** (26/10/26 kullanıcı: "şu anlık istenmedi"; kullanıcı sormadan yeniden önerilmez): önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
@@ -118,6 +117,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase'de Sorumlu kalıntısı silindi (dışarıdan doğrulandı: `fdos_sorumlular` tablosu yok).
 - [x] Servis departmanı Supabase tablolarına eklendi (kullanıcı doğruladı: Servis · SRV · Servis Talebi · 6 kategori).
 - [x] `schema.sql` 15. bölüm (aciliyet ve son tarih verisini silme) çalıştırıldı (kullanıcı bildirdi).
+- [ ] Muhasebe departmanı Supabase tablolarına eklenecek (kullanıcıya kısa SQL verildi).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
