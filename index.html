@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: phone app shell — sticky header, one scrolling screen per tab, fixed bottom tab bar. Red / yellow / blue are reserved for priority; everything else is ink on cool grey. */
+/* Layout: phone app shell — sticky header, one scrolling screen per tab, fixed bottom tab bar. Open jobs are blue, finished jobs green; red is for warnings and delete; everything else is ink on cool grey. */
 :root{
   --bg:#ECEFF3; --surface:#FFFFFF; --surface-2:#F4F6F9; --ink:#142030; --muted:#5B6779; --line:#D3D9E1;
   --acil:#C8322A; --acil-soft:#FCE4E1; --acil-ink:#9E211B;
@@ -88,13 +88,9 @@ button{font:inherit;color:inherit}
 .list{display:flex;flex-direction:column;gap:10px}
 .card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 16px;cursor:pointer;position:relative;overflow:hidden}
 .card::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
-.card.acil{--c:var(--acil);--cs:var(--acil-soft);--ci:var(--acil-ink);--on:var(--on-acil)}
-.card.orta{--c:var(--orta);--cs:var(--orta-soft);--ci:var(--orta-ink);--on:var(--on-orta)}
-.card.sureli{--c:var(--sureli);--cs:var(--sureli-soft);--ci:var(--sureli-ink);--on:var(--on-sureli)}
-.card.acil,.card.orta,.card.sureli{background:var(--cs);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
-.card.acil{border-color:var(--acil)}
-.card.done{--c:var(--ok);background:var(--surface);border-color:var(--line)}
-.card.done .prio{background:var(--surface-2);color:var(--muted)}
+.card.open{--c:var(--sureli);--cs:var(--sureli-soft)}   /* yapılacaklar: mavi */
+.card.done{--c:var(--ok);--cs:var(--ok-soft)}            /* tamamlananlar: yeşil */
+.card.open,.card.done{background:var(--cs);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
 .card .plate{background:var(--surface)}
 .card.fresh{animation:fresh 2.4s ease-out}
 /* sola kaydırınca silme */
@@ -112,7 +108,6 @@ button{font:inherit;color:inherit}
 .r1{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
 .kind{font-weight:600;font-size:14.5px;line-height:1.3}
 .kind em{font-style:normal;color:var(--muted);font-weight:500}
-.prio{flex:none;font-weight:700;font-size:11px;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--c);color:var(--on);white-space:nowrap}
 
 /* home: two hero boxes + sections */
 .hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -126,18 +121,14 @@ button{font:inherit;color:inherit}
 .hbox .hl{font-weight:700;font-size:14.5px;line-height:1.25}
 .hbox b{font:800 64px/.9 var(--font-display);font-variant-numeric:tabular-nums;margin-top:auto}
 .hbox .hs{font-size:12.5px;line-height:1.35;opacity:.8}
-.hbox .warnpill{display:inline-block;background:var(--acil);color:var(--on-acil);border-radius:999px;padding:1px 9px;font-weight:700;opacity:1}
 .sec{margin-top:24px}
 .sech{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .sech h3{margin:0;font:800 23px/1.1 var(--font-display);letter-spacing:.01em}
 .cnt{font:600 12px var(--font-mono);background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
-.cnt.red{background:var(--acil);color:var(--on-acil)}
 .more{margin-left:auto;border:0;background:none;padding:4px 0;font-weight:600;font-size:13.5px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .desc{margin:0;font-size:14px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .due{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
 .due svg{flex:none;color:var(--muted)}
-.due.over{color:var(--acil-ink)}
-.due.over svg{color:var(--acil-ink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted)}
 .dept{font-weight:600;font-size:11.5px;padding:1px 7px;border-radius:4px;border:1px solid var(--line);color:var(--ink)}
 .st{font-weight:600}
@@ -147,9 +138,7 @@ button{font:inherit;color:inherit}
 .meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
 .card.done .actions{justify-content:flex-end}   /* "Kontrol edildi" sağda, "Yeniden aç"ın altında */
 .card.done .actions [data-act="verify"]{padding:6px 11px;font-size:13px}
-/* kontrol edilmiş (onaylanmış) iş: yeşil kutu */
-.card.done.verified{--c:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
-.card.done.verified .prio{background:var(--ok);color:var(--surface)}
+.card.done.verified{border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
 .btn{font-weight:600;font-size:13.5px;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;line-height:1.2}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .btn.ghost{background:transparent}
@@ -165,11 +154,6 @@ button{font:inherit;color:inherit}
 .chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
 .chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip.c-acil{--c:var(--acil)} .chip.c-orta{--c:var(--orta)} .chip.c-sureli{--c:var(--sureli)}
-.chip.c-acil[aria-pressed="true"]{background:var(--acil);border-color:var(--acil);color:#fff}
-.chip.c-orta[aria-pressed="true"]{background:var(--orta);border-color:var(--orta);color:#1d1600}
-.chip.c-sureli[aria-pressed="true"]{background:var(--sureli);border-color:var(--sureli);color:#fff}
-.chip.c-acil[aria-pressed="true"] i,.chip.c-orta[aria-pressed="true"] i,.chip.c-sureli[aria-pressed="true"] i{background:currentColor}
 .search input{width:100%;font:inherit;font-size:16px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
 
 /* list toolbar: search + filter button */
@@ -197,10 +181,6 @@ button{font:inherit;color:inherit}
 .sel select{width:100%;font:inherit;font-size:16px;padding:11px 40px 11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);-webkit-appearance:none;appearance:none;cursor:pointer;text-overflow:ellipsis}
 .sel select:disabled,.field input:disabled{opacity:.45;cursor:not-allowed}
 .sel select:focus,.field input:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
-.sel[data-p="acil"] select{border-color:var(--acil);box-shadow:inset 6px 0 0 var(--acil)}
-.sel[data-p="orta"] select{border-color:var(--orta);box-shadow:inset 6px 0 0 var(--orta)}
-.sel[data-p="sureli"] select{border-color:var(--sureli);box-shadow:inset 6px 0 0 var(--sureli)}
-.sel[data-p] select{padding-left:18px}
 .area{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,128px);gap:8px}
 .clist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column}
 .clist li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
@@ -236,11 +216,6 @@ button{font:inherit;color:inherit}
 .kpi span{font-size:12px;color:var(--muted);font-weight:600}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
 .panel h3{margin:0 0 10px;font:800 19px/1.1 var(--font-display);letter-spacing:.01em}
-.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--surface-2)}
-.stack div{height:100%}
-.keys{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
-.keys span{display:flex;align-items:center;gap:6px}
-.keys i{width:9px;height:9px;border-radius:2px;background:var(--c)}
 .dtable{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
 .dtable th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:right;padding:0 0 6px 6px}
 .dtable th:first-child,.dtable td:first-child{text-align:left;padding-left:0}
@@ -321,7 +296,7 @@ button{font:inherit;color:inherit}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
 /* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
-#detail.verified{--c:var(--ok);--cs:var(--ok-soft)} #detail.acil{--c:var(--acil);--cs:var(--acil-soft)} #detail.orta{--c:var(--orta);--cs:var(--orta-soft)} #detail.sureli{--c:var(--sureli);--cs:var(--sureli-soft)}
+#detail.open{--c:var(--sureli);--cs:var(--sureli-soft)} #detail.done{--c:var(--ok);--cs:var(--ok-soft)}
 #detail{background:var(--cs,var(--surface))}
 #detail .sheet-head{background:var(--cs,var(--surface));box-shadow:inset 0 6px 0 var(--c,var(--line)),0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
@@ -329,7 +304,6 @@ button{font:inherit;color:inherit}
 .dcard .dc-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px;font-size:14.5px}
 .dcard .dc-row .k{color:var(--muted);font-size:12.5px;font-weight:600}
 .dcard .dc-row .v{min-width:0;overflow-wrap:anywhere}
-.dcard .dc-row .over{color:var(--acil-ink);font-weight:700}
 .dcard .dc-row .sel select{padding-block:8px}
 .dcard .ddesc{background:color-mix(in srgb,var(--surface) 75%,transparent)}
 .dcard .section-t{margin-top:14px;font-size:16px}
@@ -420,11 +394,7 @@ img{max-width:100%}
     </div>
     <div class="field"><label class="lbl" for="fArea">Alan</label>
       <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
-    <div class="pair">
-      <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
-      <div class="field"><label class="lbl" for="fPrio">Aciliyet</label><div class="sel" id="prioWrap"><select id="fPrio"></select></div></div>
-    </div>
-    <div class="field"><label class="lbl" for="fDue">Son tarih</label><input type="datetime-local" id="fDue" class="half"><span class="hint" id="dueHint">Aciliyete göre dolduruldu, değiştirebilirsin.</span></div>
+    <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
     <div class="field"><label class="lbl" for="fDesc">Açıklama</label><textarea id="fDesc" placeholder="ör. Klima soğutmuyor, kumanda ekranı yanıp sönüyor"></textarea></div>
     <div class="field"><label class="lbl" for="fItem">Liste (isteğe bağlı)</label>
       <div class="inline"><input type="text" id="fItem" maxlength="120" placeholder="Kalem yaz, ör. 20 adet şampuan" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" id="fItemAdd">Ekle</button></div>
@@ -497,11 +467,6 @@ const TYPES = {
   mutfak:{label:"Mutfak Talebi", dept:"mutfak", cats:["Oda servisi","Alerji / özel diyet","Pasta / sürpriz","Kahvaltı paketi","Minibar ürünü","Hijyen / temizlik","Diğer"]},
   servis:{label:"Servis Talebi", dept:"servis", cats:["Masa / salon hazırlığı","Oda servisi teslim / tepsi toplama","Misafir talebi (restoran / bar)","Toplantı / etkinlik servisi","Ekipman / malzeme eksik","Diğer"]}
 };
-const PRIO = {
-  acil:{label:"Acil", rank:0, hint:"Hemen müdahale"},
-  orta:{label:"Orta", rank:1, hint:"Gün içinde"},
-  sureli:{label:"Süreli", rank:2, hint:"Son tarihe kadar"}
-};
 const STATUS = {yeni:"Yeni", devam:"Devam ediyor", beklemede:"Beklemede", tamam:"Tamamlandı"};
 const AREAS = ["Lobi","Restoran","Bar","Mutfak","Toplantı Odası","Koridor"];
 const TITLES = {ana:"Anasayfa", yapilacak:"Yapılacaklar", tamamlanan:"Tamamlananlar", rapor:"Rapor"};
@@ -509,14 +474,9 @@ const TITLES = {ana:"Anasayfa", yapilacak:"Yapılacaklar", tamamlanan:"Tamamlana
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const lower = s => String(s ?? "").toLocaleLowerCase("tr");
-const prioOf = t => PRIO[t.prio] ? t.prio : (t.prio === "normal" ? "orta" : t.prio === "dusuk" ? "sureli" : "orta");
 // tüm tarihler gg/aa/yy ss:dd (ör. 23/10/26 14:30)
 const fmt = ms => { if (!ms) return ""; const d = new Date(ms); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const dayStart = d => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
-function dueLabel(ms){
-  if (!ms) return "Son tarih yok";
-  return fmt(ms);
-}
 function dur(ms){
   const m = Math.max(0, Math.round(ms / 60000));
   if (m < 60) return m + " dk";
@@ -525,23 +485,14 @@ function dur(ms){
   const d = Math.floor(h / 24); return d + " gün" + (h % 24 ? " " + (h % 24) + " sa" : "");
 }
 const pad = n => String(n).padStart(2, "0");
-const toInput = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
-const fromInput = s => { const v = new Date(s).getTime(); return isNaN(v) ? null : v; };
-const roundUp = (ms, step = 15) => { const s = step * 60000; return Math.ceil(ms / s) * s; };
-function defaultDue(p){
-  const now = Date.now();
-  if (p === "acil") return roundUp(now + 60 * 60000);
-  if (p === "orta") return roundUp(now + 4 * 3600000);
-  const t = new Date(now); t.setDate(t.getDate() + 1); t.setHours(12, 0, 0, 0); return t.getTime();
-}
 
 let loaded = false, dbFailed = false;
 let tasks = new Map();
 let me = null;   // giriş yapan kişinin profili (fdos_profiles)
 let profiles = [], authUser = null, usersMsg = "";
 const DEF = {
-  todo: {q:"", prio:"all", time:"all", status:"all"},
-  done: {q:"", check:"kontrol", prio:"all"}
+  todo: {q:"", status:"all"},
+  done: {q:"", check:"kontrol"}
 };
 const ui = {
   tab: "ana",   // uygulama her açılışta Anasayfa ile başlar
@@ -576,7 +527,6 @@ const canVerify = t => canStatus(t);                  // "Yeniden aç"
 // Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
 const canDelete = t => isAdmin() || (isCreator(t) && !locked(t));
 const canCheck = t => isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
-const isOver = t => isOpen(t) && t.dueAt && t.dueAt < Date.now();
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 function itemsProg(t){
@@ -630,13 +580,10 @@ function plate(room, dept){
   if (fl) return `<div class="plate"><small>KORİDOR</small><b class="${fl.length > 3 ? "long" : ""}">${esc(fl)}</b><small>KAT</small></div>`;
   return `<div class="plate"><small>${num ? "ODA" : "ALAN"}</small><b class="${r.length > 4 ? "long" : ""}">${esc(r)}</b></div>`;
 }
+// açık işte açılış, tamamlanmış işte bitiş zamanı
 function dueLine(t, extra = ""){
-  if (!isOpen(t)){
-    return `<div class="due">${clockSvg}<span>Bitti ${esc(dueLabel(t.doneAt))}</span>${extra ? `<span style="margin-left:auto">${extra}</span>` : ""}</div>`;
-  }
-  if (!t.dueAt) return `<div class="due">${clockSvg}<span>Son tarih yok</span></div>`;
-  const diff = t.dueAt - Date.now();
-  return `<div class="due ${diff < 0 ? "over" : ""}">${clockSvg}<span>Son: ${esc(dueLabel(t.dueAt))}</span></div>`;
+  if (!isOpen(t)) return `<div class="due">${clockSvg}<span>Bitti ${esc(fmt(t.doneAt))}</span>${extra ? `<span style="margin-left:auto">${extra}</span>` : ""}</div>`;
+  return `<div class="due">${clockSvg}<span>Açılış: ${esc(fmt(t.createdAt))}</span></div>`;
 }
 function actionsFor(t){
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
@@ -659,16 +606,16 @@ function repeatNo(t){
   return n;
 }
 function card(t){
-  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"}, rn = repeatNo(t);
+  const type = TYPES[t.type] || {label:"İş"}, rn = repeatNo(t);
   const flags = [
     rn > 1 ? `<span class="flag rep" title="Aynı yerde, aynı sorun için son ${REPEAT_DAYS} günde açılan ${rn}. iş">${REPEAT_DAYS} GÜNDE ${rn}. KEZ</span>` : "",
     t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
     t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
   ].join("");
-  const art = `<article class="card ${p} ${isOpen(t) ? "" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
+  const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
-      <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
+      <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div></div>
       ${dueLine(t, t.verified && !isOpen(t) ? `<span class="flag ok">KONTROL EDİLDİ</span>` : "")}
       ${t.desc ? `<p class="desc">${esc(t.desc)}</p>` : ""}
       ${itemsProg(t)}
@@ -685,7 +632,7 @@ function card(t){
   const armed = delArmed === t.id;
   return `<div class="swc" data-sid="${esc(t.id)}"><div class="swc-act"><button type="button" class="swc-del ${armed ? "armed" : ""}" data-cdel="${esc(t.id)}">${armed ? "Eminim" : "Sil"}</button></div>${art}</div>`;
 }
-const byDue = (a, b) => (a.dueAt || 9e15) - (b.dueAt || 9e15) || PRIO[prioOf(a)].rank - PRIO[prioOf(b)].rank;
+const byAge = (a, b) => (a.createdAt || 0) - (b.createdAt || 0);   // en eski açılan önce
 
 function stateScreen(){
   if (!loaded || (signedIn && !me)) return `<div class="empty"><h3>İşler yükleniyor</h3><p>${sb && !signedIn ? "Devam etmek için giriş yap." : "Ortak liste bağlanıyor."}</p></div>`;
@@ -696,72 +643,50 @@ function stateScreen(){
 /* ---------- screens ---------- */
 function screenHome(){
   const s = stateScreen(); if (s) return s;
-  const tEnd = dayStart(Date.now()) + 86400000;
-  const open = visTasks().filter(isOpen);
-  const today = open.filter(t => t.dueAt && t.dueAt < tEnd);
-  const over = open.filter(isOver);
-  // Son tarihine 3 saatten az kalan (ya da geçmiş) iş, aciliyeti ne olursa olsun "Acil yapılacaklar"a düşer.
-  const soon = t => t.dueAt && t.dueAt - Date.now() <= 3 * 3600000;
-  const isUrgent = t => prioOf(t) === "acil" || soon(t);
-  const urgent = open.filter(isUrgent).sort(byDue);
-  const upcoming = open.filter(t => !isUrgent(t)).sort(byDue);   // son tarihi en yakın olan en üstte
+  const open = visTasks().filter(isOpen).sort(byAge);   // en eski açılan en üstte
+  const fresh0 = open.filter(t => t.status === "yeni");
   const UP = 12;
   const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name}\u00a0${n}`).join(" · ") || "Açık iş yok";
   const hero = `<div class="hero">
-    <button type="button" class="hbox today" data-jump="today">
-      <span class="hl">Bugün yapılacaklar</span><b>${today.length}</b>
-      <span class="hs">${over.length ? `<span class="warnpill">${over.length} iş gecikti</span>` : today.length ? "Gün sonuna kadar" : "Bugüne iş yok"}</span>
+    <button type="button" class="hbox today" data-jump="yeni">
+      <span class="hl">Yeni işler</span><b>${fresh0.length}</b>
+      <span class="hs">${fresh0.length ? "Henüz başlanmadı" : "Yeni iş yok"}</span>
     </button>
     <button type="button" class="hbox open" data-jump="open">
       <span class="hl">Bitmemiş işler</span><b>${open.length}</b>
       <span class="hs">${esc(deptLine)}</span>
     </button>
   </div>`;
-  if (!tasks.size) return hero + `<div class="empty" style="margin-top:18px"><h3>Henüz iş yok</h3><p>Bir arıza, temizlik ya da müşteri talebi olduğunda sağ alttaki + ile kaydet. Aciliyetini ve son tarihini seç; sorumlu departman burada anında görür.</p></div>`;
-  const urgentSec = `<section class="sec">
-    <div class="sech"><h3>Acil yapılacaklar</h3><span class="cnt red">${urgent.length}</span></div>
-    ${urgent.length ? `<div class="list">${urgent.map(t => card(t)).join("")}</div>` : `<div class="none">Acil iş yok.</div>`}
+  if (!tasks.size) return hero + `<div class="empty" style="margin-top:18px"><h3>Henüz iş yok</h3><p>Bir arıza, temizlik ya da müşteri talebi olduğunda sağ alttaki + ile kaydet; sorumlu departman burada anında görür.</p></div>`;
+  return hero + `<section class="sec">
+    <div class="sech"><h3>Açık işler</h3><span class="cnt">${open.length}</span>
+      ${open.length > UP ? `<button type="button" class="more" data-jump="open">Tümünü gör</button>` : ""}</div>
+    ${open.length ? `<div class="list">${open.slice(0, UP).map(t => card(t)).join("")}</div>` : `<div class="none">Açık iş yok.</div>`}
   </section>`;
-  const upSec = `<section class="sec">
-    <div class="sech"><h3>Takvimi yaklaşan</h3><span class="cnt">${upcoming.length}</span>
-      ${upcoming.length > UP ? `<button type="button" class="more" data-jump="due">Tümünü gör</button>` : ""}</div>
-    <div class="keys" style="margin:0 0 10px"><span style="--c:var(--orta)"><i></i>Orta</span><span style="--c:var(--sureli)"><i></i>Süreli</span></div>
-    ${upcoming.length ? `<div class="list">${upcoming.slice(0, UP).map(t => card(t)).join("")}</div>` : `<div class="none">Yaklaşan iş yok.</div>`}
-  </section>`;
-  return hero + urgentSec + upSec;
 }
 const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
-const prioOpts = () => [["all","Tümü"], ...Object.entries(PRIO).map(([k,v]) => [k, v.label])];
 const FILTERS = {
   todo: [
-    {key:"prio", label:"Aciliyet", opts: prioOpts, color: true},
-    {key:"status", label:"Durum", opts: () => [["all","Tümü"],["yeni","Yeni"],["devam","Devam ediyor"],["beklemede","Beklemede"]]},
-    {key:"time", label:"Son tarih", opts: () => [["all","Tümü"],["today","Bugün yapılacaklar"],["over","Gecikenler"]], sheet: false}
+    {key:"status", label:"Durum", opts: () => [["all","Tümü"],["yeni","Yeni"],["devam","Devam ediyor"],["beklemede","Beklemede"]]}
   ],
   done: [
-    {key:"prio", label:"Aciliyet", opts: prioOpts, color: true},
     {key:"check", label:"Durum", opts: () => [["all","Tümü"],["kontrol","Kontrol bekleyen"],["ok","Kontrol edilen"]]}
   ]
 };
 const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
 const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.doneBy, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
 function applyTodo(f){
-  const now = Date.now(), tEnd = dayStart(now) + 86400000;
   let arr = visTasks().filter(isOpen);
-  if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
   if (f.status !== "all") arr = arr.filter(t => t.status === f.status);
-  if (f.time === "over") arr = arr.filter(isOver);
-  if (f.time === "today") arr = arr.filter(t => t.dueAt && t.dueAt < tEnd);
   arr = arr.filter(matchQ(f.q));
-  arr.sort(byDue);
+  arr.sort(byAge);
   return arr;
 }
 function applyDone(f){
   let arr = visTasks().filter(t => !isOpen(t));
   if (f.check === "kontrol") arr = arr.filter(t => !t.verified);
   if (f.check === "ok") arr = arr.filter(t => t.verified);
-  if (f.prio !== "all") arr = arr.filter(t => prioOf(t) === f.prio);
   arr = arr.filter(matchQ(f.q));
   arr.sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
   return arr.slice(0, 150);
@@ -792,7 +717,7 @@ function clearFilters(kind, keepQ = true){
 function results(kind){
   const f = ui[kind];
   const arr = kind === "todo" ? applyTodo(f) : applyDone(f);
-  const sortLab = kind === "todo" ? "son tarihi yakın olan önce" : "en son biten önce";
+  const sortLab = kind === "todo" ? "en eski açılan önce" : "en son biten önce";
   if (arr.length) return `<p class="muted resmeta">${arr.length} iş · ${sortLab}</p><div class="list">${arr.map(t => card(t)).join("")}</div>`;
   const narrowed = f.q || activeDefs(kind, f).length;
   if (kind === "todo" && !tasks.size) return `<div class="empty"><h3>Henüz iş yok</h3><p>Sağ alttaki + ile ilk işi kaydet.</p></div>`;
@@ -817,9 +742,8 @@ function renderFilter(){
   if (!fKind) return;
   $("#filterSheet").innerHTML = `
     <div class="sheet-head"><div><h2>Filtrele</h2><p class="sheet-sub">${fKind === "todo" ? "Yapılacaklar" : "Tamamlananlar"}</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
-    ${FILTERS[fKind].filter(d => d.sheet !== false).map(d => `<div class="field"><span class="lbl">${esc(d.label)}</span><div class="chips wrap">${d.opts().map(([k, l]) => {
-      const col = d.color && k !== "all";
-      return `<button type="button" class="chip ${col ? "c-" + k : ""}" data-fk="${d.key}" data-v="${k}" aria-pressed="${fDraft[d.key] === k}">${col ? "<i></i>" : ""}${esc(l)}</button>`;
+    ${FILTERS[fKind].map(d => `<div class="field"><span class="lbl">${esc(d.label)}</span><div class="chips wrap">${d.opts().map(([k, l]) => {
+      return `<button type="button" class="chip" data-fk="${d.key}" data-v="${k}" aria-pressed="${fDraft[d.key] === k}">${esc(l)}</button>`;
     }).join("")}</div></div>`).join("")}`;
 }
 $("#filterSheet").addEventListener("click", e => {
@@ -836,21 +760,13 @@ function screenReport(){
   const all = visTasks().filter(t => !ownDept || t.dept === ownDept);
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
-  const open = all.filter(isOpen), over = open.filter(isOver);
-  const onTime = done.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
-  const pct = done.length ? Math.round(onTime / done.length * 100) + "%" : "—";
+  const open = all.filter(isOpen);
   const avg = list => list.length ? dur(list.reduce((s, t) => s + (t.doneAt - t.createdAt), 0) / list.length) : "—";
   const periods = [["0","Bugün"],["7","7 gün"],["30","30 gün"]]
     .map(([k,l]) => `<button type="button" class="chip" data-f="rep" data-v="${k}" aria-pressed="${ui.rep === k}">${l}</button>`).join("");
-  const pc = k => created.filter(t => prioOf(t) === k).length;
-  const tot = created.length || 1;
-  const stack = created.length
-    ? `<div class="stack">${["acil","orta","sureli"].map(k => `<div style="width:${pc(k) / tot * 100}%;background:var(--${k})"></div>`).join("")}</div>`
-    : `<div class="stack"></div>`;
   const rows = Object.entries(DEPTS).filter(([k, v]) => ownDept ? k === ownDept : (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
-    const o = open.filter(t => t.dept === k), ov = o.filter(isOver), dn = done.filter(t => t.dept === k);
-    const ot = dn.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
-    return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td class="${ov.length ? "over" : ""}">${ov.length}</td><td>${dn.length}</td><td>${dn.length ? Math.round(ot / dn.length * 100) + "%" : "—"}</td><td>${avg(dn)}</td></tr>`;
+    const o = open.filter(t => t.dept === k), dn = done.filter(t => t.dept === k);
+    return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td>${dn.length}</td><td>${avg(dn)}</td></tr>`;
   }).join("");
   const top = (keyFn, n = 5) => {
     const m = new Map(); created.forEach(t => { const k = keyFn(t); if (k) m.set(k, (m.get(k) || 0) + 1); });
@@ -863,17 +779,13 @@ function screenReport(){
     <div class="kpis">
       <div class="kpi"><b>${created.length}</b><span>Açılan iş</span></div>
       <div class="kpi"><b>${done.length}</b><span>Tamamlanan</span></div>
-      <div class="kpi"><b>${pct}</b><span>Zamanında bitirme</span></div>
       <div class="kpi"><b>${open.length}</b><span>Şu an açık</span></div>
-      <div class="kpi"><b style="${over.length ? "color:var(--acil-ink)" : ""}">${over.length}</b><span>Son tarihi geçen</span></div>
       <div class="kpi"><b>${avg(done)}</b><span>Ort. çözüm süresi</span></div>
     </div>
     <div class="panel"><h3>${ownDept ? esc(DEPTS[ownDept]?.label || "Departmanım") : "Departmanlar"}</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Departman</th><th>Açık</th><th>Geciken</th><th>Biten</th><th>Zamanında</th><th>Ort. süre</th></tr></thead>
+      <thead><tr><th>Departman</th><th>Açık</th><th>Biten</th><th>Ort. süre</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-      <p class="muted" style="margin:8px 0 0">Açık ve geciken: şu an. Biten, zamanında ve ortalama süre: seçili dönem.</p></div>
-    <div class="panel"><h3>Aciliyet dağılımı</h3>${stack}
-      <div class="keys"><span style="--c:var(--acil)"><i></i>Acil ${pc("acil")}</span><span style="--c:var(--orta)"><i></i>Orta ${pc("orta")}</span><span style="--c:var(--sureli)"><i></i>Süreli ${pc("sureli")}</span></div></div>
+      <p class="muted" style="margin:8px 0 0">Açık: şu an. Biten ve ortalama süre: seçili dönem.</p></div>
     ${isAdmin() ? peoplePanel(created, done, open) : ""}
     <div class="panel"><h3>En sık sorunlar</h3>${top(t => `${TYPES[t.type]?.label || ""} · ${t.cat || ""}`)}</div>
     <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>
@@ -900,14 +812,14 @@ function peoplePanel(created, done, open){
   [...created, ...done].forEach(t => [t.createdBy, finisher(t)].forEach(n => { if (n && !names.has(lower(n))) names.set(lower(n), {name: n, dept: null}); }));
   const rows = [...names.values()].map(p => {
     const c = created.filter(t => same(t.createdBy, p.name)).length;
-    const d = done.filter(t => same(finisher(t), p.name)), ot = d.filter(t => t.dueAt && t.doneAt <= t.dueAt).length;
-    return {p, c, d: d.length, pct: d.length ? Math.round(ot / d.length * 100) + "%" : "—"};
+    const d = done.filter(t => same(finisher(t), p.name)).length;
+    return {p, c, d};
   }).filter(r => r.c || r.d || profiles.some(x => x.name === r.p.name))
     .sort((a, b) => (b.d + b.c) - (a.d + a.c) || a.p.name.localeCompare(b.p.name, "tr"));
-  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.d}</td><td>${r.pct}</td></tr>`).join("");
+  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.d}</td></tr>`).join("");
   return `<div class="panel"><h3>Kişiler</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Bitirdiği</th><th>Zamanında</th></tr></thead>
-      <tbody>${body || `<tr><td colspan="4">Kayıt yok.</td></tr>`}</tbody></table></div>
+      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Bitirdiği</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="3">Kayıt yok.</td></tr>`}</tbody></table></div>
       <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Açtığı ve bitirdiği (Tamamlandı yapan): seçili dönem.</p></div>`;
 }
 function renderWho(){
@@ -976,7 +888,7 @@ $("#screen").addEventListener("click", e => {
   if (j){
     ui.tab = "yapilacak"; ui.todo = {...DEF.todo};
     const v = j.dataset.jump;
-    if (v === "today" || v === "over") ui.todo.time = v; else if (PRIO[v]) ui.todo.prio = v;
+    if (v === "yeni") ui.todo.status = "yeni";
     window.scrollTo(0, 0); renderAll(); return;
   }
   const f = e.target.closest("[data-f]");
@@ -1025,22 +937,18 @@ $("#screen").addEventListener("input", e => {
 function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
-  const p = prioOf(t), type = TYPES[t.type] || {label:"İş"};
+  const type = TYPES[t.type] || {label:"İş"};
   const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time><b class="by">${esc(l.by)}</b>: ${esc(l.msg)}</li>`).join("");
   const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
-  const diff = t.dueAt ? t.dueAt - Date.now() : 0;
-  const due = !t.dueAt ? "—" : `<span class="${isOpen(t) && diff < 0 ? "over" : ""}">${esc(fmt(t.dueAt))}</span>`;
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${Object.entries(STATUS).map(([k, l]) => opt(k, l, k === t.status)).join("")}</select></div>`
     : `<b>${esc(STATUS[t.status] || "")}</b>`;
-  el.className = "sheet " + (!isOpen(t) && t.verified ? "verified" : p);
+  el.className = "sheet " + (isOpen(t) ? "open" : "done");
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
-    <div class="card ${!isOpen(t) && t.verified ? "done verified" : p} dcard">
-      <div class="r1"><span class="prio">${esc(PRIO[p].label.toLocaleUpperCase("tr"))}</span></div>
+    <div class="card ${isOpen(t) ? "open" : "done"} dcard">
       ${row("Departman", `<b>${esc(DEPTS[t.dept]?.label || "")}</b>`)}
-      ${row("Son tarih", due)}
       ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
       ${checklistDetail(t)}
       ${row("Durum", status)}
@@ -1258,7 +1166,6 @@ $("#users").addEventListener("pointercancel", swipeEnd);
 /* ---------- new task (Yapılacak İş) ---------- */
 const opt = (v, l, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(l)}</option>`;
 const typesFor = d => Object.entries(TYPES).filter(([, v]) => v.dept === d && v.active !== false);
-let dueTouched = false;
 function fillType(){
   const d = $("#fDept").value, list = d ? typesFor(d) : [];
   if (!d) $("#fType").innerHTML = opt("", "Önce departman", true);
@@ -1284,12 +1191,6 @@ function syncArea(focus){
   f.setAttribute("aria-label", isFloor ? "Kat numarası" : "Oda numarası");
   if (f.disabled) f.value = "";
   else if (focus) f.focus();
-}
-function syncPrio(){
-  const p = $("#fPrio").value;
-  $("#prioWrap").dataset.p = p;
-  if (!dueTouched) $("#fDue").value = toInput(defaultDue(p));
-  $("#dueHint").hidden = dueTouched;
 }
 const noArea = () => !!DEPTS[$("#fDept").value]?.noArea;
 function syncDeptArea(){
@@ -1333,19 +1234,16 @@ $("#fRoom").addEventListener("input", e => {
   el.hidden = false; e.target.classList.add("bad");
   clearTimeout(roomErrTimer); roomErrTimer = setTimeout(() => { el.hidden = true; e.target.classList.remove("bad"); }, 3500);
 });
-$("#fPrio").addEventListener("change", syncPrio);
-$("#fDue").addEventListener("input", () => { dueTouched = true; $("#dueHint").hidden = true; });
 let editId = null;   // doluysa form var olan işi güncelliyor
 const ensureOpt = (sel, v, label) => { if (v && ![...$(sel).options].some(o => o.value === v)) $(sel).insertAdjacentHTML("beforeend", opt(v, label || v)); };
 function openNew(t){
   editId = t ? t.id : null;
   $("#fDept").innerHTML = opt("", "Departman seç", true) + deptList().filter(([k]) => typesFor(k).length).map(([k, v]) => opt(k, v.label)).join("");
   $("#fArea").innerHTML = opt("", "Alan seç", true) + AREAS.map(a => opt(a, a)).join("") + opt("oda", "Oda No");
-  $("#fPrio").innerHTML = Object.entries(PRIO).map(([k, v]) => opt(k, v.label, k === (t ? prioOf(t) : "orta"))).join("");
   ["#fRoom", "#fDesc"].forEach(s => $(s).value = "");
   $("#fOoo").checked = false; $("#fGuest").checked = false; $("#fErr").hidden = true; $("#fSubmit").disabled = false;
   $("#fDup").hidden = true; dupOk = "";
-  $("#fItem").value = ""; draftItems = []; dueTouched = false;
+  $("#fItem").value = ""; draftItems = [];
   $("#ovNew h2").textContent = t ? "Yapılacak İşi Güncelle" : "Yapılacak İş";
   $("#fSubmit").textContent = t ? "Güncelle" : "İşi kaydet";
   $("#fDel").hidden = !(t && t.status === "tamam"); $("#fDel").classList.remove("armed"); $("#fDel").textContent = "Kaydı sil";
@@ -1360,9 +1258,7 @@ function openNew(t){
     $("#fDesc").value = t.desc || "";
     $("#fOoo").checked = !!t.ooo; $("#fGuest").checked = !!t.guest;
     draftItems = (t.items || []).map(x => ({...x}));
-    dueTouched = true; $("#fDue").value = t.dueAt ? toInput(t.dueAt) : "";
-    $("#prioWrap").dataset.p = $("#fPrio").value; $("#dueHint").hidden = true;
-  } else { fillType(); syncDeptArea(); syncPrio(); }
+  } else { fillType(); syncDeptArea(); }
   renderDraftItems();
   openOv("#ovNew"); $("#newForm").scrollTop = 0;
 }
@@ -1389,16 +1285,12 @@ async function findDupes(room, dept, cat){
 }));
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value, prio = $("#fPrio").value;
+  const dept = $("#fDept").value, type = $("#fType").value, area = $("#fArea").value, cat = $("#fCat").value;
   const roomNo = $("#fRoom").value.replace(/\D/g, "").slice(0, 4);
   const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area === FLOOR_AREA && roomNo ? floorRoom(roomNo) : area;
-  const editT = editId && tasks.get(editId);
-  // düzenlemede son tarihe dokunulmadıysa kayıttaki değer aynen kalır (dakika yuvarlaması değişiklik sayılmaz)
-  const due = editT && editT.dueAt && $("#fDue").value === toInput(editT.dueAt) ? editT.dueAt : fromInput($("#fDue").value);
   if ($("#fItem").value.trim()) addDraftItem();
   const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && !DEPTS[dept]?.noArea ? "Alanı seç."
-    : area === "oda" && !roomNo ? "Oda numarasını yaz." : area === FLOOR_AREA && !roomNo && !DEPTS[dept]?.noArea ? "Kat numarasını yaz." : !cat ? "Kategoriyi seç." : !due ? "Son tarihi seç."
-    : due < Date.now() - 5 * 60000 && !(editT && due === editT.dueAt) ? "Son tarih geçmişte olamaz." : "";
+    : area === "oda" && !roomNo ? "Oda numarasını yaz." : area === FLOOR_AREA && !roomNo && !DEPTS[dept]?.noArea ? "Kat numarasını yaz." : !cat ? "Kategoriyi seç." : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
   // Aynı yer, departman ve kategori için açık iş varsa önce uyar; aynı seçimle ikinci basışta kaydet.
@@ -1421,9 +1313,9 @@ $("#newForm").addEventListener("submit", async e => {
   if (editId){
     const t = tasks.get(editId); if (!t){ closeOv("#ovNew"); return; }
     const items = draftItems.map(x => { const o = (t.items || []).find(y => y.id === x.id); return o && !!o.done === !!x.done ? x : {...x, by: x.done ? who() : null, at: x.done ? now : null}; });
-    const next = {type, cat, dept, prio: PRIO[prio] ? prio : "orta", dueAt: due, room, desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked, items};
-    const names = {type: "tür", cat: "kategori", dept: "departman", prio: "aciliyet", dueAt: "son tarih", room: "alan/oda", desc: "açıklama", ooo: "satışa kapalı", guest: "misafir odada", items: "liste"};
-    const cur = {...t, prio: prioOf(t), ooo: !!t.ooo, guest: !!t.guest, items: t.items || [], desc: t.desc || "", room: t.room || ""};
+    const next = {type, cat, dept, room, desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked, items};
+    const names = {type: "tür", cat: "kategori", dept: "departman", room: "alan/oda", desc: "açıklama", ooo: "satışa kapalı", guest: "misafir odada", items: "liste"};
+    const cur = {...t, ooo: !!t.ooo, guest: !!t.guest, items: t.items || [], desc: t.desc || "", room: t.room || ""};
     const f = {}; Object.keys(next).forEach(k => { if (JSON.stringify(next[k]) !== JSON.stringify(cur[k])) f[k] = next[k]; });
     if (!Object.keys(f).length){ closeOv("#ovNew"); toast("Değişiklik yok."); return; }
     if (t.status === "tamam" && items.some(x => !x.done)){ $("#fErr").textContent = "İş tamamlanmış; listedeki tüm kalemler onaylı kalmalı."; $("#fErr").hidden = false; return; }
@@ -1432,12 +1324,12 @@ $("#newForm").addEventListener("submit", async e => {
     toast("Güncellendi."); return;
   }
   const doc = {
-    type, cat, dept, prio: PRIO[prio] ? prio : "orta", dueAt: due, room,
+    type, cat, dept, room,
     desc: $("#fDesc").value.trim().slice(0, 1000), ooo: $("#fOoo").checked, guest: $("#fGuest").checked,
     items: draftItems.map(x => x.done ? {...x, by: who(), at: now} : {...x}),
     status: "yeni", createdAt: now, updatedAt: now, doneAt: null, verified: false, verifiedBy: null,
     createdBy: me ? me.name : "İsimsiz", createdDept: me ? me.dept : null, createdUid: authUser?.id || null,
-    log: [{t: now, by: who(), msg: `İşi açtı (${PRIO[prio]?.label || "Orta"}, son tarih ${fmt(due)})` + (draftItems.length ? `, ${draftItems.length} kalemlik liste` : "")}]
+    log: [{t: now, by: who(), msg: "İşi açtı" + (draftItems.length ? ` (${draftItems.length} kalemlik liste)` : "")}]
   };
   $("#fSubmit").disabled = true;
   try { await insertTask(doc); closeOv("#ovNew"); toast(`Kaydedildi: ${DEPTS[dept].label} · ${room || TYPES[type].label}`); }
@@ -1459,7 +1351,7 @@ function notify(prev, d){
   if (!prev){
     if (!isOpen(d) || myCreated.has(d.id)) return;
     fresh.add(d.id); setTimeout(() => fresh.delete(d.id), 3000);
-    if (d.dept === me.dept){ toast(`${(d.log || []).length > 1 ? "Yeniden açıldı" : "Yeni iş"}: ${whereOf(d)} · ${PRIO[prioOf(d)].label} · ${d.cat || ""}`); alertBuzz(); }
+    if (d.dept === me.dept){ toast(`${(d.log || []).length > 1 ? "Yeniden açıldı" : "Yeni iş"}: ${whereOf(d)} · ${d.cat || ""}`); alertBuzz(); }
     return;
   }
   if (isOpen(prev) && !isOpen(d) && d.createdBy === me.name){ toast(`${whereOf(d)} için açtığın iş tamamlandı.`); beep(); return; }

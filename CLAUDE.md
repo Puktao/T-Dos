@@ -29,8 +29,9 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
 ## İş kaydı (`data` alanı)
-`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
-- `prio`: `acil` (kırmızı) · `orta` (sarı) · `sureli` (mavi). Eski kayıtlardaki `normal` ve `dusuk` değerleri `prioOf()` ile `orta` ve `sureli`ye eşlenir.
+`type, cat, dept, room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
+- **Aciliyet (`prio`) ve son tarih (`dueAt`) 26/10/26 kaldırıldı** (kullanıcı kararı): formda, kartta, detayda, filtrede, Rapor'da yok; veritabanından da silindi (`schema.sql` 15. bölüm). Eski geçmiş (log) yazılarında "Acil, son tarih …" kalabilir.
+- Renkler: **açık iş mavi** (`.card.open`, `--sureli` tokenları), **tamamlanan iş yeşil** (`.card.done`, `--ok` tokenları). Kırmızı yalnızca uyarı, silme ve SATIŞA KAPALI için.
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
 - Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
 
@@ -50,23 +51,20 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 1. Uygulama adı **F-Do’s**. Logo: lacivert zemin, beyaz `F-Do`, sarı tire, üstte küçük sarı `’s`; "Do" F’den küçük, altında yalnızca "Do" boyunca düz sarı çizgi, çizginin alt kenarı F’nin alt ucuyla aynı hizada (Big Shoulders Display 800). Uygulama ikonu, üst köşedeki logo ve giriş ekranındaki logo aynı çizimdir: `index.html` içindeki `#fdosLogo` SVG sembolü ve `icons/*.png`. Yazı tipi ya da renk değiştirilmez.
 2. Alt tablar: **Anasayfa · Yapılacaklar · Tamamlananlar · Rapor**. Uygulama **her açılışta Anasayfa** ile başlar (adres çubuğundaki #sekme dikkate alınmaz); her girişte (hangi kullanıcı olursa olsun) ve arka planda 10 saniyeden uzun kalıp geri gelinince de Anasayfa'ya döner (açık iş/kullanıcı formu varsa dokunulmaz). Üst çubukta logonun yanında sekme adı yazmaz (başlık yalnızca ekran okuyucu için, `sr-only`).
 3. **Anasayfa** sırası:
-   - "Bugün yapılacaklar" (açık gri kutu, solda koyu çentik) ve "Bitmemiş işler" (solda açık gri çentik) adlı iki büyük kutu. Bugün kutusu, son tarihi bugün olan ve süresi geçmiş işleri sayar.
-   - "Acil yapılacaklar" listesi: aciliyeti Acil olan işler **ve son tarihine 3 saatten az kalan (ya da geçmiş) her iş**; son tarihe göre sıralı. Kartlar kendi aciliyet renginde kalır.
-   - "Takvimi yaklaşan" listesi: kalan işler, **son tarihi en yakın olan en üstte**, aciliyet rengine boyanmış kutular, en fazla 12 iş. "Acil yapılacaklar"daki işler burada görünmez.
-4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Formdaki tarih seçici telefonun kendi biçimini kullanır. Kartlar aciliyet rengiyle boyanır, her kartta son tarih yazar. **Kalan süre / gecikme yazısı ("1 gün 21 sa kaldı", "Gecikti…", "…gecikmeli", "zamanında") hiçbir yerde yazılmaz** (kartlar, detay). Süresi geçen işin son tarihi kırmızı yazılır.
+   - "Yeni işler" (açık gri kutu, solda koyu çentik; durumu Yeni olan işler, dokununca Yapılacaklar "Durum: Yeni" filtresiyle açılır) ve "Bitmemiş işler" (solda açık gri çentik, departman dağılımı) adlı iki büyük kutu.
+   - "Açık işler" listesi: tüm açık işler, **en eski açılan en üstte**, en fazla 12 iş, fazlası için "Tümünü gör".
+4. **Tarih biçimi her yerde `gg/aa/yy ss:dd`** (ör. 23/10/26 14:30; `fmt()`); "Bugün / Yarın / Dün" yazılmaz. Açık işin kartında **"Açılış: …"**, tamamlanmış işte **"Bitti …"** yazar. Kalan süre / gecikme yazısı hiçbir yerde yazılmaz.
 5. **Liste ekranları** (Yapılacaklar ve Tamamlananlar):
-   - Kartların soldaki çentiği her listede kendi aciliyet renginde (Yapılacaklar dahil).
+   - Kartlar ve soldaki çentik: açık iş mavi, tamamlanan iş yeşil. Yapılacaklar **en eski açılan önce**, Tamamlananlar en son biten önce sıralanır.
    - **Sola kaydırarak silme** (tüm listeler: Anasayfa, Yapılacaklar, Tamamlananlar): kartı sola kaydırınca sağda kırmızı **Sil** çıkar, iki aşamalı (Sil → Eminim). İşi açan kişi kendi işlerini (kontrolü onaylanmamışsa), yönetici her işi siler (`canDelete(t)`; veritabanında `fdos_can_delete(data)`, `schema.sql` 11. bölüm).
    - Üstte arama alanı, sağında Filtre düğmesi.
-   - Filtre panelinde **yalnızca Aciliyet ve Durum** var. Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
+   - Filtre panelinde **yalnızca Durum** var (Yeni / Devam ediyor / Beklemede). Tamamlananlar'da Durum = Kontrol bekleyen / edilen.
    - Panelde "Sıfırla" ve "… işi göster" düğmeleri yok; seçim anında uygulanır, panel ✕ ya da dışına dokunarak kapanır.
    - Açık filtreler arama alanının altında kaldırılabilir etiket olarak görünür.
-   - "Son tarih" filtresi panelde yok; yalnızca Anasayfa kutusundan gelir.
 6. **"Yapılacak İş" formu** sırası:
    - [Sorumlu departman | Bildirim türü] yan yana. Tür listesi seçilen departmana göre daralır.
    - Alan açılır listesi ve sağında oda no alanı. Alan **Koridor** seçilince aynı kutu **"Kat No"** olarak açılır ve zorunludur; kayıtta `room = "Koridor Kat 3"`, kartta plaka "KORİDOR / 3 / KAT". Oda No ve Kat No **yalnızca tam sayı** kabul eder (en fazla 4 hane). Harf, nokta, virgül ya da 5. rakam yazılırsa atılır ve kutunun altında kırmızı uyarı çıkar ("… tam sayı olmalı; nokta ya da virgül kullanılamaz." / "… yalnızca rakamdan oluşmalı." / "… en fazla 4 haneli olabilir.").
-   - [Kategori | Aciliyet] yan yana.
-   - Son tarih (aciliyete göre otomatik dolar, hızlı süre düğmesi yok).
+   - Kategori (tam genişlik).
    - Açıklama.
    - Liste.
    - OOO ve Misafir odada kutuları.
@@ -76,10 +74,10 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Bir iş yalnızca **atandığı departmana** ve **işi açan kişiye** görünür; başka departman göremez. Yönetici her şeyi görür. Hem ekranda (`canSee()`) hem veritabanında (`fdos_can_see(data)` RLS kuralı, `schema.sql` 8. bölüm: okuma, güncelleme, silme) uygulanır. İşi açan kişi `createdUid` ile, eski kayıtlarda `createdBy` adıyla tanınır.
 10. **İş detayı yalnızca görüntüleme ekranıdır.** Hiçbir alan detayda düzenlenmez.
-   - Ayrı kutu yok: detay ekranının zemini aciliyet kutularının (kartların) rengiyle aynıdır (geçiş yok); kartlardaki soldaki renkli çentik burada ekranın tepesinde yatay şerittir. Ekranda sırayla: aciliyet etiketi, **Departman**, **Son tarih** (yalnızca tarih; geçmişse kırmızı), **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Aynı yerde tekrarlıyorsa **Tekrar** satırı ("Son 30 günde bu odada açılan 3. Klima / ısıtma işi"). Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
+   - Ayrı kutu yok: detay ekranının zemini kartın rengiyle aynıdır (geçiş yok); kartlardaki soldaki renkli çentik burada ekranın tepesinde yatay şerittir. Zemin açık işte mavi, tamamlanmışta yeşil. Ekranda sırayla: **Departman**, **Açıklama** (kalın), varsa **Liste**, **Durum**; varsa Bitiş, Kontrol, Oda. Aynı yerde tekrarlıyorsa **Tekrar** satırı ("Son 30 günde bu odada açılan 3. Klima / ısıtma işi"). Sağ altta küçük: "Bildiren: …" ve altında "Açılış: …" (kaç saat önce yazılmaz).
    - İşi açan kişi (`createdUid`, eski kayıtlarda `createdBy` adı) ve yönetici: başlıkta ✕ yanında **Güncelle** (`canEdit(t)`). Basınca iş, verileriyle **Yapılacak İş formunda** açılır (başlık "Yapılacak İşi Güncelle", düğme "Güncelle"); kayıtta yalnızca değişen alanlar yazılır, geçmişe "Güncelledi: …" düşer. Tamamlanmış işte formda "Kaydı sil" çıkar.
    - İşin atandığı departman (`inDept(t)`): Güncelle yok. Yalnızca "Durumu değiştir" açılır listesi ve liste maddelerini onaylama; ikisi de anında kaydedilir. Kartlardaki durum düğmeleri (Tamamlandı, Beklemeye al, Devam et; **"Üstlen" yok**, yeni işin kartında düğme yoktur) da yalnızca bu departmanda çıkar; "Detay" düğmesi yok (karta dokununca detay açılır); düğmesi olmayan kartta düğme satırı hiç görünmez.
-   - **"Kontrol edildi" yalnızca işi atayan (açan) kişide ve yöneticide** (`canCheck(t)`; yönetici her işte kullanır, başkasında görünmez). Onaylanan iş kartı **yeşil** olur (`.card.done.verified`, detay ekranı da yeşil). **"Yeniden aç"** kartta "Tamamlandı" durum yazısıyla aynı satırda, en sağda durur ("KONTROL EDİLDİ" etiketi "Bitti" satırının sağında); "Kontrol edildi" düğmesi onun altında, sağda; işin atandığı departman, işi açan kişi ve yönetici kullanır (`canVerify(t)`).
+   - **"Kontrol edildi" yalnızca işi atayan (açan) kişide ve yöneticide** (`canCheck(t)`; yönetici her işte kullanır, başkasında görünmez). Tamamlanan her iş yeşildir; onaylanan iş "KONTROL EDİLDİ" etiketiyle ayrılır (`.card.done.verified`). **"Yeniden aç"** kartta "Tamamlandı" durum yazısıyla aynı satırda, en sağda durur ("KONTROL EDİLDİ" etiketi "Bitti" satırının sağında); "Kontrol edildi" düğmesi onun altında, sağda; işin atandığı departman, işi açan kişi ve yönetici kullanır (`canVerify(t)`).
    - **Kontrolü onaylanmış iş sabittir** (`locked(t)`): kimse (yönetici dahil) Güncelle, durum değiştirme ya da liste onayı yapamaz. Yalnızca "Yeniden aç" kalır; yeniden açılınca onay kalkar, **listedeki tüm maddelerin onayı da kaldırılır** ve iş tekrar düzenlenebilir.
    - Liste boşsa detayda Liste bölümü görünmez. Tüm kalemler tiklenmeden "Tamamlandı" kaydedilmez.
    - Geçmiş listesinde değişikliği yapan kişinin adı (ve departmanı) kalın yazılır.
@@ -92,7 +90,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 
 12. **Tekrarlayan arıza uyarısı** (`repeatNo(t)`, `REPEAT_DAYS = 30`): aynı `room` + `type` + `cat` için son 30 günde açılan kaçıncı iş olduğu sayılır; 2 ve üstüyse kartta `30 GÜNDE 3. KEZ` etiketi (`.flag.rep`), detayda Tekrar satırı, Rapor'da "Tekrarlayan arızalar (son 30 gün)" paneli (en fazla 8 satır, raporun kapsamına göre). Yeni iş açmaz, yalnızca uyarır ("tekrarlayan işler" özelliği değildir). Sayım kişinin görebildiği işlerle yapılır.
 
-11. **Rapor:** Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
+11. **Rapor:** Göstergeler: Açılan iş, Tamamlanan, Şu an açık, Ort. çözüm süresi. Departman tablosu: Açık, Biten, Ort. süre. Kişiler tablosu: Açtığı, Bitirdiği. "Zamanında", "Geciken", "Son tarihi geçen" ve "Aciliyet dağılımı" kaldırıldı. Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
 ## Açık konular
 - Muhasebe departmanı: konuşuldu, **şimdilik eklenmedi** (kullanıcı ihtiyaca göre soracak). Önerilen: departman `muhasebe` (rozet MUH, `alan_gerekli = false`), tür "Muhasebe Talebi", kategoriler Fatura / hesap düzeltme, Ödeme, Avans / masraf, Diğer. Kod gerekmez, tablolara satır eklenir.
@@ -119,6 +117,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 14. bölüm (`fdos_open_dupes`) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
 - [ ] Supabase'de Sorumlu kalıntısı silinecek (kullanıcıya verilen kod: `drop table if exists public.fdos_sorumlular; drop function if exists public.fdos_my_dept(); update public.fdos_tasks set data = data - 'sorumlu' where data ? 'sorumlu';`).
 - [ ] Servis departmanı Supabase tablolarına eklenecek (7. bölümdeki başlangıç değerleri; kullanıcıya kısa SQL verildi).
+- [ ] `schema.sql` 15. bölüm (aciliyet ve son tarih verisini silme) Supabase'de çalıştırılacak.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları

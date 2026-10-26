@@ -484,3 +484,7 @@ as $$
 $$;
 revoke all on function public.fdos_open_dupes(text, text, text) from public, anon;
 grant execute on function public.fdos_open_dupes(text, text, text) to authenticated;
+
+-- 15) Aciliyet ve son tarih kaldırıldı (26/10/26): işlerdeki "prio" ve "dueAt" alanları silinir.
+--     Geçmiş (log) yazılarına dokunulmaz.
+update public.fdos_tasks set data = data - 'prio' - 'dueAt' where data ?| array['prio', 'dueAt'];
