@@ -29,7 +29,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
 
 ## İş kaydı (`data` alanı)
-`type, cat, dept, prio, dueAt(ms), room, desc, sorumlu, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
+`type, cat, dept, prio, dueAt(ms), room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
 - `prio`: `acil` (kırmızı) · `orta` (sarı) · `sureli` (mavi). Eski kayıtlardaki `normal` ve `dusuk` değerleri `prioOf()` ile `orta` ve `sureli`ye eşlenir.
 - `status`: `yeni` → `devam` / `beklemede` → `tamam`. Resepsiyon "Kontrol edildi" der (`verified`), bu durumda `ooo` (satışa kapalı) kalkar.
 - Satınalma işlerinde `room` boştur, kartta "TALEP / SAT" görünür.
@@ -72,7 +72,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
    - OOO ve Misafir odada kutuları.
    - Tüm seçimler açılır liste (select).
    - **Tekrar kayıt uyarısı:** Yeni işte (güncellemede değil) Kaydet'e basınca aynı oda/alan + departman + kategori için açık iş varsa formda sarı uyarı çıkar (kim, ne zaman, durum), düğme "Yine de kaydet" olur; ikinci basışta kaydeder. Seçim değişince uyarı kalkar. Veritabanında `fdos_open_dupes(p_room, p_dept, p_cat)` (`schema.sql` 14. bölüm, security definer: kişinin göremediği işleri de bulur, yalnızca kim/ne zaman/durum döner); fonksiyon yoksa görülebilen işlere bakılır. Satınalma (oda yok) kontrol edilmez.
-   - **Kişiye atama yok.** İş yalnızca departmana atanır (departman içinde kime verildiği **Sorumlu** ile ayrıca not edilir, bkz. 13. madde) ("Departman" = atanan departman). Departmanı değiştirmek için işi açan kişi ya da yönetici detaydaki Güncelle ile formu açar.
+   - **Kişiye atama yok.** İş yalnızca departmana atanır ("Departman" = atanan departman). Departmanı değiştirmek için işi açan kişi ya da yönetici detaydaki Güncelle ile formu açar.
 7. **Satınalma** seçilince (otelde depo yok, alan listesine "Depo" eklenmeyecek) Alan alanı "Gerekmiyor" yazısıyla kilitlenir ve zorunlu olmaz. OOO ve Misafir odada kutuları da kilitlenir.
 9. **Görünürlük:** Bir iş yalnızca **atandığı departmana** ve **işi açan kişiye** görünür; başka departman göremez. Yönetici her şeyi görür. Hem ekranda (`canSee()`) hem veritabanında (`fdos_can_see(data)` RLS kuralı, `schema.sql` 8. bölüm: okuma, güncelleme, silme) uygulanır. İşi açan kişi `createdUid` ile, eski kayıtlarda `createdBy` adıyla tanınır.
 10. **İş detayı yalnızca görüntüleme ekranıdır.** Hiçbir alan detayda düzenlenmez.
@@ -92,18 +92,11 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 
 12. **Tekrarlayan arıza uyarısı** (`repeatNo(t)`, `REPEAT_DAYS = 30`): aynı `room` + `type` + `cat` için son 30 günde açılan kaçıncı iş olduğu sayılır; 2 ve üstüyse kartta `30 GÜNDE 3. KEZ` etiketi (`.flag.rep`), detayda Tekrar satırı, Rapor'da "Tekrarlayan arızalar (son 30 gün)" paneli (en fazla 8 satır, raporun kapsamına göre). Yeni iş açmaz, yalnızca uyarır ("tekrarlayan işler" özelliği değildir). Sayım kişinin görebildiği işlerle yapılır.
 
-13. **Sorumlu** (departman içinde işin verildiği kişi, yalnızca ad; kullanıcı hesabı değil): Uygulamayı departman liderleri kullanır, hepsi eşit.
-   - Liste tablosu `fdos_sorumlular(id, dept, ad, sira)` (`schema.sql` 15. bölüm). RLS: departman kendi listesini görür/ekler/siler (`fdos_my_dept()`), yönetici hepsini. Uygulamada `loadSorumlular()` (girişte ve `refetch()` sırasında), `sorFor(dept)`.
-   - **Hesabım → Sorumlular** (departmanı olan herkes ve yönetici): ad yaz → Ekle; satırı sola kaydır → Sil → Eminim. Yönetici üstte departman seçer. Ekran Kullanıcılar ile aynı overlay'i kullanır (`usersView = "sor"`, `renderSor()`).
-   - İş detayında **Durum'un üstünde** "Sorumlu" açılır listesi: yalnızca işin atandığı departmanda (`inDept(t)`, onaylı işte kilitli) ve o departmanın listesi doluysa çıkar; liste boşsa hiç çıkmaz. Seçim anında kaydedilir (`data.sorumlu`, geçmişe "Sorumlu: Ali").
-   - Sorumlu adı **kartta** ("Sorumlu: **Ali**", departman etiketinin yanında) ve detayda yalnızca atanan departman ve yöneticiye görünür (`sorSee(t)`); işi açan başka departman görmez. Yapılacaklar/Tamamlananlar aramasında sorumlu adı da aranır.
-   - Listeden silinen ad eski işlerde görünmeye devam eder.
-
 11. **Rapor:** Tablo başlık satırları (Departmanlar, Kişiler) Anasayfa'daki "Bugün yapılacaklar" kutusunun açık grisinde. Personel yalnızca **kendi departmanına atanan işlerin** raporunu görür (açtığı başka departman işleri dahil değil); departman tablosunda yalnızca kendi departmanı, başlığı departman adı. Yönetici bütün departmanları ve **Kişiler** tablosunu görür.
 
 ## Açık konular
 - Muhasebe departmanı: konuşuldu, **şimdilik eklenmedi** (kullanıcı ihtiyaca göre soracak). Önerilen: departman `muhasebe` (rozet MUH, `alan_gerekli = false`), tür "Muhasebe Talebi", kategoriler Fatura / hesap düzeltme, Ödeme, Avans / masraf, Diğer. Kod gerekmez, tablolara satır eklenir.
-- **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler. İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
+- **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler, **departman içinde Sorumlu (kişi) seçimi** (yapıldı, yanlış anlaşıldığı için 26/10/26 kaldırıldı; `schema.sql` 15. bölüm artık tabloyu ve fonksiyonu siler). İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
 - Satışa kapalı odalar listesi: konuşuldu, **karar verilmedi, yapılmayacak** (kullanıcı "sakın yapma" dedi). Önerilen yer Anasayfa'da iki kutunun altında ince şerit; engel: görünürlük kuralı yüzünden Resepsiyon başka departmana atanmış OOO işleri göremez, veritabanı istisnası gerekir.
 - Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **şimdilik kenara alındı**: önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
 
@@ -124,7 +117,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] `schema.sql` 12. bölüm (ekleme kuralı) Supabase'de çalıştırıldı.
 - [x] `schema.sql` 13. bölüm (iş kaydı koruması) çalıştırıldı; tetikleyici var, uygulamada deneme sorunsuz (kullanıcı doğruladı).
 - [x] `schema.sql` 14. bölüm (`fdos_open_dupes`) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
-- [x] `schema.sql` 15. bölüm (`fdos_sorumlular`) kuruldu (dışarıdan doğrulandı: tablo ve `fdos_my_dept` var, `anon` kapalı).
+- [ ] `schema.sql` 15. bölüm (Sorumlu kaldırma: `fdos_sorumlular` ve `fdos_my_dept` silinir) Supabase'de çalıştırılacak.
 - [ ] Servis departmanı Supabase tablolarına eklenecek (7. bölümdeki başlangıç değerleri; kullanıcıya kısa SQL verildi).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
