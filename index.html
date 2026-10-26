@@ -483,13 +483,6 @@ const lower = s => String(s ?? "").toLocaleLowerCase("tr");
 // tüm tarihler gg/aa/yy ss:dd (ör. 23/10/26 14:30)
 const fmt = ms => { if (!ms) return ""; const d = new Date(ms); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const dayStart = d => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
-function dur(ms){
-  const m = Math.max(0, Math.round(ms / 60000));
-  if (m < 60) return m + " dk";
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + " sa" + (m % 60 ? " " + (m % 60) + " dk" : "");
-  const d = Math.floor(h / 24); return d + " gün" + (h % 24 ? " " + (h % 24) + " sa" : "");
-}
 const pad = n => String(n).padStart(2, "0");
 
 let loaded = false, dbFailed = false;
@@ -768,12 +761,11 @@ function screenReport(){
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
   const open = all.filter(isOpen);
-  const avg = list => list.length ? dur(list.reduce((s, t) => s + (t.doneAt - t.createdAt), 0) / list.length) : "—";
   const periods = [["0","Bugün"],["7","7 gün"],["30","30 gün"]]
     .map(([k,l]) => `<button type="button" class="chip" data-f="rep" data-v="${k}" aria-pressed="${ui.rep === k}">${l}</button>`).join("");
   const rows = Object.entries(DEPTS).filter(([k, v]) => ownDept ? k === ownDept : (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
     const o = open.filter(t => t.dept === k), dn = done.filter(t => t.dept === k);
-    return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td>${dn.length}</td><td>${avg(dn)}</td></tr>`;
+    return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td>${dn.length}</td></tr>`;
   }).join("");
   const top = (keyFn, n = 5) => {
     const m = new Map(); created.forEach(t => { const k = keyFn(t); if (k) m.set(k, (m.get(k) || 0) + 1); });
@@ -787,12 +779,11 @@ function screenReport(){
       <div class="kpi"><b>${created.length}</b><span>Açılan iş</span></div>
       <div class="kpi"><b>${done.length}</b><span>Tamamlanan</span></div>
       <div class="kpi"><b>${open.length}</b><span>Şu an açık</span></div>
-      <div class="kpi"><b>${avg(done)}</b><span>Ort. çözüm süresi</span></div>
     </div>
     <div class="panel"><h3>${ownDept ? esc(DEPTS[ownDept]?.label || "Departmanım") : "Departmanlar"}</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Departman</th><th>Açık</th><th>Biten</th><th>Ort. süre</th></tr></thead>
+      <thead><tr><th>Departman</th><th>Açık</th><th>Biten</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-      <p class="muted" style="margin:8px 0 0">Açık: şu an. Biten ve ortalama süre: seçili dönem.</p></div>
+      <p class="muted" style="margin:8px 0 0">Açık: şu an. Biten: seçili dönem.</p></div>
     ${isAdmin() ? peoplePanel(created, done, open) : ""}
     <div class="panel"><h3>En sık sorunlar</h3>${top(t => `${TYPES[t.type]?.label || ""} · ${t.cat || ""}`)}</div>
     <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>
