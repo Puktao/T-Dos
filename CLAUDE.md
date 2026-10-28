@@ -4,7 +4,7 @@ Otel içi iş atama uygulaması. Resepsiyon, Kat Hizmetleri, Teknik, Satınalma,
 Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'daki tasarım konuşmasında verilen kararların özetidir.
 
 ## Kullanıcıyla çalışma
-- Dil: **Türkçe**. Arayüz metinleri de Türkçe.
+- Dil: **Türkçe** (kullanıcıyla konuşma). Uygulama arayüzü **4 dilli**: Türkçe, English, Deutsch, Ελληνικά (bkz. "Diller").
 - Kullanıcı danışman tavrı istiyor: hata, risk ya da yanlış varsayım varsa **ilk cümlede** söyle. Övgü ve dolgu cümlesi kullanma.
 - Önemli iddiaları etiketle: **[Kesin]**, **[Muhtemel]**, **[Tahmin]**. Kullanıcı itiraz ederse yeni bilgi yoksa pozisyonunu koru.
 - Kullanıcı geliştirici değil. Teknik adımları tıklama düzeyinde anlat, mümkünse işi kendin yap.
@@ -27,6 +27,12 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Kullanıcı ekleme:** `fdos_admin_create_user(p_email, p_password, p_name, p_dept, p_role)` SQL fonksiyonu (security definer, yalnızca yönetici). `auth.users` ve `auth.identities` satırlarını doğrudan ekler, kullanıcı onaylı açılır. Bu Supabase'in iç tablolarına yazdığı için resmî yol değildir; Supabase Auth şeması değişirse güncellenmesi gerekebilir. Edge Function kullanılmıyor (kullanıcı panelden yükleyemedi). Profil satırı `auth.users` tetikleyicisiyle kendiliğinden oluşur.
 - **PWA:** `manifest.webmanifest`, `sw.js` (aynı köken için önce ağ, ağ 1,5 sn içinde yanıt vermezse önbellek; CDN için önce önbellek), `icons/`. **Her yayında `sw.js` içindeki `CACHE` sürümünü artır.**
 - **Yayın:** GitHub Pages, `main` dalının kökü. `.nojekyll` var.
+
+## Diller (28/10/26)
+- `index.html` başındaki sözlük: `TX` (arayüz metinleri, her anahtar `[tr, en, de, el]`), `ST_TX` (durumlar), `DATA_TX` (hazır departman/tür kodları ve kategori/alan Türkçe adlarının çevirisi). Uygulama kodunda çeviri **her zaman `tx("anahtar", {değişken})`** ile yapılır (`t` çoğu fonksiyonda işin kendisi olduğu için gölgelenir; `t()` yalnızca sözlük bölümünde). Yeni metin eklerken dört dili birden yaz.
+- Ekranda gösterim yardımcıları: `dL`/`dN` (departman tam/kısa adı), `tL` (tür), `cL` (kategori), `aL` (alan), `stL` (durum), `placeOf` (Oda 204 / Koridor Kat 3 / alan), `logL` (geçmiş kaydı), `byL` ("Ad (Departman)"), `anonL`. Statik HTML `data-i18n`, `data-i18n-ph`, `data-i18n-aria`, `data-i18n-title` öznitelikleriyle `applyStatic()` içinde çevrilir.
+- **Kayıtlar her zaman Türkçe kalır:** `cat`, `room`, departman adı, `who()` ile yazılan "Ad (Departman)", geçmiş (`log.msg`) Türkçe yazılır; ekranda seçilen dile çevrilir. Tanınmayan geçmiş satırı olduğu gibi görünür. Personelin yazdığı açıklama, liste kalemleri ve adlar çevrilmez. Supabase tablosuna sonradan eklenen kategori/alan/departman `DATA_TX`'e eklenene kadar her dilde Türkçe adıyla görünür. Rozetler (TEK, HK, SAT…) çevrilmez. Tarih biçimi her dilde `gg/aa/yy ss:dd`.
+- **Dil seçimi kişiye bağlı:** Hesabım → **Dil** açılır listesi (`#wLang`). `setLang(l, true)` → cihazda `localStorage["fdos.lang"]` + veritabanında `fdos_set_lang(p_lang)` (security definer, yalnızca kendi profilinin `lang` sütunu; `schema.sql` 2. bölüm). Girişte `syncLang()` profildeki dili bir kez okur ve uygular; profilde dil yoksa cihazdaki, o da yoksa telefonun dili (tr/en/de/el değilse Türkçe).
 
 ## İş kaydı (`data` alanı)
 `type, cat, dept, room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
@@ -108,6 +114,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Supabase → Authentication → URL Configuration: Site URL ve Redirect URLs `https://puktao.github.io/T-Dos/` (kullanıcı kaydetti; dışarıdan doğrulanamıyor, "Şifremi unuttum" ile denenebilir).
 - [x] Servis departmanı Supabase tablolarına eklendi (kullanıcı doğruladı: Servis · SRV · Servis Talebi · 6 kategori).
 - [x] Muhasebe departmanı Supabase tablolarına eklendi (kullanıcı doğruladı).
+- [ ] Dil sütunu ve `fdos_set_lang` (`schema.sql` 2. bölüm) Supabase'de çalıştırılacak (kullanıcıya kısa SQL verildi). Çalıştırılmazsa dil yalnızca cihazda saklanır.
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları

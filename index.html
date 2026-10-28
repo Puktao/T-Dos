@@ -354,9 +354,9 @@ img{max-width:100%}
 <header class="hdr gut">
   <div class="col">
     <span class="brand" role="img" aria-label="F-Do’s"><svg><use href="#fdosLogo"/></svg></span>
-    <h1 id="hTitle" class="sr-only">Anasayfa</h1>
+    <h1 id="hTitle" class="sr-only"></h1>
     <span class="sp"></span>
-    <button class="iconbtn" id="soundBtn" type="button" aria-pressed="false" aria-label="Sesli uyarı" title="Yeni işte sesli uyarı">
+    <button class="iconbtn" id="soundBtn" type="button" aria-pressed="false" data-i18n-aria="sound" data-i18n-title="sound.title">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
     </button>
     <button class="who" id="whoBtn" type="button"></button>
@@ -368,13 +368,13 @@ img{max-width:100%}
   <main id="screen" class="screen" aria-live="polite"></main>
 </div></div>
 
-<button class="fab" id="newBtn" type="button" aria-label="Yapılacak iş ekle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="fab" id="newBtn" type="button" data-i18n-aria="new.aria"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 
-<nav class="tabbar gut" aria-label="Sekmeler"><div class="col" id="tabbar">
-  <button class="tb" data-tab="ana" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Anasayfa</button>
-  <button class="tb" data-tab="yapilacak" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Yapılacaklar<span class="bd" id="bdTodo" hidden></span></button>
-  <button class="tb" data-tab="tamamlanan" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Tamamlananlar<span class="bd" id="bdDone" hidden></span></button>
-  <button class="tb" data-tab="rapor" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Rapor</button>
+<nav class="tabbar gut" data-i18n-aria="tabs"><div class="col" id="tabbar">
+  <button class="tb" data-tab="ana" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="tab.ana">Anasayfa</span></button>
+  <button class="tb" data-tab="yapilacak" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="tab.yapilacak">Yapılacaklar</span><span class="bd" id="bdTodo" hidden></span></button>
+  <button class="tb" data-tab="tamamlanan" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span data-i18n="tab.tamamlanan">Tamamlananlar</span><span class="bd" id="bdDone" hidden></span></button>
+  <button class="tb" data-tab="rapor" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i18n="tab.rapor">Rapor</span></button>
 </div></nav>
 
 <div class="toast" id="toast" role="status" hidden></div>
@@ -382,48 +382,48 @@ img{max-width:100%}
 <!-- Yapılacak iş -->
 <div class="overlay" id="ovNew" hidden>
   <form class="sheet" id="newForm" novalidate>
-    <div class="sheet-head"><div><h2>Yapılacak İş</h2><p class="sheet-sub">Sorumlu departman işi anında görür.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+    <div class="sheet-head"><div><h2 id="fTitle" data-i18n="f.title"></h2><p class="sheet-sub" data-i18n="f.sub"></p></div><button type="button" class="iconbtn x" data-close data-i18n-aria="close">✕</button></div>
     <div class="pair">
-      <div class="field"><label class="lbl" for="fDept">Sorumlu departman</label><div class="sel"><select id="fDept"></select></div></div>
-      <div class="field"><label class="lbl" for="fType">Bildirim türü</label><div class="sel"><select id="fType"></select></div></div>
+      <div class="field"><label class="lbl" for="fDept" data-i18n="f.dept"></label><div class="sel"><select id="fDept"></select></div></div>
+      <div class="field"><label class="lbl" for="fType" data-i18n="f.type"></label><div class="sel"><select id="fType"></select></div></div>
     </div>
-    <div class="field"><label class="lbl" for="fArea">Alan</label>
-      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" placeholder="Oda no" autocomplete="off" aria-label="Oda numarası" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
-    <div class="field"><label class="lbl" for="fCat">Kategori</label><div class="sel"><select id="fCat"></select></div></div>
-    <div class="field"><label class="lbl" for="fDesc">Açıklama</label><textarea id="fDesc" placeholder="ör. Klima soğutmuyor, kumanda ekranı yanıp sönüyor"></textarea></div>
-    <div class="field"><label class="lbl" for="fItem">Liste (isteğe bağlı)</label>
-      <div class="inline"><input type="text" id="fItem" maxlength="120" placeholder="Kalem yaz, ör. 20 adet şampuan" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" id="fItemAdd">Ekle</button></div>
+    <div class="field"><label class="lbl" for="fArea" data-i18n="f.area"></label>
+      <div class="area"><div class="sel"><select id="fArea"></select></div><input type="text" id="fRoom" inputmode="numeric" pattern="[0-9]*" autocomplete="off" disabled></div><p class="err" id="roomErr" role="alert" hidden></p></div>
+    <div class="field"><label class="lbl" for="fCat" data-i18n="f.cat"></label><div class="sel"><select id="fCat"></select></div></div>
+    <div class="field"><label class="lbl" for="fDesc" data-i18n="f.desc"></label><textarea id="fDesc" data-i18n-ph="f.descPh"></textarea></div>
+    <div class="field"><label class="lbl" for="fItem" data-i18n="f.list"></label>
+      <div class="inline"><input type="text" id="fItem" maxlength="120" data-i18n-ph="f.itemPh" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" id="fItemAdd" data-i18n="add"></button></div>
       <ul class="clist" id="fItems" hidden></ul>
-      <span class="hint">Tik atılan kalemin üstü çizilir. Tüm kalemler tiklenmeden iş tamamlanamaz.</span></div>
+      <span class="hint" data-i18n="f.listHint"></span></div>
     <div class="field checks">
-      <label class="check"><input type="checkbox" id="fOoo"><span>Oda satışa kapalı (OOO)<small>Sorun giderilip kontrol edilene kadar oda satılmasın.</small></span></label>
-      <label class="check"><input type="checkbox" id="fGuest"><span>Misafir odada<small>Girişten önce kapı çalınmalı ya da misafirle saat ayarlanmalı.</small></span></label>
+      <label class="check"><input type="checkbox" id="fOoo"><span><span data-i18n="f.ooo"></span><small data-i18n="f.oooHint"></small></span></label>
+      <label class="check"><input type="checkbox" id="fGuest"><span><span data-i18n="f.guest"></span><small data-i18n="f.guestHint"></small></span></label>
     </div>
     <p class="err" id="fErr" hidden></p>
     <div class="dupwarn" id="fDup" role="alert" hidden></div>
-    <div class="sheet-foot"><button type="button" class="btn danger" id="fDel" hidden>Kaydı sil</button><button type="button" class="btn ghost" data-close>Vazgeç</button><button type="submit" class="btn primary" id="fSubmit">İşi kaydet</button></div>
+    <div class="sheet-foot"><button type="button" class="btn danger" id="fDel" hidden></button><button type="button" class="btn ghost" data-close data-i18n="cancel"></button><button type="submit" class="btn primary" id="fSubmit"></button></div>
   </form>
 </div>
 
 <div class="overlay login" id="ovLogin" hidden>
   <form class="sheet" id="loginForm" novalidate>
     <div class="login-brand"><span class="brand" role="img" aria-label="F-Do’s"><svg><use href="#fdosLogo"/></svg></span></div>
-    <h2 class="login-t">Giriş yap</h2>
-    <p class="sheet-sub">Yöneticinin verdiği e-posta ve şifreyle gir.</p>
-    <div class="field"><label class="lbl" for="lEmail">E-posta</label><input type="email" id="lEmail" autocomplete="username" inputmode="email" autocapitalize="off"></div>
-    <div class="field"><label class="lbl" for="lPass">Şifre</label><input type="password" id="lPass" autocomplete="current-password"></div>
+    <h2 class="login-t" data-i18n="l.title"></h2>
+    <p class="sheet-sub" data-i18n="l.sub"></p>
+    <div class="field"><label class="lbl" for="lEmail" data-i18n="email"></label><input type="email" id="lEmail" autocomplete="username" inputmode="email" autocapitalize="off"></div>
+    <div class="field"><label class="lbl" for="lPass" data-i18n="password"></label><input type="password" id="lPass" autocomplete="current-password"></div>
     <p class="err" id="lErr" hidden></p>
-    <div class="sheet-foot"><button type="button" class="btn ghost" id="lReset">Şifremi unuttum</button><button type="submit" class="btn primary" id="lSubmit">Giriş yap</button></div>
+    <div class="sheet-foot"><button type="button" class="btn ghost" id="lReset" data-i18n="l.forgot"></button><button type="submit" class="btn primary" id="lSubmit" data-i18n="l.title"></button></div>
   </form>
 </div>
 <div class="overlay login" id="ovPass" hidden>
   <form class="sheet" id="passForm" novalidate>
-    <h2 class="login-t">Yeni şifre belirle</h2>
-    <p class="sheet-sub">En az 6 karakter.</p>
-    <div class="field"><label class="lbl" for="pNew">Yeni şifre</label><input type="password" id="pNew" autocomplete="new-password"></div>
-    <div class="field"><label class="lbl" for="pNew2">Yeni şifre (tekrar)</label><input type="password" id="pNew2" autocomplete="new-password"></div>
+    <h2 class="login-t" data-i18n="p.title"></h2>
+    <p class="sheet-sub" data-i18n="p.sub"></p>
+    <div class="field"><label class="lbl" for="pNew" data-i18n="p.new"></label><input type="password" id="pNew" autocomplete="new-password"></div>
+    <div class="field"><label class="lbl" for="pNew2" data-i18n="p.new2"></label><input type="password" id="pNew2" autocomplete="new-password"></div>
     <p class="err" id="pErr" hidden></p>
-    <div class="sheet-foot"><button type="submit" class="btn primary">Şifreyi kaydet</button></div>
+    <div class="sheet-foot"><button type="submit" class="btn primary" data-i18n="p.save"></button></div>
   </form>
 </div>
 
@@ -433,9 +433,9 @@ img{max-width:100%}
 
 <div class="overlay" id="ovWho" hidden>
   <form class="sheet" id="whoForm" novalidate>
-    <div class="sheet-head"><div><h2>Hesabım</h2><p class="sheet-sub">Ad ve departmanı yönetici belirler.</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
+    <div class="sheet-head"><div><h2 data-i18n="w.title"></h2><p class="sheet-sub" data-i18n="w.sub"></p></div><button type="button" class="iconbtn x" data-close data-i18n-aria="close">✕</button></div>
     <dl class="facts" id="wInfo"></dl>
-    <div class="sheet-foot"><button type="button" class="btn" id="usersBtn" hidden>Kullanıcılar</button><button type="button" class="btn ghost" id="logoutBtn" hidden>Oturumu kapat</button></div>
+    <div class="sheet-foot"><button type="button" class="btn" id="usersBtn" hidden data-i18n="w.users"></button><button type="button" class="btn ghost" id="logoutBtn" hidden data-i18n="w.logout"></button></div>
   </form>
 </div>
 
@@ -443,7 +443,401 @@ img{max-width:100%}
 <div class="overlay" id="ovUsers" hidden><div class="sheet" id="users"></div></div>
 
 <script>
-document.documentElement.lang = "tr";
+/* ---------- diller (Türkçe · English · Deutsch · Ελληνικά) ---------- */
+// Metinler [tr, en, de, el] sırasıyla. Kayıtlara (geçmiş, departman adı) her zaman Türkçe yazılır; ekranda seçilen dilde gösterilir.
+const LANGS = ["tr", "en", "de", "el"];
+const LANG_NAMES = {tr: "Türkçe", en: "English", de: "Deutsch", el: "Ελληνικά"};
+const LOCALES = {tr: "tr", en: "en", de: "de", el: "el"};
+const TX = {
+  "tab.ana": ["Anasayfa", "Home", "Start", "Αρχική"],
+  "tab.yapilacak": ["Yapılacaklar", "To do", "Offen", "Εκκρεμή"],
+  "tab.tamamlanan": ["Tamamlananlar", "Completed", "Erledigt", "Ολοκληρωμένα"],
+  "tab.rapor": ["Rapor", "Report", "Bericht", "Αναφορά"],
+  "tabs": ["Sekmeler", "Tabs", "Registerkarten", "Καρτέλες"],
+  "sound": ["Sesli uyarı", "Sound alert", "Tonsignal", "Ηχητική ειδοποίηση"],
+  "sound.title": ["Yeni işte sesli uyarı", "Sound alert for new jobs", "Ton bei neuem Auftrag", "Ήχος για νέα εργασία"],
+  "sound.on": ["Departmanına yeni iş gelince sesli uyarı verilecek.", "A sound will play when a new job arrives for your department.", "Bei einem neuen Auftrag für deine Abteilung ertönt ein Signal.", "Θα ακούγεται ήχος όταν έρχεται νέα εργασία στο τμήμα σας."],
+  "sound.off": ["Sesli uyarı kapalı.", "Sound alert off.", "Tonsignal aus.", "Η ηχητική ειδοποίηση είναι ανενεργή."],
+  "new.aria": ["Yapılacak iş ekle", "Add job", "Auftrag hinzufügen", "Προσθήκη εργασίας"],
+  "close": ["Kapat", "Close", "Schließen", "Κλείσιμο"],
+  "cancel": ["Vazgeç", "Cancel", "Abbrechen", "Άκυρο"],
+  "save": ["Kaydet", "Save", "Speichern", "Αποθήκευση"],
+  "update": ["Güncelle", "Update", "Aktualisieren", "Ενημέρωση"],
+  "add": ["Ekle", "Add", "Hinzufügen", "Προσθήκη"],
+  "edit": ["Düzenle", "Edit", "Bearbeiten", "Επεξεργασία"],
+  "del": ["Sil", "Delete", "Löschen", "Διαγραφή"],
+  "sure": ["Eminim", "Sure", "Sicher", "Σίγουρα"],
+  "all": ["Tümü", "All", "Alle", "Όλα"],
+  "anon": ["İsimsiz", "Unnamed", "Unbekannt", "Ανώνυμος"],
+  "job": ["İş", "Job", "Auftrag", "Εργασία"],
+  "name": ["Ad", "Name", "Name", "Όνομα"],
+  "email": ["E-posta", "Email", "E-Mail", "Email"],
+  "password": ["Şifre", "Password", "Passwort", "Κωδικός"],
+  "dept": ["Departman", "Department", "Abteilung", "Τμήμα"],
+  "status": ["Durum", "Status", "Status", "Κατάσταση"],
+  "list": ["Liste", "Checklist", "Liste", "Λίστα"],
+  "list.prog": ["Liste {d}/{n}", "Checklist {d}/{n}", "Liste {d}/{n}", "Λίστα {d}/{n}"],
+  "err.unknown": ["bilinmeyen hata", "unknown error", "unbekannter Fehler", "άγνωστο σφάλμα"],
+  "net.none": ["İnternet bağlantısı yok.", "No internet connection.", "Keine Internetverbindung.", "Δεν υπάρχει σύνδεση στο διαδίκτυο."],
+  // form
+  "f.title": ["Yapılacak İş", "Job", "Auftrag", "Εργασία"],
+  "f.titleEdit": ["Yapılacak İşi Güncelle", "Update job", "Auftrag aktualisieren", "Ενημέρωση εργασίας"],
+  "f.sub": ["Sorumlu departman işi anında görür.", "The responsible department sees the job instantly.", "Die zuständige Abteilung sieht den Auftrag sofort.", "Το υπεύθυνο τμήμα βλέπει αμέσως την εργασία."],
+  "f.dept": ["Sorumlu departman", "Responsible department", "Zuständige Abteilung", "Υπεύθυνο τμήμα"],
+  "f.type": ["Bildirim türü", "Request type", "Meldungsart", "Τύπος αιτήματος"],
+  "f.area": ["Alan", "Area", "Bereich", "Χώρος"],
+  "f.roomPh": ["Oda no", "Room no.", "Zimmer-Nr.", "Αρ. δωματίου"],
+  "f.floorPh": ["Kat No", "Floor no.", "Etage", "Όροφος"],
+  "f.roomNo": ["Oda numarası", "Room number", "Zimmernummer", "Αριθμός δωματίου"],
+  "f.floorNo": ["Kat numarası", "Floor number", "Etagennummer", "Αριθμός ορόφου"],
+  "f.cat": ["Kategori", "Category", "Kategorie", "Κατηγορία"],
+  "f.desc": ["Açıklama", "Description", "Beschreibung", "Περιγραφή"],
+  "f.descPh": ["ör. Klima soğutmuyor, kumanda ekranı yanıp sönüyor", "e.g. Air conditioning isn't cooling, remote display is blinking", "z. B. Klimaanlage kühlt nicht, Display der Fernbedienung blinkt", "π.χ. Το κλιματιστικό δεν ψύχει, η οθόνη του τηλεχειριστηρίου αναβοσβήνει"],
+  "f.list": ["Liste (isteğe bağlı)", "Checklist (optional)", "Liste (optional)", "Λίστα (προαιρετικά)"],
+  "f.itemPh": ["Kalem yaz, ör. 20 adet şampuan", "Add an item, e.g. 20 shampoos", "Position eingeben, z. B. 20 Shampoos", "Γράψτε είδος, π.χ. 20 σαμπουάν"],
+  "f.listHint": ["Tik atılan kalemin üstü çizilir. Tüm kalemler tiklenmeden iş tamamlanamaz.", "Ticked items are struck through. The job can't be completed until every item is ticked.", "Abgehakte Positionen werden durchgestrichen. Der Auftrag kann erst erledigt werden, wenn alle abgehakt sind.", "Τα τσεκαρισμένα είδη διαγράφονται. Η εργασία ολοκληρώνεται μόνο όταν τσεκαριστούν όλα."],
+  "f.itemRm": ["Kalemi sil", "Remove item", "Position entfernen", "Αφαίρεση είδους"],
+  "f.ooo": ["Oda satışa kapalı (OOO)", "Room out of order (OOO)", "Zimmer gesperrt (OOO)", "Δωμάτιο εκτός διάθεσης (OOO)"],
+  "f.oooHint": ["Sorun giderilip kontrol edilene kadar oda satılmasın.", "Don't sell the room until the issue is fixed and checked.", "Zimmer nicht verkaufen, bis das Problem behoben und geprüft ist.", "Να μη διατεθεί το δωμάτιο μέχρι να διορθωθεί και να ελεγχθεί."],
+  "f.guest": ["Misafir odada", "Guest in room", "Gast im Zimmer", "Επισκέπτης στο δωμάτιο"],
+  "f.guestHint": ["Girişten önce kapı çalınmalı ya da misafirle saat ayarlanmalı.", "Knock before entering or agree a time with the guest.", "Vor dem Betreten klopfen oder mit dem Gast eine Zeit vereinbaren.", "Χτυπήστε πριν μπείτε ή κανονίστε ώρα με τον επισκέπτη."],
+  "f.delete": ["Kaydı sil", "Delete record", "Eintrag löschen", "Διαγραφή εγγραφής"],
+  "f.deleteSure": ["Eminim, kaydı sil", "Yes, delete record", "Ja, Eintrag löschen", "Ναι, διαγραφή εγγραφής"],
+  "f.save": ["İşi kaydet", "Save job", "Auftrag speichern", "Αποθήκευση εργασίας"],
+  "f.saveAnyway": ["Yine de kaydet", "Save anyway", "Trotzdem speichern", "Αποθήκευση ούτως ή άλλως"],
+  "o.selectDept": ["Departman seç", "Select department", "Abteilung wählen", "Επιλέξτε τμήμα"],
+  "o.deptFirst": ["Önce departman", "Department first", "Erst Abteilung", "Πρώτα τμήμα"],
+  "o.selectType": ["Tür seç", "Select type", "Art wählen", "Επιλέξτε τύπο"],
+  "o.selectCat": ["Kategori seç", "Select category", "Kategorie wählen", "Επιλέξτε κατηγορία"],
+  "o.typeFirst": ["Önce tür seç", "Select type first", "Erst Art wählen", "Πρώτα τύπο"],
+  "o.selectArea": ["Alan seç", "Select area", "Bereich wählen", "Επιλέξτε χώρο"],
+  "o.notNeeded": ["Gerekmiyor", "Not needed", "Nicht nötig", "Δεν απαιτείται"],
+  "o.roomNo": ["Oda No", "Room no.", "Zimmer-Nr.", "Αρ. δωματίου"],
+  "e.dept": ["Sorumlu departmanı seç.", "Select the responsible department.", "Zuständige Abteilung wählen.", "Επιλέξτε το υπεύθυνο τμήμα."],
+  "e.type": ["Bildirim türünü seç.", "Select the request type.", "Meldungsart wählen.", "Επιλέξτε τύπο αιτήματος."],
+  "e.area": ["Alanı seç.", "Select the area.", "Bereich wählen.", "Επιλέξτε χώρο."],
+  "e.room": ["Oda numarasını yaz.", "Enter the room number.", "Zimmernummer eingeben.", "Γράψτε τον αριθμό δωματίου."],
+  "e.floor": ["Kat numarasını yaz.", "Enter the floor number.", "Etagennummer eingeben.", "Γράψτε τον αριθμό ορόφου."],
+  "e.cat": ["Kategoriyi seç.", "Select the category.", "Kategorie wählen.", "Επιλέξτε κατηγορία."],
+  "e.doneItems": ["İş tamamlanmış; listedeki tüm kalemler onaylı kalmalı.", "The job is completed; every checklist item must stay ticked.", "Der Auftrag ist erledigt; alle Positionen müssen abgehakt bleiben.", "Η εργασία έχει ολοκληρωθεί· όλα τα είδη πρέπει να μείνουν τσεκαρισμένα."],
+  "e.numDot": ["{w} tam sayı olmalı; nokta ya da virgül kullanılamaz.", "{w} must be a whole number; no dots or commas.", "{w} muss eine ganze Zahl sein; keine Punkte oder Kommas.", "{w}: μόνο ακέραιος αριθμός, χωρίς τελείες ή κόμματα."],
+  "e.numDigits": ["{w} yalnızca rakamdan oluşmalı.", "{w} may contain digits only.", "{w} darf nur Ziffern enthalten.", "{w}: μόνο ψηφία."],
+  "e.numMax": ["{w} en fazla 4 haneli olabilir.", "{w} can have at most 4 digits.", "{w} darf höchstens 4 Stellen haben.", "{w}: έως 4 ψηφία."],
+  "dup.head": ["{place} için açık bir {dept} · {cat} işi var{more}.", "There is already an open {dept} · {cat} job for {place}{more}.", "Für {place} gibt es bereits einen offenen Auftrag {dept} · {cat}{more}.", "Υπάρχει ήδη ανοιχτή εργασία {dept} · {cat} για {place}{more}."],
+  "dup.more": [" (toplam {n} açık iş)", " ({n} open jobs in total)", " (insgesamt {n} offene Aufträge)", " (σύνολο {n} ανοιχτές εργασίες)"],
+  "dup.tail": ["Aynı işse kaydetme. Farklı bir işse \"Yine de kaydet\"e bas.", "If it's the same job, don't save. If it's a different one, tap \"Save anyway\".", "Wenn es derselbe Auftrag ist, nicht speichern. Sonst „Trotzdem speichern“ tippen.", "Αν είναι η ίδια εργασία, μην αποθηκεύσετε. Αν είναι άλλη, πατήστε «Αποθήκευση ούτως ή άλλως»."],
+  "t.noChange": ["Değişiklik yok.", "No changes.", "Keine Änderungen.", "Καμία αλλαγή."],
+  "t.updated": ["Güncellendi.", "Updated.", "Aktualisiert.", "Ενημερώθηκε."],
+  "t.saved": ["Kaydedildi: {x}", "Saved: {x}", "Gespeichert: {x}", "Αποθηκεύτηκε: {x}"],
+  "t.maxItems": ["En fazla 50 kalem eklenebilir.", "You can add up to 50 items.", "Höchstens 50 Positionen möglich.", "Έως 50 είδη."],
+  "t.itemsFirst": ["Önce listedeki {n} kalemi onayla.", "First tick the {n} remaining checklist items.", "Zuerst die {n} offenen Positionen abhaken.", "Πρώτα τσεκάρετε τα {n} είδη της λίστας."],
+  "t.allTicked": ["Listenin tamamı onaylandı. İşi tamamlayabilirsin.", "Every checklist item is ticked. You can complete the job.", "Alle Positionen sind abgehakt. Du kannst den Auftrag erledigen.", "Όλα τα είδη τσεκαρίστηκαν. Μπορείτε να ολοκληρώσετε την εργασία."],
+  "t.profile": ["Profil yükleniyor, birkaç saniye sonra tekrar dene.", "Profile is loading, try again in a few seconds.", "Profil wird geladen, in ein paar Sekunden erneut versuchen.", "Φόρτωση προφίλ, δοκιμάστε ξανά σε λίγα δευτερόλεπτα."],
+  // giriş
+  "l.title": ["Giriş yap", "Sign in", "Anmelden", "Σύνδεση"],
+  "l.sub": ["Yöneticinin verdiği e-posta ve şifreyle gir.", "Sign in with the email and password from your manager.", "Mit der E-Mail und dem Passwort von der Leitung anmelden.", "Συνδεθείτε με το email και τον κωδικό από τον διαχειριστή."],
+  "l.forgot": ["Şifremi unuttum", "Forgot password", "Passwort vergessen", "Ξέχασα τον κωδικό"],
+  "l.fill": ["E-posta ve şifreyi yaz.", "Enter your email and password.", "E-Mail und Passwort eingeben.", "Γράψτε email και κωδικό."],
+  "l.emailFirst": ["Önce e-posta adresini yaz.", "Enter your email first.", "Zuerst die E-Mail eingeben.", "Γράψτε πρώτα το email."],
+  "l.resetSent": ["Şifre yenileme bağlantısı e-postana gönderildi.", "A password reset link was sent to your email.", "Ein Link zum Zurücksetzen wurde an deine E-Mail gesendet.", "Στάλθηκε σύνδεσμος επαναφοράς στο email σας."],
+  "a.wrong": ["E-posta ya da şifre yanlış.", "Wrong email or password.", "E-Mail oder Passwort falsch.", "Λάθος email ή κωδικός."],
+  "a.notConfirmed": ["Bu hesap onaylanmamış. Yönetici kullanıcıyı eklerken \"Auto Confirm User\" seçmeli.", "This account isn't confirmed. The manager must tick \"Auto Confirm User\" when adding the user.", "Dieses Konto ist nicht bestätigt. Die Leitung muss beim Anlegen „Auto Confirm User“ wählen.", "Ο λογαριασμός δεν έχει επιβεβαιωθεί. Ο διαχειριστής πρέπει να επιλέξει «Auto Confirm User»."],
+  "a.rate": ["Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.", "Too many attempts. Wait a little and try again.", "Zu viele Versuche. Kurz warten und erneut versuchen.", "Πάρα πολλές προσπάθειες. Περιμένετε λίγο και δοκιμάστε ξανά."],
+  "a.short": ["Şifre en az 6 karakter olmalı.", "The password must be at least 6 characters.", "Das Passwort muss mindestens 6 Zeichen haben.", "Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες."],
+  "a.fail": ["İşlem yapılamadı: {m}", "Couldn't complete: {m}", "Fehlgeschlagen: {m}", "Αποτυχία: {m}"],
+  "p.title": ["Yeni şifre belirle", "Set a new password", "Neues Passwort festlegen", "Ορισμός νέου κωδικού"],
+  "p.sub": ["En az 6 karakter.", "At least 6 characters.", "Mindestens 6 Zeichen.", "Τουλάχιστον 6 χαρακτήρες."],
+  "p.new": ["Yeni şifre", "New password", "Neues Passwort", "Νέος κωδικός"],
+  "p.new2": ["Yeni şifre (tekrar)", "New password (again)", "Neues Passwort (wiederholen)", "Νέος κωδικός (ξανά)"],
+  "p.save": ["Şifreyi kaydet", "Save password", "Passwort speichern", "Αποθήκευση κωδικού"],
+  "p.mismatch": ["İki şifre aynı değil.", "The passwords don't match.", "Die Passwörter stimmen nicht überein.", "Οι κωδικοί δεν ταιριάζουν."],
+  "p.changed": ["Şifren değişti.", "Your password was changed.", "Dein Passwort wurde geändert.", "Ο κωδικός σας άλλαξε."],
+  // hesabım ve kullanıcılar
+  "w.title": ["Hesabım", "My account", "Mein Konto", "Ο λογαριασμός μου"],
+  "w.sub": ["Ad ve departmanı yönetici belirler.", "Your name and department are set by the manager.", "Name und Abteilung legt die Leitung fest.", "Το όνομα και το τμήμα ορίζονται από τον διαχειριστή."],
+  "w.lang": ["Dil", "Language", "Sprache", "Γλώσσα"],
+  "w.users": ["Kullanıcılar", "Users", "Benutzer", "Χρήστες"],
+  "w.logout": ["Oturumu kapat", "Sign out", "Abmelden", "Αποσύνδεση"],
+  "w.unassigned": ["Atanmadı", "Not assigned", "Nicht zugewiesen", "Δεν έχει οριστεί"],
+  "u.sub": ["Satırı sola kaydır: düzenle ya da sil.", "Swipe a row left to edit or delete.", "Zeile nach links wischen: bearbeiten oder löschen.", "Σύρετε μια γραμμή αριστερά για επεξεργασία ή διαγραφή."],
+  "u.add": ["Kullanıcı ekle", "Add user", "Benutzer hinzufügen", "Προσθήκη χρήστη"],
+  "u.count": ["Kayıtlı kullanıcılar ({n})", "Registered users ({n})", "Registrierte Benutzer ({n})", "Εγγεγραμμένοι χρήστες ({n})"],
+  "u.none": ["Kullanıcı yok", "No users", "Keine Benutzer", "Κανένας χρήστης"],
+  "u.badge": ["YÖNETİCİ", "MANAGER", "LEITUNG", "ΔΙΑΧΕΙΡΙΣΤΗΣ"],
+  "u.noDept": ["Departman yok", "No department", "Keine Abteilung", "Χωρίς τμήμα"],
+  "u.noDeptShort": ["Yok", "None", "Keine", "Κανένα"],
+  "u.editTitle": ["Kullanıcıyı Güncelle", "Update user", "Benutzer aktualisieren", "Ενημέρωση χρήστη"],
+  "u.newTitle": ["Yeni Kullanıcı", "New user", "Neuer Benutzer", "Νέος χρήστης"],
+  "u.newSub": ["Kullanıcı bu e-posta ve şifreyle giriş yapar.", "The user signs in with this email and password.", "Der Benutzer meldet sich mit dieser E-Mail und diesem Passwort an.", "Ο χρήστης συνδέεται με αυτό το email και τον κωδικό."],
+  "u.back": ["Listeye dön", "Back to list", "Zurück zur Liste", "Επιστροφή στη λίστα"],
+  "u.namePh": ["ör. Ayşe K.", "e.g. Ayşe K.", "z. B. Ayşe K.", "π.χ. Ayşe K."],
+  "u.tempPass": ["Geçici şifre", "Temporary password", "Temporäres Passwort", "Προσωρινός κωδικός"],
+  "u.passPh": ["En az 6 karakter", "At least 6 characters", "Mindestens 6 Zeichen", "Τουλάχιστον 6 χαρακτήρες"],
+  "u.passHint": ["Kullanıcıya bu şifreyi ilet. Sonra \"Şifremi unuttum\" ile değiştirebilir.", "Give this password to the user. They can change it later with \"Forgot password\".", "Gib dem Benutzer dieses Passwort. Er kann es später über „Passwort vergessen“ ändern.", "Δώστε αυτόν τον κωδικό στον χρήστη. Μπορεί να τον αλλάξει αργότερα με «Ξέχασα τον κωδικό»."],
+  "u.nameReq": ["Adı yaz.", "Enter the name.", "Namen eingeben.", "Γράψτε το όνομα."],
+  "u.emailBad": ["Geçerli bir e-posta yaz.", "Enter a valid email.", "Gültige E-Mail eingeben.", "Γράψτε έγκυρο email."],
+  "u.updated": ["{name} güncellendi.", "{name} updated.", "{name} aktualisiert.", "Ενημερώθηκε: {name}."],
+  "u.added": ["{name} eklendi. Giriş: {email}", "{name} added. Sign-in: {email}", "{name} hinzugefügt. Anmeldung: {email}", "Προστέθηκε: {name}. Σύνδεση: {email}"],
+  "u.deleted": ["{name} silindi.", "{name} deleted.", "{name} gelöscht.", "Διαγράφηκε: {name}."],
+  "u.addFail": ["Eklenemedi: {m}", "Couldn't add: {m}", "Hinzufügen fehlgeschlagen: {m}", "Δεν προστέθηκε: {m}"],
+  "u.delFail": ["Silinemedi: {m}", "Couldn't delete: {m}", "Löschen fehlgeschlagen: {m}", "Δεν διαγράφηκε: {m}"],
+  "e.dbOld": ["Veritabanı güncel değil. schema.sql dosyasını Supabase'de yeniden çalıştır.", "The database is out of date. Run schema.sql in Supabase again.", "Die Datenbank ist veraltet. schema.sql in Supabase erneut ausführen.", "Η βάση δεδομένων δεν είναι ενημερωμένη. Εκτελέστε ξανά το schema.sql στο Supabase."],
+  "e.saveFail": ["Kaydedilemedi: {m}", "Couldn't save: {m}", "Speichern fehlgeschlagen: {m}", "Δεν αποθηκεύτηκε: {m}"],
+  // kartlar
+  "pl.req": ["TALEP", "REQUEST", "ANFRAGE", "ΑΙΤΗΜΑ"],
+  "pl.hall": ["KORİDOR", "HALLWAY", "FLUR", "ΔΙΑΔΡ."],
+  "pl.floor": ["KAT", "FLOOR", "ETAGE", "ΟΡΟΦΟΣ"],
+  "pl.room": ["ODA", "ROOM", "ZIMMER", "ΔΩΜΑΤΙΟ"],
+  "pl.area": ["ALAN", "AREA", "BEREICH", "ΧΩΡΟΣ"],
+  "c.done": ["Bitti {d}", "Done {d}", "Erledigt {d}", "Τέλος {d}"],
+  "c.opened": ["Açılış: {d}", "Opened: {d}", "Eröffnet: {d}", "Άνοιγμα: {d}"],
+  "c.by": ["Bildiren: {name}", "Reported by: {name}", "Gemeldet von: {name}", "Αναφορά από: {name}"],
+  "c.verify": ["Kontrol edildi", "Checked", "Geprüft", "Ελέγχθηκε"],
+  "c.reopen": ["Yeniden aç", "Reopen", "Wieder öffnen", "Επανάνοιγμα"],
+  "c.rep": ["{d} GÜNDE {n}. KEZ", "{n}× IN {d} DAYS", "{n}. MAL IN {d} TAGEN", "{n}η ΦΟΡΑ ΣΕ {d} ΗΜΕΡΕΣ"],
+  "c.repTitle": ["Aynı yerde, aynı sorun için son {d} günde açılan {n}. iş", "Job no. {n} for the same issue at the same place in the last {d} days", "{n}. Auftrag zum selben Problem am selben Ort in den letzten {d} Tagen", "{n}η εργασία για το ίδιο πρόβλημα στο ίδιο σημείο τις τελευταίες {d} ημέρες"],
+  "c.ooo": ["SATIŞA KAPALI", "OUT OF ORDER", "GESPERRT", "ΕΚΤΟΣ ΔΙΑΘΕΣΗΣ"],
+  "c.guest": ["MİSAFİR ODADA", "GUEST IN ROOM", "GAST IM ZIMMER", "ΕΠΙΣΚΕΠΤΗΣ ΜΕΣΑ"],
+  "c.ok": ["KONTROL EDİLDİ", "CHECKED", "GEPRÜFT", "ΕΛΕΓΧΘΗΚΕ"],
+  // durum ekranları
+  "s.loading": ["İşler yükleniyor", "Loading jobs", "Aufträge werden geladen", "Φόρτωση εργασιών"],
+  "s.signin": ["Devam etmek için giriş yap.", "Sign in to continue.", "Zum Fortfahren anmelden.", "Συνδεθείτε για να συνεχίσετε."],
+  "s.connecting": ["Ortak liste bağlanıyor.", "Connecting to the shared list.", "Gemeinsame Liste wird verbunden.", "Σύνδεση με την κοινή λίστα."],
+  "s.setup": ["Kurulum tamamlanmadı", "Setup not finished", "Einrichtung nicht abgeschlossen", "Η εγκατάσταση δεν ολοκληρώθηκε"],
+  "s.setupP": ["supabase-config.js dosyasına Supabase bilgilerini yaz. Kurulum rehberinin 2. adımına bak.", "Enter the Supabase details in supabase-config.js. See step 2 of the setup guide.", "Supabase-Daten in supabase-config.js eintragen. Siehe Schritt 2 der Anleitung.", "Συμπληρώστε τα στοιχεία Supabase στο supabase-config.js. Δείτε το βήμα 2 του οδηγού."],
+  // anasayfa
+  "h.new": ["Yeni işler", "New jobs", "Neue Aufträge", "Νέες εργασίες"],
+  "h.notStarted": ["Henüz başlanmadı", "Not started yet", "Noch nicht begonnen", "Δεν έχουν ξεκινήσει"],
+  "h.noNew": ["Yeni iş yok", "No new jobs", "Keine neuen Aufträge", "Καμία νέα εργασία"],
+  "h.unfinished": ["Bitmemiş işler", "Unfinished jobs", "Unerledigte Aufträge", "Ανολοκλήρωτες εργασίες"],
+  "h.noOpen": ["Açık iş yok", "No open jobs", "Keine offenen Aufträge", "Καμία ανοιχτή εργασία"],
+  "h.empty": ["Henüz iş yok", "No jobs yet", "Noch keine Aufträge", "Καμία εργασία ακόμη"],
+  "h.emptyP": ["Bir arıza, temizlik ya da müşteri talebi olduğunda sağ alttaki + ile kaydet; sorumlu departman burada anında görür.", "When there's a fault, cleaning or guest request, add it with + at the bottom right; the responsible department sees it here instantly.", "Bei einer Störung, Reinigung oder einem Gästewunsch mit + unten rechts anlegen; die zuständige Abteilung sieht es hier sofort.", "Για βλάβη, καθαριότητα ή αίτημα πελάτη, καταχωρίστε με το + κάτω δεξιά· το υπεύθυνο τμήμα το βλέπει αμέσως εδώ."],
+  "h.open": ["Açık işler", "Open jobs", "Offene Aufträge", "Ανοιχτές εργασίες"],
+  "h.all": ["Tümünü gör", "See all", "Alle anzeigen", "Όλες"],
+  // listeler ve filtre
+  "chk.pending": ["Kontrol bekleyen", "Awaiting check", "Prüfung offen", "Αναμένουν έλεγχο"],
+  "chk.ok": ["Kontrol edilen", "Checked", "Geprüft", "Ελεγμένες"],
+  "q.todo": ["Oda, sorun veya kişi ara", "Search room, issue or person", "Zimmer, Problem oder Person suchen", "Αναζήτηση δωματίου, προβλήματος ή ατόμου"],
+  "q.done": ["Tamamlananlarda ara", "Search completed jobs", "In erledigten Aufträgen suchen", "Αναζήτηση στις ολοκληρωμένες"],
+  "q.aria": ["Ara", "Search", "Suchen", "Αναζήτηση"],
+  "q.clear": ["Aramayı temizle", "Clear search", "Suche löschen", "Καθαρισμός αναζήτησης"],
+  "fl.btn": ["Filtre", "Filter", "Filter", "Φίλτρο"],
+  "fl.aria": ["Filtreler", "Filters", "Filter", "Φίλτρα"],
+  "fl.active": ["{n} açık", "{n} active", "{n} aktiv", "{n} ενεργά"],
+  "fl.remove": ["{l} filtresini kaldır", "Remove {l} filter", "Filter {l} entfernen", "Αφαίρεση φίλτρου {l}"],
+  "fl.clearAll": ["Tümünü temizle", "Clear all", "Alle löschen", "Καθαρισμός όλων"],
+  "fl.title": ["Filtrele", "Filter", "Filtern", "Φιλτράρισμα"],
+  "r.count": ["{n} iş · {s}", "{n} jobs · {s}", "{n} Aufträge · {s}", "{n} εργασίες · {s}"],
+  "r.sortTodo": ["en eski açılan önce", "oldest first", "älteste zuerst", "οι παλαιότερες πρώτα"],
+  "r.sortDone": ["en son biten önce", "latest finished first", "zuletzt erledigte zuerst", "οι πιο πρόσφατες πρώτα"],
+  "r.firstJob": ["Sağ alttaki + ile ilk işi kaydet.", "Add the first job with + at the bottom right.", "Den ersten Auftrag mit + unten rechts anlegen.", "Καταχωρίστε την πρώτη εργασία με το + κάτω δεξιά."],
+  "r.noPending": ["Kontrol bekleyen iş yok", "No jobs awaiting check", "Keine Aufträge zur Prüfung", "Καμία εργασία προς έλεγχο"],
+  "r.noPendingP": ["Bitirilen işler burada resepsiyonun kontrolünü bekler. Kontrol edilen oda otomatik olarak satışa açılır.", "Finished jobs wait here for a check. Once checked, the room is released for sale automatically.", "Erledigte Aufträge warten hier auf die Prüfung. Geprüfte Zimmer werden automatisch freigegeben.", "Οι ολοκληρωμένες εργασίες περιμένουν εδώ έλεγχο. Μετά τον έλεγχο το δωμάτιο διατίθεται αυτόματα."],
+  "r.showAllDone": ["Tüm tamamlananları göster", "Show all completed", "Alle erledigten anzeigen", "Εμφάνιση όλων των ολοκληρωμένων"],
+  "r.noMatch": ["Aramana uyan iş yok", "No jobs match your search", "Keine passenden Aufträge", "Καμία εργασία δεν ταιριάζει"],
+  "r.noMatchP": ["Aramayı değiştir ya da filtreleri kaldır.", "Change the search or remove filters.", "Suche ändern oder Filter entfernen.", "Αλλάξτε την αναζήτηση ή αφαιρέστε φίλτρα."],
+  "r.clearAll": ["Arama ve filtreleri temizle", "Clear search and filters", "Suche und Filter löschen", "Καθαρισμός αναζήτησης και φίλτρων"],
+  "r.noOpenP": ["Bekleyen iş kalmadı.", "Nothing left to do.", "Nichts mehr offen.", "Δεν απομένει τίποτα."],
+  "r.noDone": ["Tamamlanan iş yok", "No completed jobs", "Keine erledigten Aufträge", "Καμία ολοκληρωμένη εργασία"],
+  "r.noDoneP": ["Bitirilen işler en yeniden eskiye burada listelenir.", "Finished jobs are listed here, newest first.", "Erledigte Aufträge erscheinen hier, neueste zuerst.", "Οι ολοκληρωμένες εργασίες εμφανίζονται εδώ, οι νεότερες πρώτα."],
+  // rapor
+  "rp.today": ["Bugün", "Today", "Heute", "Σήμερα"],
+  "rp.days": ["{n} gün", "{n} days", "{n} Tage", "{n} ημέρες"],
+  "rp.created": ["Açılan iş", "Opened", "Eröffnet", "Ανοίχτηκαν"],
+  "rp.done": ["Tamamlanan", "Completed", "Erledigt", "Ολοκληρώθηκαν"],
+  "rp.open": ["Şu an açık", "Open now", "Jetzt offen", "Ανοιχτές τώρα"],
+  "rp.depts": ["Departmanlar", "Departments", "Abteilungen", "Τμήματα"],
+  "rp.myDept": ["Departmanım", "My department", "Meine Abteilung", "Το τμήμα μου"],
+  "rp.colOpen": ["Açık", "Open", "Offen", "Ανοιχτές"],
+  "rp.colDone": ["Biten", "Done", "Erledigt", "Ολοκλ."],
+  "rp.note": ["Açık: şu an. Biten: seçili dönem.", "Open: now. Done: selected period.", "Offen: jetzt. Erledigt: gewählter Zeitraum.", "Ανοιχτές: τώρα. Ολοκλ.: επιλεγμένη περίοδος."],
+  "rp.topIssues": ["En sık sorunlar", "Most frequent issues", "Häufigste Probleme", "Συχνότερα προβλήματα"],
+  "rp.topRooms": ["En çok bildirim alan odalar", "Rooms with the most reports", "Zimmer mit den meisten Meldungen", "Δωμάτια με τις περισσότερες αναφορές"],
+  "rp.repeat": ["Tekrarlayan arızalar (son {d} gün)", "Recurring issues (last {d} days)", "Wiederkehrende Probleme (letzte {d} Tage)", "Επαναλαμβανόμενα προβλήματα (τελευταίες {d} ημέρες)"],
+  "rp.none": ["Bu dönemde kayıt yok.", "No records in this period.", "Keine Einträge in diesem Zeitraum.", "Καμία εγγραφή σε αυτή την περίοδο."],
+  "rp.noRepeat": ["Aynı yerde tekrarlayan sorun yok.", "No recurring issues at the same place.", "Keine wiederkehrenden Probleme am selben Ort.", "Κανένα επαναλαμβανόμενο πρόβλημα στο ίδιο σημείο."],
+  "rp.repeatNote": ["Aynı oda ya da alanda, aynı sorun için açılan işler.", "Jobs opened for the same issue in the same room or area.", "Aufträge zum selben Problem im selben Zimmer oder Bereich.", "Εργασίες για το ίδιο πρόβλημα στο ίδιο δωμάτιο ή χώρο."],
+  "rp.people": ["Kişiler", "People", "Personen", "Άτομα"],
+  "rp.person": ["Kişi", "Person", "Person", "Άτομο"],
+  "rp.opened": ["Açtığı", "Opened", "Eröffnet", "Άνοιξε"],
+  "rp.finished": ["Bitirdiği", "Finished", "Erledigt", "Ολοκλήρωσε"],
+  "rp.noRec": ["Kayıt yok.", "No records.", "Keine Einträge.", "Καμία εγγραφή."],
+  "rp.peopleNote": ["Yalnızca yönetici görür. Açtığı ve bitirdiği (Tamamlandı yapan): seçili dönem.", "Visible to the manager only. Opened and finished (marked Completed): selected period.", "Nur für die Leitung sichtbar. Eröffnet und erledigt (als erledigt markiert): gewählter Zeitraum.", "Ορατό μόνο στον διαχειριστή. Άνοιξε και ολοκλήρωσε: επιλεγμένη περίοδος."],
+  // detay
+  "d.statusAria": ["Durumu değiştir", "Change status", "Status ändern", "Αλλαγή κατάστασης"],
+  "d.end": ["Bitiş", "Finished", "Erledigt", "Ολοκλήρωση"],
+  "d.check": ["Kontrol", "Check", "Prüfung", "Έλεγχος"],
+  "d.room": ["Oda", "Room", "Zimmer", "Δωμάτιο"],
+  "d.repeat": ["Tekrar", "Repeat", "Wiederholung", "Επανάληψη"],
+  "d.repeatTxt": ["Son {d} günde {where} açılan <b>{n}.</b> {cat} işi", "<b>No. {n}</b> {cat} job {where} in the last {d} days", "<b>{n}.</b> Auftrag „{cat}“ {where} in den letzten {d} Tagen", "<b>{n}η</b> εργασία «{cat}» {where} τις τελευταίες {d} ημέρες"],
+  "d.inRoom": ["bu odada", "in this room", "in diesem Zimmer", "σε αυτό το δωμάτιο"],
+  "d.inArea": ["bu alanda", "in this area", "in diesem Bereich", "σε αυτόν τον χώρο"],
+  "d.history": ["Geçmiş", "History", "Verlauf", "Ιστορικό"],
+  "d.noLog": ["Kayıt yok", "No records", "Keine Einträge", "Καμία εγγραφή"],
+  // bildirimler ve hatalar
+  "n.new": ["Yeni iş: {x}", "New job: {x}", "Neuer Auftrag: {x}", "Νέα εργασία: {x}"],
+  "n.reopened": ["Yeniden açıldı: {x}", "Reopened: {x}", "Wieder geöffnet: {x}", "Επανάνοιξε: {x}"],
+  "n.doneMine": ["{x} için açtığın iş tamamlandı.", "Your job for {x} was completed.", "Dein Auftrag für {x} wurde erledigt.", "Η εργασία σας για {x} ολοκληρώθηκε."],
+  "n.moved": ["Departmanına aktarıldı: {x}", "Moved to your department: {x}", "An deine Abteilung übergeben: {x}", "Μεταφέρθηκε στο τμήμα σας: {x}"],
+  "b.noTable": ["Veritabanı tablosu bulunamadı. Kurulum rehberinin 3. adımındaki SQL'i çalıştır.", "Database table not found. Run the SQL from step 3 of the setup guide.", "Datenbanktabelle nicht gefunden. SQL aus Schritt 3 der Anleitung ausführen.", "Δεν βρέθηκε ο πίνακας της βάσης. Εκτελέστε το SQL του βήματος 3 του οδηγού."],
+  "b.noPerm": ["Bu hesap işleri göremiyor. Yöneticine sor.", "This account can't see jobs. Ask your manager.", "Dieses Konto sieht keine Aufträge. Frag die Leitung.", "Αυτός ο λογαριασμός δεν βλέπει εργασίες. Ρωτήστε τον διαχειριστή."],
+  "b.noServer": ["Sunucuya bağlanılamadı. İnternet bağlantını kontrol et.", "Couldn't reach the server. Check your internet connection.", "Server nicht erreichbar. Internetverbindung prüfen.", "Αδυναμία σύνδεσης με τον διακομιστή. Ελέγξτε τη σύνδεσή σας."],
+  "b.live": ["Canlı bağlantı kesildi, yeniden bağlanılıyor…", "Live connection lost, reconnecting…", "Live-Verbindung getrennt, verbinde neu…", "Η ζωντανή σύνδεση χάθηκε, επανασύνδεση…"],
+  "x.noPerm": ["Kaydedilemedi: bu hesabın yazma izni yok.", "Couldn't save: this account has no write permission.", "Speichern fehlgeschlagen: keine Schreibberechtigung.", "Δεν αποθηκεύτηκε: ο λογαριασμός δεν έχει δικαίωμα εγγραφής."],
+  "x.session": ["Oturumun sona erdi, yeniden giriş yap.", "Your session expired, please sign in again.", "Sitzung abgelaufen, bitte neu anmelden.", "Η σύνδεση έληξε, συνδεθείτε ξανά."],
+  "x.offline": ["İnternet bağlantısı yok. Bağlantı gelince tekrar dene.", "No internet connection. Try again when you're back online.", "Keine Internetverbindung. Später erneut versuchen.", "Δεν υπάρχει σύνδεση. Δοκιμάστε ξανά όταν συνδεθείτε."],
+  "x.connecting": ["Bağlanıyor, birkaç saniye sonra tekrar dene.", "Connecting, try again in a few seconds.", "Verbinde, in ein paar Sekunden erneut versuchen.", "Σύνδεση, δοκιμάστε ξανά σε λίγα δευτερόλεπτα."],
+  "x.gone": ["Kaydedilemedi: bu iş başka departmana aktarılmış ya da silinmiş.", "Couldn't save: this job was moved to another department or deleted.", "Speichern fehlgeschlagen: Der Auftrag wurde verschoben oder gelöscht.", "Δεν αποθηκεύτηκε: η εργασία μεταφέρθηκε σε άλλο τμήμα ή διαγράφηκε."],
+  "x.delNoPerm": ["Silinemedi: bu işi silme yetkin yok.", "Couldn't delete: you aren't allowed to delete this job.", "Löschen fehlgeschlagen: keine Berechtigung.", "Δεν διαγράφηκε: δεν έχετε δικαίωμα διαγραφής."],
+  "x.deleted": ["İş silindi.", "Job deleted.", "Auftrag gelöscht.", "Η εργασία διαγράφηκε."],
+  // yer adı
+  "pl.roomN": ["Oda {r}", "Room {r}", "Zimmer {r}", "Δωμάτιο {r}"],
+  "pl.hallN": ["Koridor Kat {n}", "Hallway, floor {n}", "Flur, Etage {n}", "Διάδρομος, όροφος {n}"],
+  // geçmiş kayıtları (veritabanında Türkçe; ekranda çevrilir)
+  "g.opened": ["İşi açtı", "Opened the job", "Hat den Auftrag eröffnet", "Άνοιξε την εργασία"],
+  "g.openedList": ["İşi açtı ({n} kalemlik liste)", "Opened the job (checklist: {n})", "Hat den Auftrag eröffnet (Liste: {n})", "Άνοιξε την εργασία (λίστα: {n})"],
+  "g.done": ["Tamamlandı olarak işaretledi", "Marked as completed", "Als erledigt markiert", "Σημείωσε ως ολοκληρωμένη"],
+  "g.checked": ["Kontrol etti", "Checked", "Geprüft", "Έλεγξε"],
+  "g.checkedOpen": ["Kontrol etti, oda satışa açıldı", "Checked, room released for sale", "Geprüft, Zimmer freigegeben", "Έλεγξε, το δωμάτιο διατίθεται ξανά"],
+  "g.reopened": ["Yeniden açtı", "Reopened", "Wieder geöffnet", "Επανάνοιξε"],
+  "g.reopenedList": ["Yeniden açtı, liste onayları kaldırıldı", "Reopened, checklist ticks cleared", "Wieder geöffnet, Häkchen entfernt", "Επανάνοιξε, τα τσεκ της λίστας αφαιρέθηκαν"],
+  "g.status": ["Durumu “{s}” yaptı", "Set status to “{s}”", "Status auf „{s}“ gesetzt", "Άλλαξε την κατάσταση σε «{s}»"],
+  "g.tick": ["Onayladı: {x}", "Ticked: {x}", "Abgehakt: {x}", "Τσέκαρε: {x}"],
+  "g.untick": ["Onayı kaldırdı: {x}", "Unticked: {x}", "Häkchen entfernt: {x}", "Αφαίρεσε το τσεκ: {x}"],
+  "g.updated": ["Güncelledi: {x}", "Updated: {x}", "Aktualisiert: {x}", "Ενημέρωσε: {x}"],
+  "g.noDept": ["Departmansız", "No department", "Ohne Abteilung", "Χωρίς τμήμα"],
+  // güncellenen alan adları (geçmişte)
+  "fld.tür": ["tür", "type", "Art", "τύπος"],
+  "fld.kategori": ["kategori", "category", "Kategorie", "κατηγορία"],
+  "fld.departman": ["departman", "department", "Abteilung", "τμήμα"],
+  "fld.alan/oda": ["alan/oda", "area/room", "Bereich/Zimmer", "χώρος/δωμάτιο"],
+  "fld.açıklama": ["açıklama", "description", "Beschreibung", "περιγραφή"],
+  "fld.satışa kapalı": ["satışa kapalı", "out of order", "gesperrt", "εκτός διάθεσης"],
+  "fld.misafir odada": ["misafir odada", "guest in room", "Gast im Zimmer", "επισκέπτης στο δωμάτιο"],
+  "fld.liste": ["liste", "checklist", "Liste", "λίστα"],
+  "fld.durum": ["durum", "status", "Status", "κατάσταση"],
+  "fld.aciliyet": ["aciliyet", "priority", "Dringlichkeit", "προτεραιότητα"],
+  "fld.son tarih": ["son tarih", "due date", "Frist", "προθεσμία"]
+};
+const ST_TX = {
+  yeni: ["Yeni", "New", "Neu", "Νέα"],
+  beklemede: ["Beklemede", "On hold", "Wartend", "Σε αναμονή"],
+  dnd: ["DND Kartlı", "DND sign", "DND-Schild", "Πινακίδα DND"],
+  tamam: ["Tamamlandı", "Completed", "Erledigt", "Ολοκληρώθηκε"],
+  devam: ["Devam ediyor", "In progress", "In Arbeit", "Σε εξέλιξη"]
+};
+// Supabase listelerindeki hazır kayıtların çevirisi (kod ya da Türkçe ada göre). Yeni eklenen kayıt çevirisi yoksa Türkçe görünür.
+const DATA_TX = {
+  dept: {
+    teknik: ["Teknik", "Maintenance", "Technik", "Τεχνικό τμήμα"],
+    kat: ["Kat Hizmetleri", "Housekeeping", "Housekeeping", "Υπηρεσία ορόφων"],
+    resepsiyon: ["Resepsiyon", "Reception", "Rezeption", "Υποδοχή"],
+    satinalma: ["Satınalma", "Purchasing", "Einkauf", "Προμήθειες"],
+    mutfak: ["Mutfak", "Kitchen", "Küche", "Κουζίνα"],
+    servis: ["Servis", "Service", "Service", "Σέρβις"],
+    muhasebe: ["Muhasebe", "Accounting", "Buchhaltung", "Λογιστήριο"],
+    yonetici: ["Yönetici", "Manager", "Leitung", "Διαχειριστής"]
+  },
+  deptShort: {
+    teknik: ["Teknik", "Maint.", "Technik", "Τεχνικό"],
+    kat: ["Kat", "HK", "HK", "Όροφοι"],
+    resepsiyon: ["Resepsiyon", "Reception", "Rezeption", "Υποδοχή"],
+    satinalma: ["Satınalma", "Purchasing", "Einkauf", "Προμήθειες"],
+    mutfak: ["Mutfak", "Kitchen", "Küche", "Κουζίνα"],
+    servis: ["Servis", "Service", "Service", "Σέρβις"],
+    muhasebe: ["Muhasebe", "Accounting", "Buchhaltung", "Λογιστήριο"],
+    yonetici: ["Yönetici", "Manager", "Leitung", "Διαχειριστής"]
+  },
+  type: {
+    ariza: ["Arıza", "Fault", "Störung", "Βλάβη"],
+    temizlik: ["Temizlik Talebi", "Cleaning request", "Reinigungsauftrag", "Αίτημα καθαριότητας"],
+    istek: ["Müşteri Talebi", "Guest request", "Gästewunsch", "Αίτημα πελάτη"],
+    satinalma: ["Satınalma Talebi", "Purchase request", "Einkaufsanfrage", "Αίτημα προμήθειας"],
+    resepsiyon: ["Resepsiyon Talebi", "Reception request", "Rezeptionsanfrage", "Αίτημα υποδοχής"],
+    mutfak: ["Mutfak Talebi", "Kitchen request", "Küchenanfrage", "Αίτημα κουζίνας"],
+    servis: ["Servis Talebi", "Service request", "Serviceanfrage", "Αίτημα σέρβις"],
+    muhasebe: ["Muhasebe Talebi", "Accounting request", "Buchhaltungsanfrage", "Αίτημα λογιστηρίου"]
+  },
+  cat: {
+    "Klima / ısıtma": ["Air conditioning / heating", "Klima / Heizung", "Κλιματισμός / θέρμανση"],
+    "Elektrik / aydınlatma": ["Electrical / lighting", "Elektrik / Beleuchtung", "Ηλεκτρικά / φωτισμός"],
+    "Su / tesisat": ["Water / plumbing", "Wasser / Sanitär", "Νερό / υδραυλικά"],
+    "TV / internet": ["TV / internet", "TV / Internet", "Τηλεόραση / internet"],
+    "Kapı / kilit / kasa": ["Door / lock / safe", "Tür / Schloss / Safe", "Πόρτα / κλειδαριά / θυρίδα"],
+    "Mobilya": ["Furniture", "Möbel", "Έπιπλα"],
+    "Minibar / buzdolabı": ["Minibar / fridge", "Minibar / Kühlschrank", "Μίνι μπαρ / ψυγείο"],
+    "Diğer": ["Other", "Sonstiges", "Άλλο"],
+    "Banyo": ["Bathroom", "Bad", "Μπάνιο"],
+    "Yatak / çarşaf": ["Bed / linen", "Bett / Bettwäsche", "Κρεβάτι / σεντόνια"],
+    "Havlu / buklet eksik": ["Missing towels / amenities", "Handtücher / Pflegeartikel fehlen", "Λείπουν πετσέτες / είδη περιποίησης"],
+    "Toz / zemin": ["Dust / floor", "Staub / Boden", "Σκόνη / δάπεδο"],
+    "Minibar dolumu": ["Minibar refill", "Minibar auffüllen", "Αναπλήρωση μίνι μπαρ"],
+    "Koku": ["Odour", "Geruch", "Οσμή"],
+    "Çöp": ["Rubbish", "Müll", "Σκουπίδια"],
+    "Ekstra havlu": ["Extra towels", "Zusätzliche Handtücher", "Επιπλέον πετσέτες"],
+    "Yastık / battaniye": ["Pillow / blanket", "Kissen / Decke", "Μαξιλάρι / κουβέρτα"],
+    "Bebek yatağı": ["Baby cot", "Babybett", "Βρεφική κούνια"],
+    "Ütü / ütü masası": ["Iron / ironing board", "Bügeleisen / Bügelbrett", "Σίδερο / σιδερώστρα"],
+    "Diş / tıraş seti": ["Dental / shaving kit", "Zahn- / Rasierset", "Σετ οδοντόβουρτσας / ξυρίσματος"],
+    "Yedek parça": ["Spare parts", "Ersatzteile", "Ανταλλακτικά"],
+    "Temizlik malzemesi": ["Cleaning supplies", "Reinigungsmittel", "Υλικά καθαριότητας"],
+    "Buklet / amenity": ["Amenities", "Gästeartikel", "Είδη περιποίησης"],
+    "Tekstil (havlu, çarşaf)": ["Linen (towels, sheets)", "Textilien (Handtücher, Bettwäsche)", "Λευκά είδη (πετσέτες, σεντόνια)"],
+    "Mutfak malzemesi": ["Kitchen supplies", "Küchenbedarf", "Είδη κουζίνας"],
+    "Kırtasiye": ["Stationery", "Bürobedarf", "Γραφική ύλη"],
+    "Demirbaş": ["Equipment", "Inventar", "Εξοπλισμός"],
+    "Misafir şikayeti": ["Guest complaint", "Gästebeschwerde", "Παράπονο πελάτη"],
+    "Oda değişikliği": ["Room change", "Zimmerwechsel", "Αλλαγή δωματίου"],
+    "Geç çıkış / erken giriş": ["Late check-out / early check-in", "Später Check-out / früher Check-in", "Αργή αναχώρηση / πρώιμη άφιξη"],
+    "Uyandırma": ["Wake-up call", "Weckruf", "Αφύπνιση"],
+    "Kayıp eşya": ["Lost property", "Fundsachen", "Απολεσθέντα αντικείμενα"],
+    "Bagaj / transfer": ["Luggage / transfer", "Gepäck / Transfer", "Αποσκευές / μεταφορά"],
+    "Oda servisi": ["Room service", "Zimmerservice", "Room service"],
+    "Alerji / özel diyet": ["Allergy / special diet", "Allergie / Spezialdiät", "Αλλεργία / ειδική διατροφή"],
+    "Pasta / sürpriz": ["Cake / surprise", "Torte / Überraschung", "Τούρτα / έκπληξη"],
+    "Kahvaltı paketi": ["Breakfast box", "Frühstückspaket", "Πακέτο πρωινού"],
+    "Minibar ürünü": ["Minibar product", "Minibar-Produkt", "Προϊόν μίνι μπαρ"],
+    "Hijyen / temizlik": ["Hygiene / cleaning", "Hygiene / Reinigung", "Υγιεινή / καθαριότητα"],
+    "Masa / salon hazırlığı": ["Table / hall setup", "Tisch- / Saalvorbereitung", "Στήσιμο τραπεζιών / αίθουσας"],
+    "Oda servisi teslim / tepsi toplama": ["Room service delivery / tray pick-up", "Zimmerservice: Lieferung / Tablett abholen", "Παράδοση room service / συλλογή δίσκων"],
+    "Misafir talebi (restoran / bar)": ["Guest request (restaurant / bar)", "Gästewunsch (Restaurant / Bar)", "Αίτημα πελάτη (εστιατόριο / μπαρ)"],
+    "Toplantı / etkinlik servisi": ["Meeting / event service", "Meeting- / Eventservice", "Σέρβις συνάντησης / εκδήλωσης"],
+    "Ekipman / malzeme eksik": ["Missing equipment / supplies", "Ausstattung / Material fehlt", "Λείπει εξοπλισμός / υλικό"],
+    "Fatura / hesap düzeltme": ["Invoice / bill correction", "Rechnungs- / Kontokorrektur", "Διόρθωση τιμολογίου / λογαριασμού"],
+    "Ödeme": ["Payment", "Zahlung", "Πληρωμή"],
+    "Avans / masraf": ["Advance / expense", "Vorschuss / Spesen", "Προκαταβολή / έξοδα"]
+  },
+  area: {
+    "Lobi": ["Lobby", "Lobby", "Λόμπι"],
+    "Restoran": ["Restaurant", "Restaurant", "Εστιατόριο"],
+    "Bar": ["Bar", "Bar", "Μπαρ"],
+    "Mutfak": ["Kitchen", "Küche", "Κουζίνα"],
+    "Toplantı Odası": ["Meeting room", "Besprechungsraum", "Αίθουσα συσκέψεων"],
+    "Koridor": ["Hallway", "Flur", "Διάδρομος"]
+  }
+};
+const LANG_KEY = "fdos.lang";
+let LANG = (() => {
+  try { const s = localStorage.getItem(LANG_KEY); if (LANGS.includes(s)) return s; } catch(e){}
+  const n = (navigator.language || "tr").slice(0, 2).toLowerCase();
+  return LANGS.includes(n) ? n : "tr";
+})();
+const LI = () => Math.max(0, LANGS.indexOf(LANG));
+// t("anahtar", {n: 3}) → seçili dildeki metin; {n} yerine değer konur
+function t(k, v){
+  const row = TX[k]; let s = row ? (row[LI()] ?? row[0]) : k;
+  if (v) s = s.replace(/\{(\w+)\}/g, (m, x) => x in v ? v[x] : m);
+  return s;
+}
+const tx = (k, v) => t(k, v);   // uygulama kodunda çeviri hep tx() ile yapılır ("t" çoğu yerde işin kendisi)
+const stL = s => (ST_TX[s] || [])[LI()] || (ST_TX[s] || [])[0] || "";
+const dL = k => DATA_TX.dept[k]?.[LI()] || DEPTS[k]?.label || "";
+const dN = k => DATA_TX.deptShort[k]?.[LI()] || DEPTS[k]?.name || dL(k);
+const tL = k => DATA_TX.type[k]?.[LI()] || TYPES[k]?.label || "";
+const cL = c => (LI() && DATA_TX.cat[c]?.[LI() - 1]) || c || "";
+const aL = a => (LI() && DATA_TX.area[a]?.[LI() - 1]) || a || "";
+
 const DEPTS = {
   teknik:{label:"Teknik", short:"TEK", name:"Teknik"},
   kat:{label:"Kat Hizmetleri", short:"HK", name:"Kat"},
@@ -469,11 +863,10 @@ const isRoomNo = r => /^\d{1,5}[A-Za-z]?$/.test(String(r || ""));
 // Seçilebilen durumlar: "DND Kartlı" yalnızca oda numarası olan işte
 const statusOpts = t => ["yeni", "beklemede", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"];
 const AREAS = ["Lobi","Restoran","Bar","Mutfak","Toplantı Odası","Koridor"];
-const TITLES = {ana:"Anasayfa", yapilacak:"Yapılacaklar", tamamlanan:"Tamamlananlar", rapor:"Rapor"};
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const lower = s => String(s ?? "").toLocaleLowerCase("tr");
+const lower = s => String(s ?? "").toLocaleLowerCase(LOCALES[LANG] || "tr");
 // tüm tarihler gg/aa/yy ss:dd (ör. 23/10/26 14:30)
 const fmt = ms => { if (!ms) return ""; const d = new Date(ms); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const dayStart = d => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
@@ -499,7 +892,9 @@ let audioCtx = null;
 
 const isAdmin = () => !!(me && me.role === "admin");
 const deptOf = m => m && DEPTS[m.dept] ? DEPTS[m.dept] : null;
+// Geçmişe yazılan ad her zaman Türkçe departman adıyla kaydedilir (ekranda byL ile çevrilir).
 const who = () => me ? `${me.name} (${deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Departmansız")})` : "İsimsiz";
+const anonL = n => !n || n === "İsimsiz" ? tx("anon") : n;
 const isOpen = t => t.status !== "tamam";
 // Bir işi yalnızca atandığı departman ve işi açan kişi görür; yönetici hepsini (veritabanında da aynı kural: fdos_can_see).
 const canSee = t => !!me && (isAdmin() || (!!me.dept && t.dept === me.dept) || isCreator(t));
@@ -525,13 +920,13 @@ const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2
 function itemsProg(t){
   const it = t.items || []; if (!it.length) return "";
   const d = it.length - openItems(t);
-  return `<div class="cprog"><span>Liste ${d}/${it.length}</span><div class="cbar"><div style="width:${d / it.length * 100}%"></div></div></div>`;
+  return `<div class="cprog"><span>${tx("list.prog", {d, n: it.length})}</span><div class="cbar"><div style="width:${d / it.length * 100}%"></div></div></div>`;
 }
 function checklistDetail(t){
   const it = t.items || [];
   if (!it.length) return "";   // liste yoksa bölüm hiç görünmez
   const d = it.filter(x => x.done).length;
-  return `<h3 class="section-t">Liste ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
+  return `<h3 class="section-t">${tx("list")} ${it.length ? `<span class="muted">${d}/${it.length}</span>` : ""}</h3>
     ${it.length ? `<ul class="clist">${it.map(x => `<li class="${x.done ? "done" : ""}">
       <label class="ci"><input type="checkbox" data-item="${esc(x.id)}" ${x.done ? "checked" : ""} ${inDept(t) ? "" : "disabled"}><span class="t">${esc(x.text)}</span></label></li>`).join("")}</ul>` : ""}`;
 }
@@ -561,30 +956,30 @@ function beep(){
 $("#soundBtn").addEventListener("click", () => {
   const on = $("#soundBtn").getAttribute("aria-pressed") !== "true";
   $("#soundBtn").setAttribute("aria-pressed", String(on));
-  if (on){ try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch(e){} beep(); toast("Departmanına yeni iş gelince sesli uyarı verilecek."); }
-  else { audioCtx = null; toast("Sesli uyarı kapalı."); }
+  if (on){ try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch(e){} beep(); toast(tx("sound.on")); }
+  else { audioCtx = null; toast(tx("sound.off")); }
 });
 
 /* ---------- pieces ---------- */
 const clockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
 function plate(room, dept){
-  if (!room) return `<div class="plate"><small>TALEP</small><b>${esc(DEPTS[dept]?.short || "—")}</b></div>`;
-  const r = String(room), num = isRoomNo(r), fl = floorOf(r);
-  if (fl) return `<div class="plate"><small>KORİDOR</small><b class="${fl.length > 3 ? "long" : ""}">${esc(fl)}</b><small>KAT</small></div>`;
-  return `<div class="plate"><small>${num ? "ODA" : "ALAN"}</small><b class="${r.length > 4 ? "long" : ""}">${esc(r)}</b></div>`;
+  if (!room) return `<div class="plate"><small>${tx("pl.req")}</small><b>${esc(DEPTS[dept]?.short || "—")}</b></div>`;
+  const r = String(room), num = isRoomNo(r), fl = floorOf(r), shown = num ? r : aL(r);
+  if (fl) return `<div class="plate"><small>${tx("pl.hall")}</small><b class="${fl.length > 3 ? "long" : ""}">${esc(fl)}</b><small>${tx("pl.floor")}</small></div>`;
+  return `<div class="plate"><small>${num ? tx("pl.room") : tx("pl.area")}</small><b class="${shown.length > 4 ? "long" : ""}">${esc(shown)}</b></div>`;
 }
 // açık işte açılış, tamamlanmış işte bitiş zamanı
 function dueLine(t, extra = ""){
-  if (!isOpen(t)) return `<div class="due">${clockSvg}<span>Bitti ${esc(fmt(t.doneAt))}</span>${extra ? `<span style="margin-left:auto">${extra}</span>` : ""}</div>`;
-  return `<div class="due">${clockSvg}<span>Açılış: ${esc(fmt(t.createdAt))}</span></div>`;
+  if (!isOpen(t)) return `<div class="due">${clockSvg}<span>${tx("c.done", {d: esc(fmt(t.doneAt))})}</span>${extra ? `<span style="margin-left:auto">${extra}</span>` : ""}</div>`;
+  return `<div class="due">${clockSvg}<span>${tx("c.opened", {d: esc(fmt(t.createdAt))})}</span></div>`;
 }
 function actionsFor(t){
   const b = (act, label, cls = "") => `<button type="button" class="btn ${cls}" data-act="${act}">${label}</button>`;
   if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
     case "yeni": return "";   // yeni işin kartında düğme yok; durum detaydan değişir
-    case "beklemede": case "dnd": return b("done","Tamamlandı","primary");
-    case "tamam": return t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary");   // "Yeniden aç" durum satırında
+    case "beklemede": case "dnd": return b("done", stL("tamam"), "primary");
+    case "tamam": return t.verified || !canCheck(t) ? "" : b("verify", tx("c.verify"), "primary");   // "Yeniden aç" durum satırında
   }
   return "";
 }
@@ -598,38 +993,38 @@ function repeatNo(t){
   return n;
 }
 function card(t){
-  const type = TYPES[t.type] || {label:"İş"}, rn = repeatNo(t);
+  const typeLabel = TYPES[t.type] ? tL(t.type) : tx("job"), rn = repeatNo(t);
   const flags = [
-    rn > 1 ? `<span class="flag rep" title="Aynı yerde, aynı sorun için son ${REPEAT_DAYS} günde açılan ${rn}. iş">${REPEAT_DAYS} GÜNDE ${rn}. KEZ</span>` : "",
-    t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span>` : "",
-    t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : "",
+    rn > 1 ? `<span class="flag rep" title="${esc(tx("c.repTitle", {d: REPEAT_DAYS, n: rn}))}">${tx("c.rep", {d: REPEAT_DAYS, n: rn})}</span>` : "",
+    t.ooo ? `<span class="flag ooo">${tx("c.ooo")}</span>` : "",
+    t.guest ? `<span class="flag">${tx("c.guest")}</span>` : "",
   ].join("");
   const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
-      <div class="r1"><div class="kind">${esc(type.label)} <em>· ${esc(t.cat || "")}</em></div></div>
-      ${dueLine(t, t.verified && !isOpen(t) ? `<span class="flag ok">KONTROL EDİLDİ</span>` : "")}
+      <div class="r1"><div class="kind">${esc(typeLabel)} <em>· ${esc(cL(t.cat))}</em></div></div>
+      ${dueLine(t, t.verified && !isOpen(t) ? `<span class="flag ok">${tx("c.ok")}</span>` : "")}
       ${t.desc ? `<p class="desc">${esc(t.desc)}</p>` : ""}
       ${itemsProg(t)}
       <div class="meta">
-        <span class="dept">${esc(DEPTS[t.dept]?.label || "")}</span>
-        <span class="st">${STATUS[t.status] || ""}</span>
+        <span class="dept">${esc(dL(t.dept))}</span>
+        <span class="st">${stL(t.status)}</span>
         ${flags}
-        ${!isOpen(t) && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">Yeniden aç</button>` : ""}
+        ${!isOpen(t) && canVerify(t) ? `<button type="button" class="btn ghost reopen" data-act="reopen">${tx("c.reopen")}</button>` : ""}
       </div>
       ${(a => a ? `<div class="actions">${a}</div>` : "")(actionsFor(t))}
-      ${isOpen(t) ? `<div class="by">Bildiren: ${esc(t.createdBy || "İsimsiz")}</div>` : ""}
+      ${isOpen(t) ? `<div class="by">${tx("c.by", {name: esc(anonL(t.createdBy))})}</div>` : ""}
     </div>
   </article>`;
   if (!canDelete(t)) return art;
   const armed = delArmed === t.id;
-  return `<div class="swc" data-sid="${esc(t.id)}"><div class="swc-act"><button type="button" class="swc-del ${armed ? "armed" : ""}" data-cdel="${esc(t.id)}">${armed ? "Eminim" : "Sil"}</button></div>${art}</div>`;
+  return `<div class="swc" data-sid="${esc(t.id)}"><div class="swc-act"><button type="button" class="swc-del ${armed ? "armed" : ""}" data-cdel="${esc(t.id)}">${armed ? tx("sure") : tx("del")}</button></div>${art}</div>`;
 }
 const byAge = (a, b) => (a.createdAt || 0) - (b.createdAt || 0);   // en eski açılan önce
 
 function stateScreen(){
-  if (!loaded || (signedIn && !me)) return `<div class="empty"><h3>İşler yükleniyor</h3><p>${sb && !signedIn ? "Devam etmek için giriş yap." : "Ortak liste bağlanıyor."}</p></div>`;
-  if (dbFailed) return `<div class="empty"><h3>Kurulum tamamlanmadı</h3><p>supabase-config.js dosyasına Supabase bilgilerini yaz. Kurulum rehberinin 2. adımına bak.</p></div>`;
+  if (!loaded || (signedIn && !me)) return `<div class="empty"><h3>${tx("s.loading")}</h3><p>${sb && !signedIn ? tx("s.signin") : tx("s.connecting")}</p></div>`;
+  if (dbFailed) return `<div class="empty"><h3>${tx("s.setup")}</h3><p>${tx("s.setupP")}</p></div>`;
   return null;
 }
 
@@ -639,36 +1034,36 @@ function screenHome(){
   const open = visTasks().filter(isOpen).sort(byAge);   // en eski açılan en üstte
   const fresh0 = open.filter(t => t.status === "yeni");
   const UP = 12;
-  const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${DEPTS[k].name}\u00a0${n}`).join(" · ") || "Açık iş yok";
+  const deptLine = Object.keys(DEPTS).map(k => [k, open.filter(t => t.dept === k).length]).filter(x => x[1]).map(([k, n]) => `${dN(k)}\u00a0${n}`).join(" · ") || tx("h.noOpen");
   const hero = `<div class="hero">
     <button type="button" class="hbox today" data-jump="yeni">
-      <span class="hl">Yeni işler</span><b>${fresh0.length}</b>
-      <span class="hs">${fresh0.length ? "Henüz başlanmadı" : "Yeni iş yok"}</span>
+      <span class="hl">${tx("h.new")}</span><b>${fresh0.length}</b>
+      <span class="hs">${fresh0.length ? tx("h.notStarted") : tx("h.noNew")}</span>
     </button>
     <button type="button" class="hbox open" data-jump="open">
-      <span class="hl">Bitmemiş işler</span><b>${open.length}</b>
+      <span class="hl">${tx("h.unfinished")}</span><b>${open.length}</b>
       <span class="hs">${esc(deptLine)}</span>
     </button>
   </div>`;
-  if (!tasks.size) return hero + `<div class="empty" style="margin-top:18px"><h3>Henüz iş yok</h3><p>Bir arıza, temizlik ya da müşteri talebi olduğunda sağ alttaki + ile kaydet; sorumlu departman burada anında görür.</p></div>`;
+  if (!tasks.size) return hero + `<div class="empty" style="margin-top:18px"><h3>${tx("h.empty")}</h3><p>${tx("h.emptyP")}</p></div>`;
   return hero + `<section class="sec">
-    <div class="sech"><h3>Açık işler</h3><span class="cnt">${open.length}</span>
-      ${open.length > UP ? `<button type="button" class="more" data-jump="open">Tümünü gör</button>` : ""}</div>
-    ${open.length ? `<div class="list">${open.slice(0, UP).map(t => card(t)).join("")}</div>` : `<div class="none">Açık iş yok.</div>`}
+    <div class="sech"><h3>${tx("h.open")}</h3><span class="cnt">${open.length}</span>
+      ${open.length > UP ? `<button type="button" class="more" data-jump="open">${tx("h.all")}</button>` : ""}</div>
+    ${open.length ? `<div class="list">${open.slice(0, UP).map(x => card(x)).join("")}</div>` : `<div class="none">${tx("h.noOpen")}.</div>`}
   </section>`;
 }
 const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
 const FILTERS = {
   todo: [
-    {key:"status", label:"Durum", opts: () => [["all","Tümü"],["yeni","Yeni"],["beklemede","Beklemede"],["dnd","DND Kartlı"]]}
+    {key:"status", label: () => tx("status"), opts: () => [["all", tx("all")], ...["yeni", "beklemede", "dnd"].map(k => [k, stL(k)])]}
   ],
   done: [
-    {key:"check", label:"Durum", opts: () => [["all","Tümü"],["kontrol","Kontrol bekleyen"],["ok","Kontrol edilen"]]}
+    {key:"check", label: () => tx("status"), opts: () => [["all", tx("all")], ["kontrol", tx("chk.pending")], ["ok", tx("chk.ok")]]}
   ]
 };
 const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
-const matchQ = q => { q = lower(String(q || "").trim()); return t => !q || [t.room, t.desc, t.cat, t.doneBy, t.createdBy, TYPES[t.type]?.label, DEPTS[t.dept]?.label, (t.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
+const matchQ = q => { q = lower(String(q || "").trim()); return x => !q || [x.room, placeOf(x.room), x.desc, x.cat, cL(x.cat), x.doneBy, x.createdBy, TYPES[x.type]?.label, tL(x.type), DEPTS[x.dept]?.label, dL(x.dept), (x.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
 function applyTodo(f){
   let arr = visTasks().filter(isOpen);
   if (f.status !== "all") arr = arr.filter(t => t.status === f.status);
@@ -688,18 +1083,18 @@ const activeDefs = (kind, f) => FILTERS[kind].filter(d => f[d.key] !== "all");
 function toolbar(kind){
   const f = ui[kind], n = activeDefs(kind, f).length;
   return `<div class="toolbar">
-    <div class="sbox">${searchSvg}<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="${kind === "todo" ? "Oda, sorun veya kişi ara" : "Tamamlananlarda ara"}" aria-label="Ara" value="${esc(f.q)}">
-      <button type="button" class="clr" id="qClr" aria-label="Aramayı temizle" ${f.q ? "" : "hidden"}>✕</button></div>
-    <button type="button" class="fbtn ${n ? "on" : ""}" id="fOpen" aria-label="Filtreler${n ? ", " + n + " açık" : ""}">${filterSvg}<span>Filtre</span>${n ? `<span class="n">${n}</span>` : ""}</button>
+    <div class="sbox">${searchSvg}<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(kind === "todo" ? tx("q.todo") : tx("q.done"))}" aria-label="${esc(tx("q.aria"))}" value="${esc(f.q)}">
+      <button type="button" class="clr" id="qClr" aria-label="${esc(tx("q.clear"))}" ${f.q ? "" : "hidden"}>✕</button></div>
+    <button type="button" class="fbtn ${n ? "on" : ""}" id="fOpen" aria-label="${esc(tx("fl.aria") + (n ? ", " + tx("fl.active", {n}) : ""))}">${filterSvg}<span>${tx("fl.btn")}</span>${n ? `<span class="n">${n}</span>` : ""}</button>
   </div>`;
 }
 function activeChips(kind){
   const f = ui[kind];
   const items = activeDefs(kind, f).map(d => {
     const lab = d.opts().find(o => o[0] === f[d.key])?.[1] || "";
-    return `<button type="button" class="achip" data-rm="${d.key}" aria-label="${esc(d.label)} filtresini kaldır">${esc(d.label)}: ${esc(lab)}<span class="x" aria-hidden="true">✕</span></button>`;
+    return `<button type="button" class="achip" data-rm="${d.key}" aria-label="${esc(tx("fl.remove", {l: d.label()}))}">${esc(d.label())}: ${esc(lab)}<span class="x" aria-hidden="true">✕</span></button>`;
   });
-  if (items.length > 1) items.push(`<button type="button" class="achip clear" data-rm="__all">Tümünü temizle</button>`);
+  if (items.length > 1) items.push(`<button type="button" class="achip clear" data-rm="__all">${tx("fl.clearAll")}</button>`);
   return items.length ? `<div class="active">${items.join("")}</div>` : "";
 }
 function clearFilters(kind, keepQ = true){
@@ -710,16 +1105,16 @@ function clearFilters(kind, keepQ = true){
 function results(kind){
   const f = ui[kind];
   const arr = kind === "todo" ? applyTodo(f) : applyDone(f);
-  const sortLab = kind === "todo" ? "en eski açılan önce" : "en son biten önce";
-  if (arr.length) return `<p class="muted resmeta">${arr.length} iş · ${sortLab}</p><div class="list">${arr.map(t => card(t)).join("")}</div>`;
+  const sortLab = kind === "todo" ? tx("r.sortTodo") : tx("r.sortDone");
+  if (arr.length) return `<p class="muted resmeta">${tx("r.count", {n: arr.length, s: sortLab})}</p><div class="list">${arr.map(x => card(x)).join("")}</div>`;
   const narrowed = f.q || activeDefs(kind, f).length;
-  if (kind === "todo" && !tasks.size) return `<div class="empty"><h3>Henüz iş yok</h3><p>Sağ alttaki + ile ilk işi kaydet.</p></div>`;
+  if (kind === "todo" && !tasks.size) return `<div class="empty"><h3>${tx("h.empty")}</h3><p>${tx("r.firstJob")}</p></div>`;
   if (kind === "done" && f.check === "kontrol" && !f.q && activeDefs(kind, f).length === 1)
-    return `<div class="empty"><h3>Kontrol bekleyen iş yok</h3><p>Bitirilen işler burada resepsiyonun kontrolünü bekler. Kontrol edilen oda otomatik olarak satışa açılır.</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__all">Tüm tamamlananları göster</button></p></div>`;
-  if (narrowed) return `<div class="empty"><h3>Aramana uyan iş yok</h3><p>Aramayı değiştir ya da filtreleri kaldır.</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__everything">Arama ve filtreleri temizle</button></p></div>`;
+    return `<div class="empty"><h3>${tx("r.noPending")}</h3><p>${tx("r.noPendingP")}</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__all">${tx("r.showAllDone")}</button></p></div>`;
+  if (narrowed) return `<div class="empty"><h3>${tx("r.noMatch")}</h3><p>${tx("r.noMatchP")}</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__everything">${tx("r.clearAll")}</button></p></div>`;
   return kind === "todo"
-    ? `<div class="empty"><h3>Açık iş yok</h3><p>Bekleyen iş kalmadı.</p></div>`
-    : `<div class="empty"><h3>Tamamlanan iş yok</h3><p>Bitirilen işler en yeniden eskiye burada listelenir.</p></div>`;
+    ? `<div class="empty"><h3>${tx("h.noOpen")}</h3><p>${tx("r.noOpenP")}</p></div>`
+    : `<div class="empty"><h3>${tx("r.noDone")}</h3><p>${tx("r.noDoneP")}</p></div>`;
 }
 function screenList(kind){
   const s = stateScreen(); if (s) return s;
@@ -734,8 +1129,8 @@ function openFilter(kind){ fKind = kind; fDraft = {...ui[kind]}; renderFilter();
 function renderFilter(){
   if (!fKind) return;
   $("#filterSheet").innerHTML = `
-    <div class="sheet-head"><div><h2>Filtrele</h2><p class="sheet-sub">${fKind === "todo" ? "Yapılacaklar" : "Tamamlananlar"}</p></div><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div>
-    ${FILTERS[fKind].map(d => `<div class="field"><span class="lbl">${esc(d.label)}</span><div class="chips wrap">${d.opts().map(([k, l]) => {
+    <div class="sheet-head"><div><h2>${tx("fl.title")}</h2><p class="sheet-sub">${fKind === "todo" ? tx("tab.yapilacak") : tx("tab.tamamlanan")}</p></div><button type="button" class="iconbtn x" data-close aria-label="${esc(tx("close"))}">✕</button></div>
+    ${FILTERS[fKind].map(d => `<div class="field"><span class="lbl">${esc(d.label())}</span><div class="chips wrap">${d.opts().map(([k, l]) => {
       return `<button type="button" class="chip" data-fk="${d.key}" data-v="${k}" aria-pressed="${fDraft[d.key] === k}">${esc(l)}</button>`;
     }).join("")}</div></div>`).join("")}`;
 }
@@ -754,33 +1149,33 @@ function screenReport(){
   const created = all.filter(t => (t.createdAt || 0) >= from);
   const done = all.filter(t => t.doneAt && t.doneAt >= from);
   const open = all.filter(isOpen);
-  const periods = [["0","Bugün"],["7","7 gün"],["30","30 gün"]]
+  const periods = [["0", tx("rp.today")], ["7", tx("rp.days", {n: 7})], ["30", tx("rp.days", {n: 30})]]
     .map(([k,l]) => `<button type="button" class="chip" data-f="rep" data-v="${k}" aria-pressed="${ui.rep === k}">${l}</button>`).join("");
   const rows = Object.entries(DEPTS).filter(([k, v]) => ownDept ? k === ownDept : (v.active !== false && typesFor(k).length) || all.some(t => t.dept === k)).map(([k,v]) => {
     const o = open.filter(t => t.dept === k), dn = done.filter(t => t.dept === k);
-    return `<tr><td>${esc(v.label)}</td><td>${o.length}</td><td>${dn.length}</td></tr>`;
+    return `<tr><td>${esc(dL(k))}</td><td>${o.length}</td><td>${dn.length}</td></tr>`;
   }).join("");
   const top = (keyFn, n = 5) => {
     const m = new Map(); created.forEach(t => { const k = keyFn(t); if (k) m.set(k, (m.get(k) || 0) + 1); });
     const arr = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
     const max = arr[0]?.[1] || 1;
     return arr.length ? `<div class="bars">${arr.map(([k, c]) => `<div class="bar"><span>${esc(k)}</span><b>${c}</b><div class="tr"><div style="width:${c / max * 100}%"></div></div></div>`).join("")}</div>`
-      : `<p class="muted" style="margin:0">Bu dönemde kayıt yok.</p>`;
+      : `<p class="muted" style="margin:0">${tx("rp.none")}</p>`;
   };
   return `<div class="filters"><div class="chips">${periods}</div></div>
     <div class="kpis">
-      <div class="kpi"><b>${created.length}</b><span>Açılan iş</span></div>
-      <div class="kpi"><b>${done.length}</b><span>Tamamlanan</span></div>
-      <div class="kpi"><b>${open.length}</b><span>Şu an açık</span></div>
+      <div class="kpi"><b>${created.length}</b><span>${tx("rp.created")}</span></div>
+      <div class="kpi"><b>${done.length}</b><span>${tx("rp.done")}</span></div>
+      <div class="kpi"><b>${open.length}</b><span>${tx("rp.open")}</span></div>
     </div>
-    <div class="panel"><h3>${ownDept ? esc(DEPTS[ownDept]?.label || "Departmanım") : "Departmanlar"}</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Departman</th><th>Açık</th><th>Biten</th></tr></thead>
+    <div class="panel"><h3>${ownDept ? esc(dL(ownDept) || tx("rp.myDept")) : tx("rp.depts")}</h3><div class="tscroll"><table class="dtable">
+      <thead><tr><th>${tx("dept")}</th><th>${tx("rp.colOpen")}</th><th>${tx("rp.colDone")}</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-      <p class="muted" style="margin:8px 0 0">Açık: şu an. Biten: seçili dönem.</p></div>
+      <p class="muted" style="margin:8px 0 0">${tx("rp.note")}</p></div>
     ${isAdmin() ? peoplePanel(created, done, open) : ""}
-    <div class="panel"><h3>En sık sorunlar</h3>${top(t => `${TYPES[t.type]?.label || ""} · ${t.cat || ""}`)}</div>
-    <div class="panel"><h3>En çok bildirim alan odalar</h3>${top(t => t.room)}</div>
-    <div class="panel"><h3>Tekrarlayan arızalar (son ${REPEAT_DAYS} gün)</h3>${repeats(all)}</div>`;
+    <div class="panel"><h3>${tx("rp.topIssues")}</h3>${top(x => `${tL(x.type)} · ${cL(x.cat)}`)}</div>
+    <div class="panel"><h3>${tx("rp.topRooms")}</h3>${top(x => x.room ? placeOf(x.room) : "")}</div>
+    <div class="panel"><h3>${tx("rp.repeat", {d: REPEAT_DAYS})}</h3>${repeats(all)}</div>`;
 }
 
 // Aynı yer + aynı tür/kategori için son 30 günde 2 ve üstü iş.
@@ -789,11 +1184,11 @@ function repeats(list){
   list.forEach(t => { if (!t.room || !t.cat || (t.createdAt || 0) < from) return;
     const k = t.room + "\u0000" + t.type + "\u0000" + t.cat; m.set(k, (m.get(k) || 0) + 1); });
   const arr = [...m.entries()].filter(x => x[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  if (!arr.length) return `<p class="muted" style="margin:0">Aynı yerde tekrarlayan sorun yok.</p>`;
+  if (!arr.length) return `<p class="muted" style="margin:0">${tx("rp.noRepeat")}</p>`;
   const max = arr[0][1];
   return `<div class="bars">${arr.map(([k, c]) => { const [room, type, cat] = k.split("\u0000");
-    return `<div class="bar"><span>${esc(placeOf(room))} · ${esc(cat)}</span><b>${c}</b><div class="tr"><div style="width:${c / max * 100}%"></div></div></div>`; }).join("")}</div>
-    <p class="muted" style="margin:8px 0 0">Aynı oda ya da alanda, aynı sorun için açılan işler.</p>`;
+    return `<div class="bar"><span>${esc(placeOf(room))} · ${esc(cL(cat))}</span><b>${c}</b><div class="tr"><div style="width:${c / max * 100}%"></div></div></div>`; }).join("")}</div>
+    <p class="muted" style="margin:8px 0 0">${tx("rp.repeatNote")}</p>`;
 }
 function peoplePanel(created, done, open){
   const same = (a, b) => a && b && lower(a) === lower(b);
@@ -807,14 +1202,14 @@ function peoplePanel(created, done, open){
     return {p, c, d};
   }).filter(r => r.c || r.d || profiles.some(x => x.name === r.p.name))
     .sort((a, b) => (b.d + b.c) - (a.d + a.c) || a.p.name.localeCompare(b.p.name, "tr"));
-  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(DEPTS[r.p.dept]?.label || "—")}</small></td><td>${r.c}</td><td>${r.d}</td></tr>`).join("");
-  return `<div class="panel"><h3>Kişiler</h3><div class="tscroll"><table class="dtable">
-      <thead><tr><th>Kişi</th><th>Açtığı</th><th>Bitirdiği</th></tr></thead>
-      <tbody>${body || `<tr><td colspan="3">Kayıt yok.</td></tr>`}</tbody></table></div>
-      <p class="muted" style="margin:8px 0 0">Yalnızca yönetici görür. Açtığı ve bitirdiği (Tamamlandı yapan): seçili dönem.</p></div>`;
+  const body = rows.map(r => `<tr><td>${esc(r.p.name)}<br><small class="muted">${esc(dL(r.p.dept) || "—")}</small></td><td>${r.c}</td><td>${r.d}</td></tr>`).join("");
+  return `<div class="panel"><h3>${tx("rp.people")}</h3><div class="tscroll"><table class="dtable">
+      <thead><tr><th>${tx("rp.person")}</th><th>${tx("rp.opened")}</th><th>${tx("rp.finished")}</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="3">${tx("rp.noRec")}</td></tr>`}</tbody></table></div>
+      <p class="muted" style="margin:8px 0 0">${tx("rp.peopleNote")}</p></div>`;
 }
 function renderWho(){
-  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">Hesabım</span>`;
+  $("#whoBtn").innerHTML = me ? `<span class="nm">${esc(me.name)}</span><small>${deptOf(me)?.short || (me.role === "admin" ? "YÖN" : "—")}</small>` : `<span class="nm">${tx("w.title")}</span>`;
 }
 function renderTabs(){
   document.querySelectorAll(".tb").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -823,7 +1218,7 @@ function renderTabs(){
   const pend = visTasks().filter(t => !isOpen(t) && !t.verified).length;
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
   $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
-  $("#hTitle").textContent = TITLES[ui.tab]; document.body.dataset.tab = ui.tab;
+  $("#hTitle").textContent = tx("tab." + ui.tab); document.body.dataset.tab = ui.tab;
   $("#newBtn").hidden = dbFailed || !(ui.tab === "ana" || ui.tab === "yapilacak");
 }
 function renderScreen(){
@@ -902,7 +1297,7 @@ $("#screen").addEventListener("click", e => {
   if (a === "verify" ? !canCheck(t) : a === "reopen" ? !canVerify(t) : !inDept(t)) return;
   requireMe(() => {
     if (a === "done"){
-      if (openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); openDetail(id); return; }
+      if (openItems(t)){ toast(tx("t.itemsFirst", {n: openItems(t)})); openDetail(id); return; }
       patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name}, "Tamamlandı olarak işaretledi");
     }
     if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
@@ -925,29 +1320,29 @@ $("#screen").addEventListener("input", e => {
 function renderDetail(){
   const t = tasks.get(detailId), el = $("#detail");
   if (!t){ closeOv("#ovDetail"); return; }
-  const type = TYPES[t.type] || {label:"İş"};
-  const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time><b class="by">${esc(l.by)}</b>: ${esc(l.msg)}</li>`).join("");
+  const typeLabel = TYPES[t.type] ? tL(t.type) : tx("job");
+  const log = (t.log || []).slice().reverse().map(l => `<li><time>${esc(fmt(l.t))}</time><b class="by">${esc(byL(l.by))}</b>: ${esc(logL(l.msg))}</li>`).join("");
   const row = (k, v) => `<div class="dc-row"><span class="k">${k}</span><div class="v">${v}</div></div>`;
   const status = inDept(t)
-    ? `<div class="sel"><select id="dStatus" aria-label="Durumu değiştir">${statusOpts(t).map(k => opt(k, STATUS[k], k === t.status)).join("")}</select></div>`
-    : `<b>${esc(STATUS[t.status] || "")}</b>`;
+    ? `<div class="sel"><select id="dStatus" aria-label="${esc(tx("d.statusAria"))}">${statusOpts(t).map(k => opt(k, stL(k), k === t.status)).join("")}</select></div>`
+    : `<b>${esc(stL(t.status))}</b>`;
   el.className = "sheet " + (isOpen(t) ? "open" : "done");
   el.innerHTML = `
-    <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(type.label)}</h2><p class="sheet-sub">${esc(t.cat || "")} · ${STATUS[t.status]}</p></div>
-      <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">Güncelle</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
+    <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(typeLabel)}</h2><p class="sheet-sub">${esc(cL(t.cat))} · ${stL(t.status)}</p></div>
+      <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">${tx("update")}</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="${esc(tx("close"))}">✕</button></div></div>
     <div class="card ${isOpen(t) ? "open" : "done"} dcard">
-      ${row("Departman", `<b>${esc(DEPTS[t.dept]?.label || "")}</b>`)}
+      ${row(tx("dept"), `<b>${esc(dL(t.dept))}</b>`)}
       ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
       ${checklistDetail(t)}
-      ${row("Durum", status)}
-      ${t.doneAt ? row("Bitiş", `${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}`) : ""}
-      ${t.verified ? row("Kontrol", esc(t.verifiedBy || "")) : ""}
-      ${t.ooo || t.guest ? row("Oda", `${t.ooo ? `<span class="flag ooo">SATIŞA KAPALI</span> ` : ""}${t.guest ? `<span class="flag">MİSAFİR ODADA</span>` : ""}`) : ""}
-      ${(n => n > 1 ? row("Tekrar", `Son ${REPEAT_DAYS} günde ${/^\d{1,5}[A-Za-z]?$/.test(t.room) ? "bu odada" : "bu alanda"} açılan <b>${n}.</b> ${esc(t.cat)} işi`) : "")(repeatNo(t))}
-      <div class="dc-foot">Bildiren: ${esc(t.createdBy || "İsimsiz")}${t.createdDept ? " · " + esc(DEPTS[t.createdDept]?.label || "") : ""}<br>Açılış: ${esc(fmt(t.createdAt))}</div>
+      ${row(tx("status"), status)}
+      ${t.doneAt ? row(tx("d.end"), `${esc(fmt(t.doneAt))}${t.doneBy ? " · " + esc(t.doneBy) : ""}`) : ""}
+      ${t.verified ? row(tx("d.check"), esc(byL(t.verifiedBy))) : ""}
+      ${t.ooo || t.guest ? row(tx("d.room"), `${t.ooo ? `<span class="flag ooo">${tx("c.ooo")}</span> ` : ""}${t.guest ? `<span class="flag">${tx("c.guest")}</span>` : ""}`) : ""}
+      ${(n => n > 1 ? row(tx("d.repeat"), tx("d.repeatTxt", {d: REPEAT_DAYS, n, where: tx(isRoomNo(t.room) ? "d.inRoom" : "d.inArea"), cat: esc(cL(t.cat))})) : "")(repeatNo(t))}
+      <div class="dc-foot">${tx("c.by", {name: esc(anonL(t.createdBy))})}${t.createdDept ? " · " + esc(dL(t.createdDept)) : ""}<br>${tx("c.opened", {d: esc(fmt(t.createdAt))})}</div>
     </div>
-    <h3 class="section-t">Geçmiş</h3>
-    <ul class="log">${log || "<li>Kayıt yok</li>"}</ul>`;
+    <h3 class="section-t">${tx("d.history")}</h3>
+    <ul class="log">${log || `<li>${tx("d.noLog")}</li>`}</ul>`;
 }
 function openDetail(id){ detailId = id; $("#detail").innerHTML = ""; renderDetail(); openOv("#ovDetail"); }
 $("#detail").addEventListener("click", e => {
@@ -956,10 +1351,10 @@ $("#detail").addEventListener("click", e => {
 });
 function setStatus(t, v){
   if (v === t.status) return;
-  if (v === "tamam" && openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); renderDetail(); return; }
+  if (v === "tamam" && openItems(t)){ toast(tx("t.itemsFirst", {n: openItems(t)})); renderDetail(); return; }
   const f = {status: v};
   if (v === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
-  patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);
+  patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);   // geçmişe Türkçe yazılır, ekranda logL ile çevrilir
 }
 $("#detail").addEventListener("change", e => {
   const t = detailId && tasks.get(detailId); if (!t || !inDept(t)) return;
@@ -971,22 +1366,24 @@ $("#detail").addEventListener("change", e => {
     const items = (t.items || []).map(x => x.id === iid ? {...x, done: on, by: on ? who() : null, at: on ? Date.now() : null} : x);
     const it = items.find(x => x.id === iid); if (!it) return;
     patch(t.id, {items}, `${on ? "Onayladı" : "Onayı kaldırdı"}: ${it.text}`);
-    if (on && items.every(x => x.done)) toast("Listenin tamamı onaylandı. İşi tamamlayabilirsin.");
+    if (on && items.every(x => x.done)) toast(tx("t.allTicked"));
   });
 });
 
-function requireMe(fn){ if (me) return fn(); toast("Profil yükleniyor, birkaç saniye sonra tekrar dene."); loadProfiles(); }
+function requireMe(fn){ if (me) return fn(); toast(tx("t.profile")); loadProfiles(); }
 
 /* ---------- hesabım ---------- */
 function openWho(){
   if (!me) return;
   $("#usersBtn").hidden = !isAdmin();
-  $("#wInfo").innerHTML = `<dt>Ad</dt><dd>${esc(me.name)}</dd><dt>E-posta</dt><dd>${esc(authUser?.email || "")}</dd>
-    <dt>Departman</dt><dd>${esc(deptOf(me)?.label || (me.role === "admin" ? "Yönetici" : "Atanmadı"))}</dd>`;
+  $("#wInfo").innerHTML = `<dt>${tx("name")}</dt><dd>${esc(me.name)}</dd><dt>${tx("email")}</dt><dd>${esc(authUser?.email || "")}</dd>
+    <dt>${tx("dept")}</dt><dd>${esc(deptOf(me) ? dL(me.dept) : me.role === "admin" ? dL("yonetici") : tx("w.unassigned"))}</dd>
+    <dt>${tx("w.lang")}</dt><dd><div class="sel"><select id="wLang" aria-label="${esc(tx("w.lang"))}">${LANGS.map(l => opt(l, LANG_NAMES[l], l === LANG)).join("")}</select></div></dd>`;
   openOv("#ovWho");
 }
 $("#whoBtn").addEventListener("click", openWho);
 $("#whoForm").addEventListener("submit", e => e.preventDefault());
+$("#wInfo").addEventListener("change", e => { if (e.target.id === "wLang") setLang(e.target.value, true); });
 
 /* ---------- listeler (Supabase tabloları; yoksa yukarıdaki sabitler) ---------- */
 const deptList = () => Object.entries(DEPTS).filter(([, v]) => v.active !== false);
@@ -1023,11 +1420,11 @@ async function loadProfiles(){
               : {name: (authUser?.email || "").split("@")[0] || "İsimsiz", dept: null, role: "user"};
     if (!$("#ovWho").hidden) openWho();
     if (!$("#ovUsers").hidden) renderUsers();
-    renderAll(); saveSnap();
+    renderAll(); saveSnap(); syncLang();
   } catch(e){}
 }
 const ADMIN_DEPT = "yonetici";   // yalnızca Tuncer'in departmanı; başkasına atanamaz
-const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? "Yok" : "Departman yok", !cur)}${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === cur)).map(([k, v]) => opt(k, short ? v.name : v.label, k === cur)).join("")}</select></div>`;
+const deptSel = (id, cur, short) => `<div class="sel"><select id="${id}">${opt("", short ? tx("u.noDeptShort") : tx("u.noDept"), !cur)}${Object.entries(DEPTS).filter(([k, v]) => k !== ADMIN_DEPT && (v.active !== false || k === cur)).map(([k]) => opt(k, short ? dN(k) : dL(k), k === cur)).join("")}</select></div>`;
 // Kullanıcılar: önce liste. Satırı sola kaydırınca sağda "Düzenle" ve "Sil" çıkar. Sağ üstteki + kayıt formunu açar.
 let usersView = "list", userEdit = null, userDelArmed = null;
 function renderUsers(){
@@ -1037,34 +1434,34 @@ function renderUsers(){
     const me0 = u.role === "admin";
     return `<li class="uitem" data-uid="${esc(u.user_id)}">
       <div class="uact">
-        <button type="button" class="ua edit" data-uedit="${esc(u.user_id)}">Düzenle</button>
-        ${me0 ? "" : `<button type="button" class="ua del ${userDelArmed === u.user_id ? "armed" : ""}" data-udel="${esc(u.user_id)}">${userDelArmed === u.user_id ? "Eminim" : "Sil"}</button>`}
+        <button type="button" class="ua edit" data-uedit="${esc(u.user_id)}">${tx("edit")}</button>
+        ${me0 ? "" : `<button type="button" class="ua del ${userDelArmed === u.user_id ? "armed" : ""}" data-udel="${esc(u.user_id)}">${userDelArmed === u.user_id ? tx("sure") : tx("del")}</button>`}
       </div>
       <div class="ufront">
-        <div class="uh"><b>${esc(u.name)}</b>${me0 ? `<span class="badge">YÖNETİCİ</span>` : ""}</div>
-        <div class="um"><span>${esc(u.email)}</span><span class="ud">${esc(me0 ? "Yönetici" : DEPTS[u.dept]?.label || "Departman yok")}</span></div>
+        <div class="uh"><b>${esc(u.name)}</b>${me0 ? `<span class="badge">${tx("u.badge")}</span>` : ""}</div>
+        <div class="um"><span>${esc(u.email)}</span><span class="ud">${esc(me0 ? dL("yonetici") : dL(u.dept) || tx("u.noDept"))}</span></div>
       </div></li>`;
   }).join("");
   $("#users").innerHTML = `
-    <div class="sheet-head"><div><h2>Kullanıcılar</h2><p class="sheet-sub">Satırı sola kaydır: düzenle ya da sil.</p></div>
-      <div class="hact"><button type="button" class="iconbtn" id="uNew" aria-label="Kullanıcı ekle" title="Kullanıcı ekle">${plus}</button><button type="button" class="iconbtn x" data-close aria-label="Kapat">✕</button></div></div>
+    <div class="sheet-head"><div><h2>${tx("w.users")}</h2><p class="sheet-sub">${tx("u.sub")}</p></div>
+      <div class="hact"><button type="button" class="iconbtn" id="uNew" aria-label="${esc(tx("u.add"))}" title="${esc(tx("u.add"))}">${plus}</button><button type="button" class="iconbtn x" data-close aria-label="${esc(tx("close"))}">✕</button></div></div>
     ${usersMsg ? `<p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" style="margin-top:12px">${esc(usersMsg.replace(/^✓ /, ""))}</p>` : ""}
-    <h3 class="section-t">Kayıtlı kullanıcılar (${profiles.length})</h3>
-    <ul class="ulist">${rows || "<li>Kullanıcı yok</li>"}</ul>`;
+    <h3 class="section-t">${tx("u.count", {n: profiles.length})}</h3>
+    <ul class="ulist">${rows || `<li>${tx("u.none")}</li>`}</ul>`;
 }
 function renderUserForm(){
   const u = userEdit && profiles.find(x => x.user_id === userEdit), admin = u && u.role === "admin";
   const keep = {n: $("#uName")?.value, e: $("#uEmail")?.value, p: $("#uPass")?.value, d: $("#uDept")?.value};
   $("#users").innerHTML = `
-    <div class="sheet-head"><div><h2>${u ? "Kullanıcıyı Güncelle" : "Yeni Kullanıcı"}</h2><p class="sheet-sub">${u ? esc(u.email) : "Kullanıcı bu e-posta ve şifreyle giriş yapar."}</p></div>
-      <button type="button" class="iconbtn x" id="uBack" aria-label="Listeye dön">✕</button></div>
+    <div class="sheet-head"><div><h2>${u ? tx("u.editTitle") : tx("u.newTitle")}</h2><p class="sheet-sub">${u ? esc(u.email) : tx("u.newSub")}</p></div>
+      <button type="button" class="iconbtn x" id="uBack" aria-label="${esc(tx("u.back"))}">✕</button></div>
     <form id="uForm" novalidate>
-      <div class="field"><label class="lbl" for="uName">Ad</label><input type="text" id="uName" maxlength="40" placeholder="ör. Ayşe K." autocomplete="off"></div>
-      ${u ? "" : `<div class="field"><label class="lbl" for="uEmail">E-posta</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
-      <div class="field"><label class="lbl" for="uPass">Geçici şifre</label><input type="text" id="uPass" autocomplete="off" placeholder="En az 6 karakter"><span class="hint">Kullanıcıya bu şifreyi ilet. Sonra "Şifremi unuttum" ile değiştirebilir.</span></div>`}
-      <div class="field"><label class="lbl" for="uDept">Departman</label>${admin ? `<div class="sel"><select id="uDept" disabled>${opt(ADMIN_DEPT, "Yönetici", true)}</select></div>` : deptSel("uDept", keep.d ?? (u ? u.dept : ""))}</div>
+      <div class="field"><label class="lbl" for="uName">${tx("name")}</label><input type="text" id="uName" maxlength="40" placeholder="${esc(tx("u.namePh"))}" autocomplete="off"></div>
+      ${u ? "" : `<div class="field"><label class="lbl" for="uEmail">${tx("email")}</label><input type="email" id="uEmail" inputmode="email" autocapitalize="off" autocomplete="off"></div>
+      <div class="field"><label class="lbl" for="uPass">${tx("u.tempPass")}</label><input type="text" id="uPass" autocomplete="off" placeholder="${esc(tx("u.passPh"))}"><span class="hint">${esc(tx("u.passHint"))}</span></div>`}
+      <div class="field"><label class="lbl" for="uDept">${tx("dept")}</label>${admin ? `<div class="sel"><select id="uDept" disabled>${opt(ADMIN_DEPT, dL(ADMIN_DEPT), true)}</select></div>` : deptSel("uDept", keep.d ?? (u ? u.dept : ""))}</div>
       <p class="err ${usersMsg.startsWith("✓") ? "ok" : ""}" id="uErr" ${usersMsg ? "" : "hidden"}>${esc(usersMsg.replace(/^✓ /, ""))}</p>
-      <div class="sheet-foot"><button type="button" class="btn ghost" id="uCancel">Vazgeç</button><button type="submit" class="btn primary" id="uAdd">${u ? "Güncelle" : "Kaydet"}</button></div>
+      <div class="sheet-foot"><button type="button" class="btn ghost" id="uCancel">${tx("cancel")}</button><button type="submit" class="btn primary" id="uAdd">${u ? tx("update") : tx("save")}</button></div>
     </form>`;
   $("#uName").value = keep.n ?? (u ? u.name : "");
   if ($("#uEmail")) $("#uEmail").value = keep.e || ""; if ($("#uPass")) $("#uPass").value = keep.p || "";
@@ -1075,34 +1472,34 @@ function openUsers(){ usersMsg = ""; closeOv("#ovWho"); usersView = "list"; user
 $("#usersBtn").addEventListener("click", () => { if (isAdmin()) openUsers(); });
 function createError(error){
   const m = (error && error.message) || "";
-  if (/could not find the function|PGRST202/i.test(m + (error && error.code))) return "Veritabanı güncel değil. schema.sql dosyasını Supabase'de yeniden çalıştır.";
-  if (/fetch|network|load failed/i.test(m)) return "İnternet bağlantısı yok.";
-  return m || "bilinmeyen hata";
+  if (/could not find the function|PGRST202/i.test(m + (error && error.code))) return tx("e.dbOld");
+  if (/fetch|network|load failed/i.test(m)) return tx("net.none");
+  return m || tx("err.unknown");
 }
 $("#users").addEventListener("submit", async e => {
   if (e.target.id !== "uForm") return;
   e.preventDefault();
   const showErr = m => { usersMsg = m; renderUsers(); };
   const name = $("#uName").value.trim().slice(0, 40), dept = $("#uDept").value || null;
-  if (!name) return showErr("Adı yaz.");
+  if (!name) return showErr(tx("u.nameReq"));
   $("#uAdd").disabled = true;
   try {
     if (userEdit){
       const u = profiles.find(x => x.user_id === userEdit); if (!u) return usersList();
       const fields = {name}; if (u.role !== "admin") fields.dept = dept;
       const {error} = await sb.from("fdos_profiles").update(fields).eq("user_id", u.user_id);
-      if (error) return showErr("Kaydedilemedi: " + createError(error));
-      usersMsg = `✓ ${name} güncellendi.`;
+      if (error) return showErr(tx("e.saveFail", {m: createError(error)}));
+      usersMsg = "✓ " + tx("u.updated", {name});
     } else {
       const email = $("#uEmail").value.trim(), password = $("#uPass").value;
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Geçerli bir e-posta yaz.");
-      if (password.length < 6) return showErr("Şifre en az 6 karakter olmalı.");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr(tx("u.emailBad"));
+      if (password.length < 6) return showErr(tx("a.short"));
       const {error} = await sb.rpc("fdos_admin_create_user", {p_email: email, p_password: password, p_name: name, p_dept: dept, p_role: "user"});
-      if (error) return showErr("Eklenemedi: " + createError(error));
-      usersMsg = `✓ ${name} eklendi. Giriş: ${email}`;
+      if (error) return showErr(tx("u.addFail", {m: createError(error)}));
+      usersMsg = "✓ " + tx("u.added", {name, email});
     }
     await loadProfiles(); usersView = "list"; userEdit = null; renderUsers();
-  } catch(err){ showErr("Kaydedilemedi: " + ((err && err.message) || "bilinmeyen hata")); }
+  } catch(err){ showErr(tx("e.saveFail", {m: (err && err.message) || tx("err.unknown")})); }
 });
 $("#users").addEventListener("click", async e => {
   if (e.target.closest("#uNew")) return usersForm(null);
@@ -1114,8 +1511,8 @@ $("#users").addEventListener("click", async e => {
     if (userDelArmed !== uid){ userDelArmed = uid; renderUsers(); openSwipe(uid); return; }
     userDelArmed = null;
     const {error} = await sb.rpc("fdos_admin_delete_user", {p_user_id: uid});
-    if (error){ usersMsg = "Silinemedi: " + createError(error); renderUsers(); return; }
-    usersMsg = `✓ ${u.name} silindi.`; await loadProfiles(); renderUsers(); return;
+    if (error){ usersMsg = tx("u.delFail", {m: createError(error)}); renderUsers(); return; }
+    usersMsg = "✓ " + tx("u.deleted", {name: u.name}); await loadProfiles(); renderUsers(); return;
   }
   // kapalı satıra dokunmak satırı açar/kapatır
   const li = e.target.closest(".uitem");
@@ -1156,16 +1553,16 @@ const opt = (v, l, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>$
 const typesFor = d => Object.entries(TYPES).filter(([, v]) => v.dept === d && v.active !== false);
 function fillType(){
   const d = $("#fDept").value, list = d ? typesFor(d) : [];
-  if (!d) $("#fType").innerHTML = opt("", "Önce departman", true);
-  else if (list.length === 1) $("#fType").innerHTML = opt(list[0][0], list[0][1].label, true);
-  else $("#fType").innerHTML = opt("", "Tür seç", true) + list.map(([k, v]) => opt(k, v.label)).join("");
+  if (!d) $("#fType").innerHTML = opt("", tx("o.deptFirst"), true);
+  else if (list.length === 1) $("#fType").innerHTML = opt(list[0][0], tL(list[0][0]), true);
+  else $("#fType").innerHTML = opt("", tx("o.selectType"), true) + list.map(([k]) => opt(k, tL(k))).join("");
   $("#fType").disabled = !d;
   fillCat();
 }
 function fillCat(){
-  const t = $("#fType").value;
-  $("#fCat").innerHTML = t ? opt("", "Kategori seç", true) + TYPES[t].cats.map(c => opt(c, c)).join("") : opt("", "Önce tür seç", true);
-  $("#fCat").disabled = !t;
+  const ty = $("#fType").value;
+  $("#fCat").innerHTML = ty ? opt("", tx("o.selectCat"), true) + TYPES[ty].cats.map(c => opt(c, cL(c))).join("") : opt("", tx("o.typeFirst"), true);
+  $("#fCat").disabled = !ty;
 }
 // "Oda No" seçilince oda numarası, "Koridor" seçilince kat numarası alanı açılır.
 const FLOOR_AREA = "Koridor";
@@ -1175,8 +1572,8 @@ function syncArea(focus){
   const a = $("#fArea").value, isRoom = a === "oda", isFloor = a === FLOOR_AREA;
   const f = $("#fRoom");
   f.disabled = !(isRoom || isFloor);
-  f.placeholder = isFloor ? "Kat No" : "Oda no";
-  f.setAttribute("aria-label", isFloor ? "Kat numarası" : "Oda numarası");
+  f.placeholder = isFloor ? tx("f.floorPh") : tx("f.roomPh");
+  f.setAttribute("aria-label", isFloor ? tx("f.floorNo") : tx("f.roomNo"));
   if (f.disabled) f.value = "";
   else if (focus) f.focus();
 }
@@ -1185,18 +1582,18 @@ function syncDeptArea(){
   const na = noArea();
   $("#fArea").disabled = na;
   if (na) $("#fArea").value = "";
-  $("#fArea").options[0].textContent = na ? "Gerekmiyor" : "Alan seç";
+  $("#fArea").options[0].textContent = na ? tx("o.notNeeded") : tx("o.selectArea");
   ["#fOoo", "#fGuest"].forEach(s => { $(s).disabled = na; if (na) $(s).checked = false; });
   syncArea(false);
 }
 let draftItems = [];
 function renderDraftItems(){
-  $("#fItems").innerHTML = draftItems.map((it, i) => `<li class="${it.done ? "done" : ""}"><label class="ci"><input type="checkbox" data-di="${i}" ${it.done ? "checked" : ""}><span class="t">${esc(it.text)}</span></label><button type="button" class="rm" data-i="${i}" aria-label="Kalemi sil">✕</button></li>`).join("");
+  $("#fItems").innerHTML = draftItems.map((it, i) => `<li class="${it.done ? "done" : ""}"><label class="ci"><input type="checkbox" data-di="${i}" ${it.done ? "checked" : ""}><span class="t">${esc(it.text)}</span></label><button type="button" class="rm" data-i="${i}" aria-label="${esc(tx("f.itemRm"))}">✕</button></li>`).join("");
   $("#fItems").hidden = !draftItems.length;
 }
 function addDraftItem(){
   const v = $("#fItem").value.trim().slice(0, 120); if (!v) return;
-  if (draftItems.length >= 50){ toast("En fazla 50 kalem eklenebilir."); return; }
+  if (draftItems.length >= 50){ toast(tx("t.maxItems")); return; }
   draftItems.push({id: newId(), text: v, done: false});
   $("#fItem").value = ""; renderDraftItems(); $("#fItem").focus();
 }
@@ -1216,9 +1613,8 @@ let roomErrTimer;
 $("#fRoom").addEventListener("input", e => {
   const raw = e.target.value, digits = raw.replace(/\D/g, ""), v = digits.slice(0, 4); if (v === raw) return;
   e.target.value = v;
-  const el = $("#roomErr"), what = $("#fArea").value === FLOOR_AREA ? "Kat numarası" : "Oda numarası";
-  el.textContent = /[.,]/.test(raw) ? `${what} tam sayı olmalı; nokta ya da virgül kullanılamaz.`
-    : digits !== raw ? `${what} yalnızca rakamdan oluşmalı.` : `${what} en fazla 4 haneli olabilir.`;
+  const el = $("#roomErr"), w = $("#fArea").value === FLOOR_AREA ? tx("f.floorNo") : tx("f.roomNo");
+  el.textContent = /[.,]/.test(raw) ? tx("e.numDot", {w}) : digits !== raw ? tx("e.numDigits", {w}) : tx("e.numMax", {w});
   el.hidden = false; e.target.classList.add("bad");
   clearTimeout(roomErrTimer); roomErrTimer = setTimeout(() => { el.hidden = true; e.target.classList.remove("bad"); }, 3500);
 });
@@ -1226,22 +1622,23 @@ let editId = null;   // doluysa form var olan işi güncelliyor
 const ensureOpt = (sel, v, label) => { if (v && ![...$(sel).options].some(o => o.value === v)) $(sel).insertAdjacentHTML("beforeend", opt(v, label || v)); };
 function openNew(t){
   editId = t ? t.id : null;
-  $("#fDept").innerHTML = opt("", "Departman seç", true) + deptList().filter(([k]) => typesFor(k).length).map(([k, v]) => opt(k, v.label)).join("");
-  $("#fArea").innerHTML = opt("", "Alan seç", true) + AREAS.map(a => opt(a, a)).join("") + opt("oda", "Oda No");
+  $("#fDept").innerHTML = opt("", tx("o.selectDept"), true) + deptList().filter(([k]) => typesFor(k).length).map(([k]) => opt(k, dL(k))).join("");
+  $("#fArea").innerHTML = opt("", tx("o.selectArea"), true) + AREAS.map(a => opt(a, aL(a))).join("") + opt("oda", tx("o.roomNo"));
   ["#fRoom", "#fDesc"].forEach(s => $(s).value = "");
   $("#fOoo").checked = false; $("#fGuest").checked = false; $("#fErr").hidden = true; $("#fSubmit").disabled = false;
   $("#fDup").hidden = true; dupOk = "";
   $("#fItem").value = ""; draftItems = [];
-  $("#ovNew h2").textContent = t ? "Yapılacak İşi Güncelle" : "Yapılacak İş";
-  $("#fSubmit").textContent = t ? "Güncelle" : "İşi kaydet";
-  $("#fDel").hidden = !(t && t.status === "tamam"); $("#fDel").classList.remove("armed"); $("#fDel").textContent = "Kaydı sil";
+  $("#fTitle").textContent = t ? tx("f.titleEdit") : tx("f.title");
+  $("#fSubmit").textContent = t ? tx("update") : tx("f.save");
+  $("#fDel").hidden = !(t && t.status === "tamam"); $("#fDel").classList.remove("armed"); $("#fDel").textContent = tx("f.delete");
   if (t){
-    ensureOpt("#fDept", t.dept, DEPTS[t.dept]?.label); $("#fDept").value = t.dept || "";
-    fillType(); ensureOpt("#fType", t.type, TYPES[t.type]?.label); $("#fType").value = t.type || ""; fillCat();
-    ensureOpt("#fCat", t.cat); $("#fCat").value = t.cat || "";
+    ensureOpt("#fDept", t.dept, dL(t.dept)); $("#fDept").value = t.dept || "";
+    fillType(); ensureOpt("#fType", t.type, tL(t.type)); $("#fType").value = t.type || ""; fillCat();
+    ensureOpt("#fCat", t.cat, cL(t.cat)); $("#fCat").value = t.cat || "";
     syncDeptArea();
     if (floorOf(t.room)){ $("#fArea").value = FLOOR_AREA; syncArea(false); $("#fRoom").value = floorOf(t.room); }
     else if (t.room && AREAS.includes(t.room)) $("#fArea").value = t.room;
+    else if (t.room && !isRoomNo(t.room)){ ensureOpt("#fArea", t.room, aL(t.room)); $("#fArea").value = t.room; }
     else if (t.room){ $("#fArea").value = "oda"; syncArea(false); $("#fRoom").value = t.room; }
     $("#fDesc").value = t.desc || "";
     $("#fOoo").checked = !!t.ooo; $("#fGuest").checked = !!t.guest;
@@ -1253,7 +1650,7 @@ function openNew(t){
 $("#newBtn").addEventListener("click", () => requireMe(() => openNew()));
 $("#fDel").addEventListener("click", () => {
   const b = $("#fDel"); if (!editId) return;
-  if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Eminim, kaydı sil"; return; }
+  if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = tx("f.deleteSure"); return; }
   const id = editId; editId = null; closeOv("#ovNew"); remove(id);
 });
 let dupOk = "";   // kullanıcının "Yine de kaydet" dediği yer|departman|kategori
@@ -1269,7 +1666,7 @@ async function findDupes(room, dept, cat){
 // seçim değişince uyarı kalkar
 ["#fDept", "#fType", "#fArea", "#fRoom", "#fCat"].forEach(id => $(id).addEventListener("input", () => {
   if ($("#fDup").hidden) return;
-  $("#fDup").hidden = true; dupOk = ""; $("#fSubmit").textContent = editId ? "Güncelle" : "İşi kaydet";
+  $("#fDup").hidden = true; dupOk = ""; $("#fSubmit").textContent = editId ? tx("update") : tx("f.save");
 }));
 $("#newForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -1277,8 +1674,8 @@ $("#newForm").addEventListener("submit", async e => {
   const roomNo = $("#fRoom").value.replace(/\D/g, "").slice(0, 4);
   const room = DEPTS[dept]?.noArea ? "" : area === "oda" ? roomNo : area === FLOOR_AREA && roomNo ? floorRoom(roomNo) : area;
   if ($("#fItem").value.trim()) addDraftItem();
-  const err = !dept ? "Sorumlu departmanı seç." : !type ? "Bildirim türünü seç." : !area && !DEPTS[dept]?.noArea ? "Alanı seç."
-    : area === "oda" && !roomNo ? "Oda numarasını yaz." : area === FLOOR_AREA && !roomNo && !DEPTS[dept]?.noArea ? "Kat numarasını yaz." : !cat ? "Kategoriyi seç." : "";
+  const err = !dept ? tx("e.dept") : !type ? tx("e.type") : !area && !DEPTS[dept]?.noArea ? tx("e.area")
+    : area === "oda" && !roomNo ? tx("e.room") : area === FLOOR_AREA && !roomNo && !DEPTS[dept]?.noArea ? tx("e.floor") : !cat ? tx("e.cat") : "";
   if (err){ $("#fErr").textContent = err; $("#fErr").hidden = false; return; }
   if (!guard()) return;
   // Aynı yer, departman ve kategori için açık iş varsa önce uyar; aynı seçimle ikinci basışta kaydet.
@@ -1288,11 +1685,11 @@ $("#newForm").addEventListener("submit", async e => {
     const d = await findDupes(room, dept, cat);
     $("#fSubmit").disabled = false;
     if (d.length){
-      const x = d[0], more = d.length > 1 ? ` (toplam ${d.length} açık iş)` : "";
-      $("#fDup").innerHTML = `<b>${esc(placeOf(room))} için açık bir ${esc(DEPTS[dept]?.label || "")} · ${esc(cat)} işi var${more}.</b><br>`
-        + `${esc(x.by || "İsimsiz")} · ${esc(fmt(x.at))} · ${esc(STATUS[x.status] || "")}<br>Aynı işse kaydetme. Farklı bir işse "Yine de kaydet"e bas.`;
+      const x = d[0], more = d.length > 1 ? tx("dup.more", {n: d.length}) : "";
+      $("#fDup").innerHTML = `<b>${esc(tx("dup.head", {place: placeOf(room), dept: dL(dept), cat: cL(cat), more}))}</b><br>`
+        + `${esc(anonL(x.by))} · ${esc(fmt(x.at))} · ${esc(stL(x.status))}<br>${esc(tx("dup.tail"))}`;
       $("#fDup").hidden = false; $("#fErr").hidden = true;
-      $("#fSubmit").textContent = "Yine de kaydet"; dupOk = dupKey;
+      $("#fSubmit").textContent = tx("f.saveAnyway"); dupOk = dupKey;
       $("#fDup").scrollIntoView({block: "nearest", behavior: "smooth"});
       return;
     }
@@ -1306,11 +1703,11 @@ $("#newForm").addEventListener("submit", async e => {
     const cur = {...t, ooo: !!t.ooo, guest: !!t.guest, items: t.items || [], desc: t.desc || "", room: t.room || ""};
     const f = {}; Object.keys(next).forEach(k => { if (JSON.stringify(next[k]) !== JSON.stringify(cur[k])) f[k] = next[k]; });
     if ("room" in f && t.status === "dnd" && !isRoomNo(room)) f.status = "yeni";   // "DND Kartlı" yalnızca odada geçerli
-    if (!Object.keys(f).length){ closeOv("#ovNew"); toast("Değişiklik yok."); return; }
-    if (t.status === "tamam" && items.some(x => !x.done)){ $("#fErr").textContent = "İş tamamlanmış; listedeki tüm kalemler onaylı kalmalı."; $("#fErr").hidden = false; return; }
+    if (!Object.keys(f).length){ closeOv("#ovNew"); toast(tx("t.noChange")); return; }
+    if (t.status === "tamam" && items.some(x => !x.done)){ $("#fErr").textContent = tx("e.doneItems"); $("#fErr").hidden = false; return; }
     closeOv("#ovNew"); editId = null;
     patch(t.id, f, "Güncelledi: " + Object.keys(f).map(k => names[k]).join(", "));
-    toast("Güncellendi."); return;
+    toast(tx("t.updated")); return;
   }
   const doc = {
     type, cat, dept, room,
@@ -1321,31 +1718,53 @@ $("#newForm").addEventListener("submit", async e => {
     log: [{t: now, by: who(), msg: "İşi açtı" + (draftItems.length ? ` (${draftItems.length} kalemlik liste)` : "")}]
   };
   $("#fSubmit").disabled = true;
-  try { await insertTask(doc); closeOv("#ovNew"); toast(`Kaydedildi: ${DEPTS[dept].label} · ${room || TYPES[type].label}`); }
+  try { await insertTask(doc); closeOv("#ovNew"); toast(tx("t.saved", {x: `${dL(dept)} · ${room ? placeOf(room) : tL(type)}`})); }
   catch(e2){ $("#fSubmit").disabled = false; writeError(e2); }
 });
 
 /* ---------- live data (Supabase) ---------- */
 const TABLE = "fdos_tasks", DONE_DAYS = 30;
 let sb = null, channel = null, signedIn = false, setupMissing = false, fetching = null;
-const whereOf = d => d.room || TYPES[d.type]?.label || "";
-const placeOf = room => /^\d{1,5}[A-Za-z]?$/.test(String(room || "")) ? `Oda ${room}` : String(room || "");
+const whereOf = d => d.room ? placeOf(d.room) : tL(d.type);
+// Yer adı (ekranda): oda no → "Oda 204", koridor → "Koridor Kat 3", alan → çevrilmiş ad. Kayıtta her zaman Türkçe kalır.
+const placeOf = room => { const r = String(room || ""); if (!r) return ""; if (isRoomNo(r)) return tx("pl.roomN", {r}); const fl = floorOf(r); return fl ? tx("pl.hallN", {n: fl}) : aL(r); };
+// Geçmiş kaydı: veritabanında Türkçe; seçilen dilde gösterilir. Tanınmayan kayıt olduğu gibi kalır.
+const LOG_FIXED = {"İşi açtı": "g.opened", "Tamamlandı olarak işaretledi": "g.done", "Kontrol etti": "g.checked", "Kontrol etti, oda satışa açıldı": "g.checkedOpen", "Yeniden açtı": "g.reopened", "Yeniden açtı, liste onayları kaldırıldı": "g.reopenedList"};
+function logL(m){
+  const s = String(m || ""); if (!LI()) return s;
+  let x;
+  if (LOG_FIXED[s]) return tx(LOG_FIXED[s]);
+  if ((x = s.match(/^İşi açtı \((\d+) kalemlik liste\)$/))) return tx("g.openedList", {n: x[1]});
+  if ((x = s.match(/^Durumu “(.+)” yaptı$/))){ const k = Object.keys(ST_TX).find(k => ST_TX[k][0] === x[1]); return tx("g.status", {s: k ? stL(k) : x[1]}); }
+  if ((x = s.match(/^Onayladı: ([\s\S]*)$/))) return tx("g.tick", {x: x[1]});
+  if ((x = s.match(/^Onayı kaldırdı: ([\s\S]*)$/))) return tx("g.untick", {x: x[1]});
+  if ((x = s.match(/^Güncelledi: (.+)$/))) return tx("g.updated", {x: x[1].split(", ").map(f => TX["fld." + f] ? tx("fld." + f) : f).join(", ")});
+  return s;
+}
+// "Ad (Departman)" biçimindeki kişi adında departmanı seçilen dile çevirir
+function byL(b){
+  const s = String(b || ""); if (!LI()) return s;
+  const m = s.match(/^(.*) \(([^()]+)\)$/); if (!m) return anonL(s);
+  if (m[2] === "Departmansız") return `${m[1]} (${tx("g.noDept")})`;
+  const k = Object.keys(DEPTS).find(k => DEPTS[k].label === m[2]) || Object.keys(DATA_TX.dept).find(k => DATA_TX.dept[k][0] === m[2]);
+  return k ? `${m[1]} (${dL(k)})` : s;
+}
 const sinceMs = () => Date.now() - DONE_DAYS * 86400000;
 const newUuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : newId() + newId();
 const keepRow = d => isOpen(d) || (d.doneAt && d.doneAt >= sinceMs());
 function alertBuzz(){ beep(); try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch(e){} }
 function notify(prev, d){
   if (!me) return;
-  const label = `${whereOf(d)} · ${d.cat || ""}`;
+  const label = `${whereOf(d)} · ${cL(d.cat)}`;
   if (!prev){
     if (!isOpen(d) || myCreated.has(d.id)) return;
     fresh.add(d.id); setTimeout(() => fresh.delete(d.id), 3000);
-    if (d.dept === me.dept){ toast(`${(d.log || []).length > 1 ? "Yeniden açıldı" : "Yeni iş"}: ${whereOf(d)} · ${d.cat || ""}`); alertBuzz(); }
+    if (d.dept === me.dept){ toast(tx((d.log || []).length > 1 ? "n.reopened" : "n.new", {x: label})); alertBuzz(); }
     return;
   }
-  if (isOpen(prev) && !isOpen(d) && d.createdBy === me.name){ toast(`${whereOf(d)} için açtığın iş tamamlandı.`); beep(); return; }
-  if (!isOpen(prev) && isOpen(d) && d.dept === me.dept){ toast(`Yeniden açıldı: ${label}`); alertBuzz(); return; }
-  if (isOpen(d) && prev.dept !== d.dept && d.dept === me.dept){ toast(`Departmanına aktarıldı: ${label}`); beep(); }
+  if (isOpen(prev) && !isOpen(d) && d.createdBy === me.name){ toast(tx("n.doneMine", {x: whereOf(d)})); beep(); return; }
+  if (!isOpen(prev) && isOpen(d) && d.dept === me.dept){ toast(tx("n.reopened", {x: label})); alertBuzz(); return; }
+  if (isOpen(d) && prev.dept !== d.dept && d.dept === me.dept){ toast(tx("n.moved", {x: label})); beep(); }
 }
 function applyRow(row, silent){
   if (!row || !row.id || !row.data) return;
@@ -1356,9 +1775,9 @@ function applyRow(row, silent){
 }
 function listenErr(e){
   const c = (e && e.code) || "", m = (e && e.message) || "";
-  if (c === "42P01" || c === "PGRST205" || /does not exist|could not find the table/i.test(m)) banner("Veritabanı tablosu bulunamadı. Kurulum rehberinin 3. adımındaki SQL'i çalıştır.");
-  else if (c === "42501" || /permission denied/i.test(m)) banner("Bu hesap işleri göremiyor. Yöneticine sor.");
-  else banner("Sunucuya bağlanılamadı. İnternet bağlantını kontrol et.");
+  if (c === "42P01" || c === "PGRST205" || /does not exist|could not find the table/i.test(m)) banner(tx("b.noTable"));
+  else if (c === "42501" || /permission denied/i.test(m)) banner(tx("b.noPerm"));
+  else banner(tx("b.noServer"));
   loaded = true; renderAll();
 }
 function refetch(){
@@ -1387,7 +1806,7 @@ function startLive(){
     })
     .subscribe(status => {
       if (status === "SUBSCRIBED") refetch();
-      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") banner("Canlı bağlantı kesildi, yeniden bağlanılıyor…");
+      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") banner(tx("b.live"));
     });
   refetch();
 }
@@ -1411,13 +1830,13 @@ setInterval(() => { if (document.visibilityState === "visible") refetch(); }, 5 
 /* ---------- writes (Supabase) ---------- */
 function writeError(e){
   const c = (e && e.code) || "", m = (e && e.message) || "";
-  if (c === "42501" || /row-level security|permission denied/i.test(m)) toast("Kaydedilemedi: bu hesabın yazma izni yok.");
-  else if (e && e.status === 401 || /jwt|session/i.test(m)){ toast("Oturumun sona erdi, yeniden giriş yap."); openLogin(); }
-  else if (/fetch|network|load failed/i.test(m)) toast("İnternet bağlantısı yok. Bağlantı gelince tekrar dene.");
-  else toast("Kaydedilemedi: " + (m || "bilinmeyen hata"));
+  if (c === "42501" || /row-level security|permission denied/i.test(m)) toast(tx("x.noPerm"));
+  else if (e && e.status === 401 || /jwt|session/i.test(m)){ toast(tx("x.session")); openLogin(); }
+  else if (/fetch|network|load failed/i.test(m)) toast(tx("x.offline"));
+  else toast(tx("e.saveFail", {m: m || tx("err.unknown")}));
 }
 function guard(){
-  if (sb && !signedIn && !authReady){ toast("Bağlanıyor, birkaç saniye sonra tekrar dene."); return false; }
+  if (sb && !signedIn && !authReady){ toast(tx("x.connecting")); return false; }
   if (!sb || !signedIn){ openLogin(); return false; }
   return true;
 }
@@ -1431,7 +1850,7 @@ async function patch(id, fields, msg){
   try {
     const {data, error} = await sb.rpc("fdos_patch_task", {p_id: id, p_patch: body});
     if (error){ writeError(error); refetch(); }
-    else if (data === false){ toast("Kaydedilemedi: bu iş başka departmana aktarılmış ya da silinmiş."); refetch(); }
+    else if (data === false){ toast(tx("x.gone")); refetch(); }
   } catch(e){ writeError(e); refetch(); }
 }
 async function remove(id){
@@ -1440,8 +1859,8 @@ async function remove(id){
   try {
     const {data, error} = await sb.from(TABLE).delete().eq("id", id).select("id");
     if (error){ writeError(error); refetch(); }
-    else if (!data || !data.length){ toast("Silinemedi: bu işi silme yetkin yok."); refetch(); }
-    else toast("İş silindi.");
+    else if (!data || !data.length){ toast(tx("x.delNoPerm")); refetch(); }
+    else toast(tx("x.deleted"));
   } catch(e){ writeError(e); refetch(); }
 }
 async function insertTask(doc){
@@ -1454,19 +1873,19 @@ async function insertTask(doc){
 /* ---------- login ---------- */
 function authMsg(m){
   m = m || "";
-  if (/invalid login credentials|invalid_credentials/i.test(m)) return "E-posta ya da şifre yanlış.";
-  if (/email not confirmed/i.test(m)) return "Bu hesap onaylanmamış. Yönetici kullanıcıyı eklerken \"Auto Confirm User\" seçmeli.";
-  if (/rate limit|too many/i.test(m)) return "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.";
-  if (/at least|weak|short/i.test(m)) return "Şifre en az 6 karakter olmalı.";
-  if (/fetch|network|load failed/i.test(m)) return "İnternet bağlantısı yok.";
-  return "İşlem yapılamadı: " + m;
+  if (/invalid login credentials|invalid_credentials/i.test(m)) return tx("a.wrong");
+  if (/email not confirmed/i.test(m)) return tx("a.notConfirmed");
+  if (/rate limit|too many/i.test(m)) return tx("a.rate");
+  if (/at least|weak|short/i.test(m)) return tx("a.short");
+  if (/fetch|network|load failed/i.test(m)) return tx("net.none");
+  return tx("a.fail", {m});
 }
 function loginMsg(text, ok){ const el = $("#lErr"); el.textContent = text; el.classList.toggle("ok", !!ok); el.hidden = !text; }
 function openLogin(){ loginMsg(""); $("#lSubmit").disabled = false; openOv("#ovLogin"); }
 $("#loginForm").addEventListener("submit", async e => {
   e.preventDefault();
   const em = $("#lEmail").value.trim(), pw = $("#lPass").value;
-  if (!em || !pw){ loginMsg("E-posta ve şifreyi yaz."); return; }
+  if (!em || !pw){ loginMsg(tx("l.fill")); return; }
   $("#lSubmit").disabled = true; loginMsg("");
   try {
     const {error} = await sb.auth.signInWithPassword({email: em, password: pw});
@@ -1476,10 +1895,10 @@ $("#loginForm").addEventListener("submit", async e => {
 });
 $("#lReset").addEventListener("click", async () => {
   const em = $("#lEmail").value.trim();
-  if (!em){ loginMsg("Önce e-posta adresini yaz."); return; }
+  if (!em){ loginMsg(tx("l.emailFirst")); return; }
   try {
     const {error} = await sb.auth.resetPasswordForEmail(em, {redirectTo: location.origin + location.pathname});
-    if (error) loginMsg(authMsg(error.message)); else loginMsg("Şifre yenileme bağlantısı e-postana gönderildi.", true);
+    if (error) loginMsg(authMsg(error.message)); else loginMsg(tx("l.resetSent"), true);
   } catch(err){ loginMsg(authMsg(err && err.message)); }
 });
 $("#logoutBtn").addEventListener("click", () => { closeOv("#ovWho"); if (sb) sb.auth.signOut(); });
@@ -1487,12 +1906,39 @@ function openNewPass(){ $("#pErr").hidden = true; $("#pNew").value = ""; $("#pNe
 $("#passForm").addEventListener("submit", async e => {
   e.preventDefault();
   const a = $("#pNew").value, b = $("#pNew2").value, err = $("#pErr");
-  if (a.length < 6){ err.textContent = "Şifre en az 6 karakter olmalı."; err.hidden = false; return; }
-  if (a !== b){ err.textContent = "İki şifre aynı değil."; err.hidden = false; return; }
+  if (a.length < 6){ err.textContent = tx("a.short"); err.hidden = false; return; }
+  if (a !== b){ err.textContent = tx("p.mismatch"); err.hidden = false; return; }
   const {error} = await sb.auth.updateUser({password: a});
   if (error){ err.textContent = authMsg(error.message); err.hidden = false; return; }
-  closeOv("#ovPass"); toast("Şifren değişti.");
+  closeOv("#ovPass"); toast(tx("p.changed"));
 });
+
+/* ---------- dil ---------- */
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = tx(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = tx(el.dataset.i18nPh));
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", tx(el.dataset.i18nAria)));
+  document.querySelectorAll("[data-i18n-title]").forEach(el => el.title = tx(el.dataset.i18nTitle));
+}
+// Dil kişiye bağlıdır: veritabanında fdos_profiles.lang (fdos_set_lang ile), ayrıca bu cihazda saklanır.
+function setLang(l, remote){
+  if (!LANGS.includes(l)) return;
+  const changed = l !== LANG; LANG = l;
+  try { localStorage.setItem(LANG_KEY, l); } catch(e){}
+  if (remote && sb && signedIn) sb.rpc("fdos_set_lang", {p_lang: l}).then(() => {}, () => {});
+  if (!changed) return;
+  applyStatic(); renderAll();
+  if (!$("#ovWho").hidden) openWho();
+  if (!$("#ovUsers").hidden) renderUsers();
+}
+let langSynced = false;
+function syncLang(){
+  if (langSynced || !sb || !signedIn || !authUser) return;
+  langSynced = true;
+  sb.from("fdos_profiles").select("lang").eq("user_id", authUser.id).maybeSingle()
+    .then(({data, error}) => { if (!error && data && LANGS.includes(data.lang)) setLang(data.lang, false); }, () => {});
+}
 
 /* ---------- start ---------- */
 // Açılışı hızlandırmak için son görülen işler, profil ve listeler cihazda saklanır.
@@ -1532,7 +1978,7 @@ function onSession(session){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
     if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); }
   } else {
-    stopLive(); tasks = new Map(); loaded = false; $("#logoutBtn").hidden = true;
+    stopLive(); tasks = new Map(); loaded = false; langSynced = false; $("#logoutBtn").hidden = true;
     profiles = []; me = null; dropSnap();
     closeOv("#ovUsers"); renderAll(); openLogin();
   }
@@ -1551,7 +1997,7 @@ function boot(){
     }, 0);
   });
 }
-renderAll();
+applyStatic(); renderAll();
 setInterval(() => { if (!$("#q") || document.activeElement?.id !== "q") renderScreen(); }, 60000);
 boot();
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

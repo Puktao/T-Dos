@@ -111,6 +111,7 @@ Bu listeler Supabase'deki tablolarda durur. Değişiklik, uygulama yeniden açı
 
 ## Bilinmesi gerekenler
 - **İnternet gerekir:** İş açmak ve güncellemek için bağlantı şart. Bağlantı yoksa uygulama "İnternet bağlantısı yok" der, değişiklik kaydedilmez.
+- **Diller:** Türkçe, English, Deutsch, Ελληνικά. Her kişi kendi dilini sağ üstteki ada basıp **Dil** listesinden seçer. Personelin yazdığı açıklamalar çevrilmez.
 - **Bildirimler:** Uygulama açıkken yeni iş gelince ekranda uyarı ve ses çıkar. Telefon kilitliyken bildirim gelmez.
 - **Tamamlananlar ve Rapor** son 30 günün tamamlanan işlerini gösterir. Daha eski kayıtlar veritabanında durur, uygulamada listelenmez.
 - **Ücretsiz plan:** Supabase ücretsiz projeleri uzun süre kullanılmazsa duraklatabilir. Her gün kullanılan bir uygulamada bu olmaz. Durumu Supabase panelinden takip edebilirsin.

@@ -72,6 +72,27 @@ create trigger fdos_profiles_guard before insert or update on public.fdos_profil
   for each row execute function public.fdos_profiles_guard();
 update public.fdos_profiles set role = role;   -- kuralı mevcut kayıtlara uygula
 
+-- Dil seçimi kişiye bağlıdır (Türkçe · English · Deutsch · Ελληνικά). Personel profilini değiştiremediği için
+-- yalnızca kendi dilini fdos_set_lang ile kaydeder.
+alter table public.fdos_profiles add column if not exists lang text;
+do $$
+begin
+  alter table public.fdos_profiles add constraint fdos_profiles_lang_check check (lang is null or lang in ('tr','en','de','el'));
+exception when duplicate_object then null;
+end $$;
+create or replace function public.fdos_set_lang(p_lang text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_lang not in ('tr','en','de','el') then raise exception 'Desteklenmeyen dil'; end if;
+  update public.fdos_profiles set lang = p_lang where user_id = auth.uid();
+end $$;
+revoke all on function public.fdos_set_lang(text) from public, anon;
+grant execute on function public.fdos_set_lang(text) to authenticated;
+
 -- Supabase'e yeni kullanıcı eklenince profili kendiliğinden oluşur
 create or replace function public.fdos_new_user()
 returns trigger
