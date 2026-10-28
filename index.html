@@ -22,10 +22,9 @@
 /* Layout: phone app shell — sticky header, one scrolling screen per tab, fixed bottom tab bar. Open jobs are blue, finished jobs green; red is for warnings and delete; everything else is ink on cool grey. */
 :root{
   --bg:#ECEFF3; --surface:#FFFFFF; --surface-2:#F4F6F9; --ink:#142030; --muted:#5B6779; --line:#D3D9E1;
-  --acil:#C8322A; --acil-soft:#FCE4E1; --acil-ink:#9E211B;
+  --acil:#C8322A; --acil-ink:#9E211B;
   --orta:#E2A700; --orta-soft:#FFF3CC; --orta-ink:#7A5800;
-  --sureli:#2563C4; --sureli-soft:#E2EBFA; --sureli-ink:#1C4C99;
-  --on-acil:#FFFFFF; --on-orta:#1D1600; --on-sureli:#FFFFFF;
+  --sureli:#2563C4; --sureli-soft:#E2EBFA;
   --ok:#2B7A4B; --ok-soft:#E0F0E6;
   --scrim:rgba(14,20,28,.5); --shadow:0 2px 6px rgba(20,32,48,.10),0 10px 28px rgba(20,32,48,.14);
   --font-display:"Big Shoulders Display","Arial Narrow",system-ui,sans-serif;
@@ -34,19 +33,17 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0D131A; --surface:#151E28; --surface-2:#1B2532; --ink:#E6EBF1; --muted:#98A3B2; --line:#2A3544;
-  --acil:#F0695E; --acil-soft:#3D1C19; --acil-ink:#FF9B92;
+  --acil:#F0695E; --acil-ink:#FF9B92;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
-  --sureli:#5B95F0; --sureli-soft:#18284A; --sureli-ink:#9CBEF7;
-  --on-acil:#1A0806; --on-orta:#1D1600; --on-sureli:#06122A;
+  --sureli:#5B95F0; --sureli-soft:#18284A;
   --ok:#78C895; --ok-soft:#163222;
   --scrim:rgba(0,0,0,.6); --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#0D131A; --surface:#151E28; --surface-2:#1B2532; --ink:#E6EBF1; --muted:#98A3B2; --line:#2A3544;
-  --acil:#F0695E; --acil-soft:#3D1C19; --acil-ink:#FF9B92;
+  --acil:#F0695E; --acil-ink:#FF9B92;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
-  --sureli:#5B95F0; --sureli-soft:#18284A; --sureli-ink:#9CBEF7;
-  --on-acil:#1A0806; --on-orta:#1D1600; --on-sureli:#06122A;
+  --sureli:#5B95F0; --sureli-soft:#18284A;
   --ok:#78C895; --ok-soft:#163222;
   --scrim:rgba(0,0,0,.6); --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }
@@ -199,8 +196,6 @@ button{font:inherit;color:inherit}
 .section-t .muted{font-family:var(--font-body);font-size:13px;font-weight:500;letter-spacing:0;margin-left:6px}
 .pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 /* son tarih: diğer alanlarla aynı genişlikte (yarım satır) */
-.field input[type=datetime-local].half{width:calc(50% - 5px);min-width:0;box-sizing:border-box;padding-inline:8px 6px;letter-spacing:-.01em}
-.field input[type=datetime-local].half::-webkit-calendar-picker-indicator{margin-left:0;padding:0;width:16px;height:16px}
 .pair .field{min-width:0}
 .pair .sel select{padding-right:32px}
 .pair .sel::after{right:13px}
@@ -227,7 +222,6 @@ button{font:inherit;color:inherit}
 .dtable td:first-child{padding-left:8px}
 .dtable td:last-child{padding-right:8px}
 .dtable td{text-align:right;padding:8px 0 8px 6px;border-top:1px solid var(--line)}
-.dtable td.over{color:var(--acil-ink);font-weight:600}
 .tscroll{overflow-x:auto}
 .bars{display:flex;flex-direction:column;gap:8px}
 .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;font-size:13.5px}
@@ -280,7 +274,7 @@ button{font:inherit;color:inherit}
 .sheet-sub{margin:4px 0 0;color:var(--muted);font-size:13px}
 .field{display:flex;flex-direction:column;gap:7px;margin-top:16px}
 .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
-.field input[type=text],.field input[type=datetime-local],.field textarea{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
+.field input[type=text],.field textarea{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
 .field textarea{min-height:72px;resize:vertical}
 .hint{font-size:12.5px;color:var(--muted)}
 .checks{display:flex;flex-direction:column;gap:8px}
@@ -470,10 +464,10 @@ const TYPES = {
   servis:{label:"Servis Talebi", dept:"servis", cats:["Masa / salon hazırlığı","Oda servisi teslim / tepsi toplama","Misafir talebi (restoran / bar)","Toplantı / etkinlik servisi","Ekipman / malzeme eksik","Diğer"]},
   muhasebe:{label:"Muhasebe Talebi", dept:"muhasebe", cats:["Fatura / hesap düzeltme","Ödeme","Avans / masraf","Diğer"]}
 };
-const STATUS = {yeni:"Yeni", beklemede:"Beklemede", dnd:"DND Kartlı", tamam:"Tamamlandı", devam:"Devam ediyor"};   // "devam" yalnızca eski kayıtlar için, seçilemez
+const STATUS = {yeni:"Yeni", beklemede:"Beklemede", dnd:"DND Kartlı", tamam:"Tamamlandı"};
 const isRoomNo = r => /^\d{1,5}[A-Za-z]?$/.test(String(r || ""));
 // Seçilebilen durumlar: "DND Kartlı" yalnızca oda numarası olan işte
-const statusOpts = t => ["yeni", "beklemede", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"].concat(STATUS[t.status] && !["yeni","beklemede","dnd","tamam"].includes(t.status) ? [t.status] : []);
+const statusOpts = t => ["yeni", "beklemede", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"];
 const AREAS = ["Lobi","Restoran","Bar","Mutfak","Toplantı Odası","Koridor"];
 const TITLES = {ana:"Anasayfa", yapilacak:"Yapılacaklar", tamamlanan:"Tamamlananlar", rapor:"Rapor"};
 
@@ -590,7 +584,6 @@ function actionsFor(t){
   switch (t.status){
     case "yeni": return "";   // yeni işin kartında düğme yok; durum detaydan değişir
     case "beklemede": case "dnd": return b("done","Tamamlandı","primary");
-    case "devam": return b("done","Tamamlandı","primary") + b("hold","Beklemeye al","ghost");   // eski kayıt
     case "tamam": return t.verified || !canCheck(t) ? "" : b("verify","Kontrol edildi","primary");   // "Yeniden aç" durum satırında
   }
   return "";
@@ -806,7 +799,7 @@ function peoplePanel(created, done, open){
   const same = (a, b) => a && b && lower(a) === lower(b);
   const names = new Map();
   profiles.forEach(p => names.set(lower(p.name), {name: p.name, dept: p.dept}));
-  const finisher = t => t.doneBy || t.assignee;
+  const finisher = t => t.doneBy;
   [...created, ...done].forEach(t => [t.createdBy, finisher(t)].forEach(n => { if (n && !names.has(lower(n))) names.set(lower(n), {name: n, dept: null}); }));
   const rows = [...names.values()].map(p => {
     const c = created.filter(t => same(t.createdBy, p.name)).length;
@@ -912,7 +905,6 @@ $("#screen").addEventListener("click", e => {
       if (openItems(t)){ toast(`Önce listedeki ${openItems(t)} kalemi onayla.`); openDetail(id); return; }
       patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name}, "Tamamlandı olarak işaretledi");
     }
-    if (a === "hold") patch(id, {status: "beklemede"}, "Beklemeye aldı");
     if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
     if (a === "reopen"){
       // yeniden açılan işte listedeki onaylar da kalkar
@@ -1375,7 +1367,7 @@ function refetch(){
   fetching = (async () => {
     try {
       const [a, b] = await Promise.all([
-        sb.from(TABLE).select("id,data").in("status", ["yeni", "beklemede", "dnd", "devam"]).limit(1000),
+        sb.from(TABLE).select("id,data").in("status", ["yeni", "beklemede", "dnd"]).limit(1000),
         sb.from(TABLE).select("id,data").gte("done_at", sinceMs()).order("done_at", {ascending: false}).limit(1000)
       ]);
       const err = a.error || b.error;

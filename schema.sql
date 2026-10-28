@@ -1,6 +1,6 @@
 -- F-Do’s veritabanı kurulumu
 -- Supabase → SQL Editor → New query → bu dosyanın tamamını yapıştır → Run
--- Birden fazla kez çalıştırmak güvenlidir.
+-- Birden fazla kez çalıştırmak güvenlidir; var olan veriye dokunmaz.
 
 -- 1) İşler tablosu (her iş tek satır, ayrıntılar "data" alanında)
 create table if not exists public.fdos_tasks (
@@ -14,50 +14,7 @@ create table if not exists public.fdos_tasks (
 create index if not exists fdos_tasks_status_idx  on public.fdos_tasks (status);
 create index if not exists fdos_tasks_done_at_idx on public.fdos_tasks (done_at);
 
--- 2) Güvenlik: yalnızca giriş yapmış personel erişir
-alter table public.fdos_tasks enable row level security;
-revoke all on public.fdos_tasks from anon;
-grant select, insert, update, delete on public.fdos_tasks to authenticated;
-
-drop policy if exists "fdos okuma"     on public.fdos_tasks;
-drop policy if exists "fdos ekleme"    on public.fdos_tasks;
-drop policy if exists "fdos guncelleme" on public.fdos_tasks;
-drop policy if exists "fdos silme"     on public.fdos_tasks;
-create policy "fdos okuma"      on public.fdos_tasks for select to authenticated using (true);
-create policy "fdos ekleme"     on public.fdos_tasks for insert to authenticated with check (true);
-create policy "fdos guncelleme" on public.fdos_tasks for update to authenticated using (true) with check (true);
-create policy "fdos silme"      on public.fdos_tasks for delete to authenticated using (status = 'tamam');
-
--- 3) Bir işin yalnızca değişen alanlarını güncelleyen fonksiyon
---    (iki kişi aynı işin farklı alanlarını değiştirirse ikisi de korunur)
---    Kayıt değiştiyse true döner; iş artık görünmüyorsa (başka departmana aktarılmış, silinmiş) false.
-drop function if exists public.fdos_patch_task(text, jsonb);
-create function public.fdos_patch_task(p_id text, p_patch jsonb)
-returns boolean
-language sql
-security invoker
-set search_path = public
-as $$
-  with u as (
-    update public.fdos_tasks
-       set data = data || p_patch, updated_at = now()
-     where id = p_id
-    returning 1
-  )
-  select exists (select 1 from u);
-$$;
-revoke all on function public.fdos_patch_task(text, jsonb) from public, anon;
-grant execute on function public.fdos_patch_task(text, jsonb) to authenticated;
-
--- 4) Canlı güncelleme (bir telefonda yapılan değişiklik diğerlerinde anında görünür)
-do $$
-begin
-  alter publication supabase_realtime add table public.fdos_tasks;
-exception when duplicate_object then null;
-end $$;
-
--- 5) Kullanıcı profilleri: ad, departman ve rol (yönetici / personel)
---    Ad ve departmanı yönetici atar. Personel kendi kaydını değiştiremez.
+-- 2) Kullanıcı profilleri: ad, departman ve rol. Ad ve departmanı yönetici atar; personel kendi kaydını değiştiremez.
 create table if not exists public.fdos_profiles (
   user_id    uuid primary key references auth.users(id) on delete cascade,
   email      text not null,
@@ -93,22 +50,27 @@ create policy "profil okuma"      on public.fdos_profiles for select to authenti
 create policy "profil guncelleme" on public.fdos_profiles for update to authenticated
   using (public.fdos_is_admin()) with check (public.fdos_is_admin());
 
--- Yönetici kendi yönetici yetkisini yanlışlıkla kaldıramasın
+-- Yetki: yalnızca tuncer@feronya.com yöneticidir, departmanı "Yönetici". Diğer herkes personeldir.
+-- Uygulamada "Yetki" seçimi yoktur; bu kural veritabanında zorlanır.
 create or replace function public.fdos_profiles_guard()
 returns trigger
 language plpgsql
 set search_path = public
 as $$
 begin
-  if old.user_id = auth.uid() and old.role = 'admin' and new.role <> 'admin' then
-    raise exception 'Kendi yönetici yetkini kaldıramazsın';
+  if lower(new.email) = 'tuncer@feronya.com' then
+    new.role := 'admin'; new.dept := 'yonetici';
+  else
+    new.role := 'user';
+    if new.dept = 'yonetici' then new.dept := null; end if;
   end if;
   new.updated_at := now();
   return new;
 end $$;
 drop trigger if exists fdos_profiles_guard on public.fdos_profiles;
-create trigger fdos_profiles_guard before update on public.fdos_profiles
+create trigger fdos_profiles_guard before insert or update on public.fdos_profiles
   for each row execute function public.fdos_profiles_guard();
+update public.fdos_profiles set role = role;   -- kuralı mevcut kayıtlara uygula
 
 -- Supabase'e yeni kullanıcı eklenince profili kendiliğinden oluşur
 create or replace function public.fdos_new_user()
@@ -141,51 +103,7 @@ on conflict (user_id) do nothing;
 update public.fdos_profiles set role = 'admin', name = 'Tuncer'
  where lower(email) = 'tuncer@feronya.com';
 
--- 6) Yönetici uygulamadan yeni kullanıcı ekler (ayrı sunucu fonksiyonu gerekmez)
---    Yalnızca yönetici çalıştırabilir. Kullanıcı onaylı (Auto Confirm) açılır.
-create or replace function public.fdos_admin_create_user(
-  p_email text, p_password text, p_name text, p_dept text default null, p_role text default 'user')
-returns uuid
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_id    uuid := gen_random_uuid();
-  v_email text := lower(trim(p_email));
-  v_name  text := left(trim(coalesce(p_name, '')), 40);
-  v_dept  text := case when exists (select 1 from public.fdos_departmanlar where kod = p_dept) then p_dept else null end;
-  v_role  text := case when p_role = 'admin' then 'admin' else 'user' end;
-begin
-  if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
-  if v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then raise exception 'E-posta adresi geçersiz'; end if;
-  if length(coalesce(p_password, '')) < 6 then raise exception 'Şifre en az 6 karakter olmalı'; end if;
-  if v_name = '' then raise exception 'Ad boş olamaz'; end if;
-  if exists (select 1 from auth.users where lower(email) = v_email) then
-    raise exception 'Bu e-posta ile kayıtlı bir kullanıcı zaten var';
-  end if;
-
-  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-                          raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
-                          confirmation_token, recovery_token, email_change_token_new, email_change)
-  values ('00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated', v_email,
-          extensions.crypt(p_password, extensions.gen_salt('bf')), now(),
-          '{"provider":"email","providers":["email"]}'::jsonb,
-          jsonb_build_object('name', v_name, 'dept', v_dept), now(), now(), '', '', '', '');
-
-  insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
-  values (gen_random_uuid(), v_id, v_id::text,
-          jsonb_build_object('sub', v_id::text, 'email', v_email, 'email_verified', true),
-          'email', now(), now(), now());
-
-  -- profil tetikleyiciyle oluştu; adı, departmanı ve yetkiyi yaz
-  update public.fdos_profiles set name = v_name, dept = v_dept, role = v_role where user_id = v_id;
-  return v_id;
-end $$;
-revoke all on function public.fdos_admin_create_user(text, text, text, text, text) from public, anon;
-grant execute on function public.fdos_admin_create_user(text, text, text, text, text) to authenticated;
-
--- 7) Listeler: departmanlar, bildirim türleri, kategoriler, alanlar
+-- 3) Listeler: departmanlar, bildirim türleri, kategoriler, alanlar
 --    Supabase → Table Editor'dan satır ekleyip değiştirebilirsin. Uygulama girişte bu tabloları okur.
 --    Kural: bir satırı SİLME, "aktif" kutusunu kapat (eski işlerde adı görünmeye devam eder).
 --    "kod" sütunlarını sonradan DEĞİŞTİRME; eski işler bu kodla kayıtlı.
@@ -327,9 +245,14 @@ insert into public.fdos_alanlar (ad, sira) values
   ('Toplantı Odası', 50),
   ('Koridor', 60)
 on conflict (ad) do nothing;
+insert into public.fdos_departmanlar (kod, ad, kisa_ad, rozet, alan_gerekli, sira)
+values ('yonetici', 'Yönetici', 'Yönetici', 'YÖN', true, 90)
+on conflict (kod) do nothing;
 
--- 8) Görünürlük: bir işi yalnızca atandığı departman, işi açan kişi ve yönetici görür / değiştirir.
---    (2. bölümdeki herkese açık kuralların yerine geçer.)
+-- 4) İşlerin güvenliği: yalnızca giriş yapmış personel erişir.
+--    Bir işi yalnızca atandığı departman, işi açan kişi ve yönetici görür / değiştirir.
+--    İşi açan kişi (kontrolü onaylanmamış işte) ve yönetici (her işte) siler.
+--    Yalnızca profili olan (silinmemiş) kullanıcı iş açar, iş kendi adına kaydedilir.
 create or replace function public.fdos_can_see(d jsonb)
 returns boolean
 language sql
@@ -349,63 +272,6 @@ $$;
 revoke all on function public.fdos_can_see(jsonb) from public, anon;
 grant execute on function public.fdos_can_see(jsonb) to authenticated;
 
-drop policy if exists "fdos okuma"      on public.fdos_tasks;
-drop policy if exists "fdos guncelleme" on public.fdos_tasks;
-drop policy if exists "fdos silme"      on public.fdos_tasks;
-create policy "fdos okuma"      on public.fdos_tasks for select to authenticated using (public.fdos_can_see(data));
-create policy "fdos guncelleme" on public.fdos_tasks for update to authenticated
-  using (public.fdos_can_see(data)) with check (public.fdos_can_see(data));
-create policy "fdos silme"      on public.fdos_tasks for delete to authenticated
-  using (status = 'tamam' and public.fdos_can_see(data));
-
--- 9) Yetki: yalnızca tuncer@feronya.com yöneticidir, departmanı "Yönetici". Diğer herkes personeldir.
---    Uygulamada "Yetki" seçimi yoktur; bu kural veritabanında zorlanır.
-insert into public.fdos_departmanlar (kod, ad, kisa_ad, rozet, alan_gerekli, sira)
-values ('yonetici', 'Yönetici', 'Yönetici', 'YÖN', true, 90)
-on conflict (kod) do nothing;
-
-create or replace function public.fdos_profiles_guard()
-returns trigger
-language plpgsql
-set search_path = public
-as $$
-begin
-  if lower(new.email) = 'tuncer@feronya.com' then
-    new.role := 'admin'; new.dept := 'yonetici';
-  else
-    new.role := 'user';
-    if new.dept = 'yonetici' then new.dept := null; end if;
-  end if;
-  new.updated_at := now();
-  return new;
-end $$;
-drop trigger if exists fdos_profiles_guard on public.fdos_profiles;
-create trigger fdos_profiles_guard before insert or update on public.fdos_profiles
-  for each row execute function public.fdos_profiles_guard();
-
-update public.fdos_profiles set role = role;   -- kuralı mevcut kayıtlara uygula
-
--- 10) Yönetici bir kullanıcıyı siler (girişi kapanır, profili silinir; açtığı işler ve geçmiş kayıtları kalır).
-create or replace function public.fdos_admin_delete_user(p_user_id uuid)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
-  if p_user_id = auth.uid() then raise exception 'Kendi hesabını silemezsin'; end if;
-  if exists (select 1 from public.fdos_profiles where user_id = p_user_id and role = 'admin') then
-    raise exception 'Yönetici hesabı silinemez';
-  end if;
-  delete from auth.identities where user_id = p_user_id;
-  delete from auth.users where id = p_user_id;   -- profil satırı da silinir (on delete cascade)
-end $$;
-revoke all on function public.fdos_admin_delete_user(uuid) from public, anon;
-grant execute on function public.fdos_admin_delete_user(uuid) to authenticated;
-
--- 11) Silme: işi açan kişi (kontrolü onaylanmamış işte) ve yönetici (her işte) siler.
---     (8. bölümdeki "yalnızca tamamlanmış iş silinir" kuralının yerine geçer.)
 create or replace function public.fdos_can_delete(d jsonb)
 returns boolean
 language sql
@@ -423,21 +289,26 @@ $$;
 revoke all on function public.fdos_can_delete(jsonb) from public, anon;
 grant execute on function public.fdos_can_delete(jsonb) to authenticated;
 
-drop policy if exists "fdos silme" on public.fdos_tasks;
-create policy "fdos silme" on public.fdos_tasks for delete to authenticated using (public.fdos_can_delete(data));
-
--- 12) Ekleme: yalnızca profili olan (silinmemiş) kullanıcı iş açar, iş kendi adına kaydedilir.
---     (2. bölümdeki "herkes ekler" kuralının yerine geçer. Silinen kullanıcının telefonunda açık kalan oturum yeni iş açamaz.)
-drop policy if exists "fdos ekleme" on public.fdos_tasks;
-create policy "fdos ekleme" on public.fdos_tasks for insert to authenticated
+alter table public.fdos_tasks enable row level security;
+revoke all on public.fdos_tasks from anon;
+grant select, insert, update, delete on public.fdos_tasks to authenticated;
+drop policy if exists "fdos okuma"      on public.fdos_tasks;
+drop policy if exists "fdos ekleme"     on public.fdos_tasks;
+drop policy if exists "fdos guncelleme" on public.fdos_tasks;
+drop policy if exists "fdos silme"      on public.fdos_tasks;
+create policy "fdos okuma"      on public.fdos_tasks for select to authenticated using (public.fdos_can_see(data));
+create policy "fdos ekleme"     on public.fdos_tasks for insert to authenticated
   with check ( exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
                and data->>'createdUid' = auth.uid()::text );
+create policy "fdos guncelleme" on public.fdos_tasks for update to authenticated
+  using (public.fdos_can_see(data)) with check (public.fdos_can_see(data));
+create policy "fdos silme"      on public.fdos_tasks for delete to authenticated using (public.fdos_can_delete(data));
 
--- 13) İş kaydının korunması
---     a) "Bildiren" adı ve departmanı, işi açan kişinin profilinden yazılır (uygulamanın gönderdiği ada güvenilmez).
---     b) İşi kimin açtığı sonradan değiştirilemez.
---     c) Kontrolü onaylanmış iş sabittir: yalnızca "Yeniden aç" (onayın kaldırılması) yapılabilir.
---     Supabase panelinden (SQL Editor, Table Editor) yapılan değişiklikler bu kurala takılmaz.
+-- 5) İş kaydının korunması
+--    a) "Bildiren" adı ve departmanı, işi açan kişinin profilinden yazılır (uygulamanın gönderdiği ada güvenilmez).
+--    b) İşi kimin açtığı sonradan değiştirilemez.
+--    c) Kontrolü onaylanmış iş sabittir: yalnızca "Yeniden aç" (onayın kaldırılması) yapılabilir.
+--    Supabase panelinden (SQL Editor, Table Editor) yapılan değişiklikler bu kurala takılmaz.
 create or replace function public.fdos_tasks_guard()
 returns trigger
 language plpgsql
@@ -468,8 +339,29 @@ drop trigger if exists fdos_tasks_guard on public.fdos_tasks;
 create trigger fdos_tasks_guard before insert or update on public.fdos_tasks
   for each row execute function public.fdos_tasks_guard();
 
--- 14) Tekrar kayıt uyarısı: aynı oda/alan, departman ve kategori için açık iş var mı?
---     Başka departmanın açtığı ve kişinin göremediği işleri de bulur; ayrıntı vermez, yalnızca kim, ne zaman, durum.
+-- 6) Bir işin yalnızca değişen alanlarını güncelleyen fonksiyon
+--    (iki kişi aynı işin farklı alanlarını değiştirirse ikisi de korunur)
+--    Kayıt değiştiyse true döner; iş artık görünmüyorsa (başka departmana aktarılmış, silinmiş) false.
+drop function if exists public.fdos_patch_task(text, jsonb);
+create function public.fdos_patch_task(p_id text, p_patch jsonb)
+returns boolean
+language sql
+security invoker
+set search_path = public
+as $$
+  with u as (
+    update public.fdos_tasks
+       set data = data || p_patch, updated_at = now()
+     where id = p_id
+    returning 1
+  )
+  select exists (select 1 from u);
+$$;
+revoke all on function public.fdos_patch_task(text, jsonb) from public, anon;
+grant execute on function public.fdos_patch_task(text, jsonb) to authenticated;
+
+-- 7) Tekrar kayıt uyarısı: aynı oda/alan, departman ve kategori için açık iş var mı?
+--    Başka departmanın açtığı ve kişinin göremediği işleri de bulur; ayrıntı vermez, yalnızca kim, ne zaman, durum.
 create or replace function public.fdos_open_dupes(p_room text, p_dept text, p_cat text)
 returns table (created_by text, created_at bigint, status text)
 language sql
@@ -481,7 +373,7 @@ as $$
     from public.fdos_tasks t
    where exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
      and coalesce(p_room, '') <> ''
-     and t.status in ('yeni', 'beklemede', 'dnd', 'devam')
+     and t.status in ('yeni', 'beklemede', 'dnd')
      and t.data->>'room' = p_room
      and t.data->>'dept' = p_dept
      and t.data->>'cat'  = p_cat
@@ -491,10 +383,71 @@ $$;
 revoke all on function public.fdos_open_dupes(text, text, text) from public, anon;
 grant execute on function public.fdos_open_dupes(text, text, text) to authenticated;
 
--- 15) Aciliyet ve son tarih kaldırıldı (26/10/26): işlerdeki "prio" ve "dueAt" alanları silinir.
---     Geçmiş (log) yazılarına dokunulmaz.
-update public.fdos_tasks set data = data - 'prio' - 'dueAt' where data ?| array['prio', 'dueAt'];
+-- 8) Kullanıcı yönetimi (yalnızca yönetici). Ayrı sunucu fonksiyonu gerekmez; kullanıcı onaylı (Auto Confirm) açılır.
+--    Silinen kullanıcının girişi kapanır, profili silinir; açtığı işler ve geçmiş kayıtları kalır.
+create or replace function public.fdos_admin_create_user(
+  p_email text, p_password text, p_name text, p_dept text default null, p_role text default 'user')
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id    uuid := gen_random_uuid();
+  v_email text := lower(trim(p_email));
+  v_name  text := left(trim(coalesce(p_name, '')), 40);
+  v_dept  text := case when exists (select 1 from public.fdos_departmanlar where kod = p_dept) then p_dept else null end;
+  v_role  text := case when p_role = 'admin' then 'admin' else 'user' end;
+begin
+  if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
+  if v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then raise exception 'E-posta adresi geçersiz'; end if;
+  if length(coalesce(p_password, '')) < 6 then raise exception 'Şifre en az 6 karakter olmalı'; end if;
+  if v_name = '' then raise exception 'Ad boş olamaz'; end if;
+  if exists (select 1 from auth.users where lower(email) = v_email) then
+    raise exception 'Bu e-posta ile kayıtlı bir kullanıcı zaten var';
+  end if;
 
--- 16) Durumlar (26/10/26): Yeni, Beklemede, DND Kartlı (yalnızca oda), Tamamlandı. "Devam ediyor" kalktı;
---     bu durumdaki işler "Yeni" yapılır. 14. bölümdeki açık iş kontrolü "dnd" durumunu da kapsar.
-update public.fdos_tasks set data = jsonb_set(data, '{status}', '"yeni"') where status = 'devam';
+  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+                          raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+                          confirmation_token, recovery_token, email_change_token_new, email_change)
+  values ('00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated', v_email,
+          extensions.crypt(p_password, extensions.gen_salt('bf')), now(),
+          '{"provider":"email","providers":["email"]}'::jsonb,
+          jsonb_build_object('name', v_name, 'dept', v_dept), now(), now(), '', '', '', '');
+
+  insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+  values (gen_random_uuid(), v_id, v_id::text,
+          jsonb_build_object('sub', v_id::text, 'email', v_email, 'email_verified', true),
+          'email', now(), now(), now());
+
+  -- profil tetikleyiciyle oluştu; adı, departmanı ve yetkiyi yaz
+  update public.fdos_profiles set name = v_name, dept = v_dept, role = v_role where user_id = v_id;
+  return v_id;
+end $$;
+revoke all on function public.fdos_admin_create_user(text, text, text, text, text) from public, anon;
+grant execute on function public.fdos_admin_create_user(text, text, text, text, text) to authenticated;
+
+create or replace function public.fdos_admin_delete_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.fdos_is_admin() then raise exception 'Bu işlem yalnızca yönetici içindir'; end if;
+  if p_user_id = auth.uid() then raise exception 'Kendi hesabını silemezsin'; end if;
+  if exists (select 1 from public.fdos_profiles where user_id = p_user_id and role = 'admin') then
+    raise exception 'Yönetici hesabı silinemez';
+  end if;
+  delete from auth.identities where user_id = p_user_id;
+  delete from auth.users where id = p_user_id;   -- profil satırı da silinir (on delete cascade)
+end $$;
+revoke all on function public.fdos_admin_delete_user(uuid) from public, anon;
+grant execute on function public.fdos_admin_delete_user(uuid) to authenticated;
+
+-- 9) Canlı güncelleme (bir telefonda yapılan değişiklik diğerlerinde anında görünür)
+do $$
+begin
+  alter publication supabase_realtime add table public.fdos_tasks;
+exception when duplicate_object then null;
+end $$;

@@ -1,6 +1,6 @@
 # F-Do’s – Otel İş Atama (Supabase sürümü)
 
-Resepsiyon, Kat Hizmetleri, Teknik, Satınalma ve Mutfak arasında iş açma, atama ve takip uygulaması.
+Resepsiyon, Kat Hizmetleri, Teknik, Satınalma, Mutfak, Servis ve Muhasebe arasında iş açma, atama ve takip uygulaması.
 Telefonda ana ekrana eklenip uygulama gibi çalışır. Veriler senin Supabase projende tutulur, personel e-posta ve şifreyle girer.
 
 ## Klasördeki dosyalar
@@ -9,7 +9,7 @@ Telefonda ana ekrana eklenip uygulama gibi çalışır. Veriler senin Supabase p
 |---|---|
 | `index.html` | Uygulamanın kendisi |
 | `supabase-config.js` | Supabase bağlantı bilgileri (2. adımda doldurulur) |
-| `schema.sql` | Veritabanı tablosu ve güvenlik kuralları (3. adımda çalıştırılır) |
+| `schema.sql` | Veritabanı tabloları ve güvenlik kuralları (3. adımda çalıştırılır) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Telefona uygulama olarak kurulma |
 
 ---
@@ -41,9 +41,7 @@ Var olan bir Supabase projeni de kullanabilirsin. Tablonun adı `fdos_tasks` old
 1. **Authentication** → **Sign In / Providers** → **Email** açık olsun.
 2. Aynı ekranda **Allow new users to sign up** ayarını **KAPAT** → Save.
    > ⚠️ Bu adımı atlama. Açık kalırsa uygulamanın adresini bulan herkes kendine hesap açıp otelin işlerini görebilir.
-3. **Authentication** → **Users** → **Add user** → **Create new user**:
-   e-posta + şifre yaz, **Auto Confirm User** kutusunu işaretle → Create.
-   Her personel için tekrarla. Ortak resepsiyon cihazı için `resepsiyon@oteliniz.com` gibi tek bir hesap da açabilirsin.
+3. Personel hesaplarını uygulamadan yönetici ekler (9. adım). Supabase'den yalnızca yönetici hesabı eklenir.
 
 ### 5. GitHub'a yükle
 1. https://github.com → sağ üstte **+** → **New repository**.
@@ -74,7 +72,7 @@ Giriş bu adım olmadan da çalışır. Ama yapılmazsa şifre yenileme e-postas
 Yönetici hesabı `tuncer@feronya.com` (ad: Tuncer). Yönetici herkesin işlerini ve Rapor'daki **Kişiler** tablosunu görür, uygulamadan kullanıcı ekler ve departman atar.
 1. **Authentication → Users → Add user → Create new user:** `tuncer@feronya.com` + şifre, **Auto Confirm User** işaretli → Create. (Zaten varsa atla.)
 2. **SQL Editor → New query:** `schema.sql` dosyasının tamamını yeniden yapıştır → **Run**. Bu, kullanıcı profillerini kurar ve Tuncer'i yönetici yapar.
-3. Uygulamada Tuncer ile giriş yap → sağ üstteki ada bas → **Kullanıcılar**. Ad, e-posta, geçici şifre ve departman yazıp **Kullanıcı ekle**.
+3. Uygulamada Tuncer ile giriş yap → sağ üstteki ada bas → **Kullanıcılar** → sağ üstteki **+**. Ad, e-posta, geçici şifre ve departman yazıp **Kaydet**. Düzenlemek ya da silmek için satırı sola kaydır.
 
 Personel artık adını ve departmanını kendisi seçmez; girişte yöneticinin atadığı bilgiler gelir. Ortak cihaz kullanılıyorsa her personel kendi hesabıyla girip çıkmalı.
 
@@ -108,7 +106,7 @@ Bu listeler Supabase'deki tablolarda durur. Değişiklik, uygulama yeniden açı
 | "Veritabanı tablosu bulunamadı" | `schema.sql` çalıştırılmamış (3. adım). |
 | "E-posta ya da şifre yanlış" | Kullanıcı eklenmemiş ya da şifre yanlış (4. adım). |
 | "Bu hesap onaylanmamış" | Kullanıcı eklenirken **Auto Confirm User** seçilmemiş. Kullanıcıyı silip yeniden ekle. |
-| Bir telefondaki değişiklik diğerinde hemen görünmüyor | `schema.sql`'in 4. bölümü (canlı güncelleme) çalışmamış. 3. adımı tekrarla. Uygulama yine de açılışta ve ekrana dönüldüğünde listeyi yeniler. |
+| Bir telefondaki değişiklik diğerinde hemen görünmüyor | `schema.sql`'in 9. bölümü (canlı güncelleme) çalışmamış. 3. adımı tekrarla. Uygulama yine de açılışta ve ekrana dönüldüğünde listeyi yeniler. |
 | Değişiklik telefonda görünmüyor | `sw.js` içindeki sürüm numarası artırılmamış (Güncelleme 2. adım). |
 
 ## Bilinmesi gerekenler
