@@ -34,6 +34,13 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - **Kayıtlar her zaman Türkçe kalır:** `cat`, `room`, departman adı, `who()` ile yazılan "Ad (Departman)", geçmiş (`log.msg`) Türkçe yazılır; ekranda seçilen dile çevrilir. Tanınmayan geçmiş satırı olduğu gibi görünür. Personelin yazdığı açıklama, liste kalemleri ve adlar çevrilmez. Supabase tablosuna sonradan eklenen kategori/alan/departman `DATA_TX`'e eklenene kadar her dilde Türkçe adıyla görünür. Rozetler (TEK, HK, SAT…) çevrilmez. Tarih biçimi her dilde `gg/aa/yy ss:dd`.
 - **Dil seçimi kişiye bağlı:** Hesabım → **Dil** açılır listesi (`#wLang`). `setLang(l, true)` → cihazda `localStorage["fdos.lang"]` + veritabanında `fdos_set_lang(p_lang)` (security definer, yalnızca kendi profilinin `lang` sütunu; `schema.sql` 2. bölüm). Girişte `syncLang()` profildeki dili bir kez okur ve uygular; profilde dil yoksa cihazdaki, o da yoksa telefonun dili (tr/en/de/el değilse Türkçe).
 
+## Telefon bildirimi (OneSignal, 03/11/26)
+- OneSignal App ID `2680bc4d-47f5-4104-adaf-687d5024d5cc` (gizli değil; `index.html` ve `schema.sql` içinde). **REST API anahtarı depoda yok**: Supabase Vault'ta `onesignal_rest_key` adıyla, kullanıcı kendisi girer.
+- Uygulama: `OneSignalSDK.page.js` (v16, cdn.onesignal.com). OneSignal'ın service worker'ı **ayrı dosya ve kapsamda**: `push/onesignal/OneSignalSDKWorker.js` (`importScripts` ile OneSignal'ın worker'ı), `serviceWorkerPath: "T-Dos/push/onesignal/OneSignalSDKWorker.js"`, kapsam `/T-Dos/push/onesignal/`; uygulamanın `sw.js`'ine dokunmaz. Yalnızca `https://puktao.github.io` kökeninde başlatılır (yerelde çalışmaz; testte `window.__FDOS_PUSH_TEST`).
+- Cihaz kişiye `OneSignal.login(authUser.id)` ile bağlanır (external_id = Supabase kullanıcı id); ayırma (`logout`) yalnızca oturum kapatılınca. Uygulama ekrandayken OneSignal bildirimi gösterilmez (`foregroundWillDisplay` → `preventDefault`), çünkü uygulama içi uyarı çıkıyor.
+- İzin: Anasayfa'nın üstünde "Bildirimleri aç" daveti (✕ = "Daha sonra", `localStorage["fdos.pushAsk"]`), Hesabım → **Bildirimler** satırı (Açık / Bildirimleri aç / Engellendi / iPhone'da önce ana ekrana ekle / desteklenmiyor). iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
+- Gönderim veritabanından: `schema.sql` 10. bölüm, tetikleyici `fdos_tasks_push` → `fdos_push_send` → `pg_net` ile `https://api.onesignal.com/notifications` (`Authorization: Key …`, `include_aliases.external_id`, `target_channel: push`). Kurallar uygulama içi uyarılarla aynı: yeni iş → atanan departmandakiler; tamamlandı → işi açan kişi; yeniden açıldı / departmanına aktarıldı → atanan departmandakiler; işi yapan kişinin kendisine gitmez. Metin kişinin uygulama diline göre (`fdos_push_text`: başlık + "Oda 204 · Arıza — açıklama"). Anahtar yoksa ya da hata olursa iş kaydı etkilenmez.
+
 ## İş kaydı (`data` alanı)
 `type, cat, dept, room, desc, items[{id,text,done,by?,at?}], ooo, guest, status, createdAt, updatedAt, doneAt, doneBy, verified, verifiedBy, createdBy, createdDept, createdUid, log[{t,by,msg}]` (`log` en fazla 40 kayıt tutar)
 - **Aciliyet (`prio`) ve son tarih (`dueAt`) 26/10/26 kaldırıldı** (kullanıcı kararı): formda, kartta, detayda, filtrede, Rapor'da yok; veritabanından da silindi (tek seferlik SQL ile). Eski geçmiş (log) yazılarında "Acil, son tarih …" kalabilir.
@@ -101,7 +108,6 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 ## Açık konular
 - **Eklenmeyecek özellikler (kullanıcı kararı):** işe not yazma, işe fotoğraf ekleme, tekrarlayan işler, **departman içinde Sorumlu (kişi) seçimi** (yapıldı, yanlış anlaşıldığı için 26/10/26 kaldırıldı; kod ve `schema.sql` bölümü tamamen silindi). İletişim yüz yüze/telefonla yapılıyor, uygulama acil işleri takip için. Bunlar yeniden önerilmez.
 - Satışa kapalı odalar listesi: konuşuldu, **karar verilmedi, yapılmayacak** (kullanıcı "sakın yapma" dedi). Önerilen yer Anasayfa'da iki kutunun altında ince şerit; engel: görünürlük kuralı yüzünden Resepsiyon başka departmana atanmış OOO işleri göremez, veritabanı istisnası gerekir.
-- Telefon kilitliyken bildirim yok (Web Push yapılmadı). Konuşuldu, **istenmiyor** (26/10/26 kullanıcı: "şu anlık istenmedi"; kullanıcı sormadan yeniden önerilmez): önerilen yol OneSignal (kullanıcı App ID verir, REST anahtarını kendisi Supabase'e girer, bildirim veritabanı tetikleyicisinden `pg_net` ile gider); alternatif Cloudflare Worker. iPhone'da yalnızca ana ekrana eklenmiş uygulamada çalışır.
 
 ## Kurulum durumu
 - [x] Dosyalar GitHub'a yüklendi.
@@ -116,6 +122,7 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Muhasebe departmanı Supabase tablolarına eklendi (kullanıcı doğruladı).
 - [x] `fdos_open_dupes` güncellemesi (açık iş kontrolüne `cozulemedi`) kuruldu (kullanıcı doğruladı: `prosrc` içinde `cozulemedi` → true).
 - [x] Dil sütunu ve `fdos_set_lang` (`schema.sql` 2. bölüm) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
+- [ ] Bildirim kurulumu (kullanıcı): Supabase'de `pg_net` eklentisi, Vault'a `onesignal_rest_key`, `schema.sql` 10. bölüm. Sonra telefonlarda "Bildirimleri aç".
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları

@@ -472,3 +472,109 @@ begin
   alter publication supabase_realtime add table public.fdos_tasks;
 exception when duplicate_object then null;
 end $$;
+
+-- 10) Telefon bildirimi (OneSignal). İş açılınca, tamamlanınca, yeniden açılınca ya da departman değişince
+--     ilgili kişilere bildirim gider; işi yapan kişinin kendisine gitmez.
+--     Gerekenler: pg_net eklentisi ve Vault'ta "onesignal_rest_key" adlı gizli anahtar (anahtar bu dosyada YOK).
+--     Anahtar yoksa ya da gönderim hata verirse işin kaydı etkilenmez, yalnızca bildirim gitmez.
+create extension if not exists pg_net;
+
+-- bildirim metni (kişinin uygulama dili)
+create or replace function public.fdos_push_text(p_kind text, p_lang text, d jsonb)
+returns jsonb
+language plpgsql
+immutable
+set search_path = public
+as $$
+declare
+  i int := coalesce(array_position(array['tr','en','de','el'], p_lang), 1);
+  r text := coalesce(d->>'room', '');
+  place text; head text; typ text;
+begin
+  head := (case p_kind
+    when 'new'      then array['Yeni iş', 'New job', 'Neuer Auftrag', 'Νέα εργασία']
+    when 'reopened' then array['Yeniden açıldı', 'Reopened', 'Wieder geöffnet', 'Επανάνοιξε']
+    when 'done'     then array['Açtığın iş tamamlandı', 'Your job was completed', 'Dein Auftrag ist erledigt', 'Η εργασία σας ολοκληρώθηκε']
+    when 'moved'    then array['Departmanına aktarıldı', 'Moved to your department', 'An deine Abteilung übergeben', 'Μεταφέρθηκε στο τμήμα σας']
+  end)[i];
+  typ := coalesce((case d->>'type'
+    when 'ariza'      then array['Arıza', 'Fault', 'Störung', 'Βλάβη']
+    when 'temizlik'   then array['Temizlik Talebi', 'Cleaning request', 'Reinigungsauftrag', 'Αίτημα καθαριότητας']
+    when 'istek'      then array['Müşteri Talebi', 'Guest request', 'Gästewunsch', 'Αίτημα πελάτη']
+    when 'satinalma'  then array['Satınalma Talebi', 'Purchase request', 'Einkaufsanfrage', 'Αίτημα προμήθειας']
+    when 'resepsiyon' then array['Resepsiyon Talebi', 'Reception request', 'Rezeptionsanfrage', 'Αίτημα υποδοχής']
+    when 'mutfak'     then array['Mutfak Talebi', 'Kitchen request', 'Küchenanfrage', 'Αίτημα κουζίνας']
+    when 'servis'     then array['Servis Talebi', 'Service request', 'Serviceanfrage', 'Αίτημα σέρβις']
+    when 'muhasebe'   then array['Muhasebe Talebi', 'Accounting request', 'Buchhaltungsanfrage', 'Αίτημα λογιστηρίου']
+  end)[i], d->>'type', '');
+  if r ~ '^\d{1,5}[A-Za-z]?$' then place := (array['Oda ', 'Room ', 'Zimmer ', 'Δωμάτιο '])[i] || r;
+  elsif r ~ '^Koridor Kat ' then place := (array['Koridor Kat ', 'Hallway, floor ', 'Flur, Etage ', 'Διάδρομος, όροφος '])[i] || substr(r, 13);
+  else place := r;
+  end if;
+  return jsonb_build_object('head', head, 'body', concat_ws(' · ', nullif(place, ''), nullif(typ, '')) || coalesce(' — ' || nullif(left(d->>'desc', 80), ''), ''));
+end $$;
+
+-- kişilere gönder (dillerine göre gruplayarak)
+create or replace function public.fdos_push_send(p_uids uuid[], p_kind text, d jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  k text; g record; m jsonb;
+begin
+  if p_uids is null or cardinality(p_uids) = 0 then return; end if;
+  select decrypted_secret into k from vault.decrypted_secrets where name = 'onesignal_rest_key' limit 1;
+  if k is null then return; end if;
+  for g in select coalesce(p.lang, 'tr') as lang, array_agg(p.user_id::text) as ids
+             from public.fdos_profiles p where p.user_id = any(p_uids) group by 1 loop
+    m := public.fdos_push_text(p_kind, g.lang, d);
+    perform net.http_post(
+      url := 'https://api.onesignal.com/notifications',
+      headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Key ' || k),
+      body := jsonb_build_object(
+        'app_id', '2680bc4d-47f5-4104-adaf-687d5024d5cc',
+        'target_channel', 'push',
+        'include_aliases', jsonb_build_object('external_id', to_jsonb(g.ids)),
+        'headings', jsonb_build_object('en', m->>'head'),
+        'contents', jsonb_build_object('en', m->>'body'),
+        'url', 'https://puktao.github.io/T-Dos/'));
+  end loop;
+end $$;
+revoke all on function public.fdos_push_send(uuid[], text, jsonb) from public, anon, authenticated;
+
+-- hangi değişiklikte kime gider (uygulama içi uyarılarla aynı kural)
+create or replace function public.fdos_tasks_push()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  actor uuid := auth.uid();
+  d jsonb := new.data;
+  dept_users uuid[];
+  creator uuid;
+begin
+  select array_agg(user_id) into dept_users from public.fdos_profiles
+   where dept = d->>'dept' and user_id is distinct from actor;
+  if tg_op = 'INSERT' then
+    if new.status <> 'tamam' then perform public.fdos_push_send(dept_users, 'new', d); end if;
+  elsif old.status <> 'tamam' and new.status = 'tamam' then
+    creator := nullif(d->>'createdUid', '')::uuid;
+    if creator is not null and creator is distinct from actor then perform public.fdos_push_send(array[creator], 'done', d); end if;
+  elsif old.status = 'tamam' and new.status <> 'tamam' then
+    perform public.fdos_push_send(dept_users, 'reopened', d);
+  elsif new.status <> 'tamam' and (old.data->>'dept') is distinct from (d->>'dept') then
+    perform public.fdos_push_send(dept_users, 'moved', d);
+  end if;
+  return null;
+exception when others then
+  raise warning 'F-Do''s bildirim gönderilemedi: %', sqlerrm;
+  return null;
+end $$;
+revoke all on function public.fdos_tasks_push() from public, anon, authenticated;
+drop trigger if exists fdos_tasks_push on public.fdos_tasks;
+create trigger fdos_tasks_push after insert or update on public.fdos_tasks
+  for each row execute function public.fdos_tasks_push();

@@ -284,6 +284,13 @@ button{font:inherit;color:inherit}
 .err{color:var(--acil-ink);font-size:13px;margin:8px 0 0}
 .dupwarn{margin:8px 0 0;padding:10px 12px;border:1px solid var(--orta);border-left-width:4px;border-radius:6px;font-size:13px;line-height:1.45;background:color-mix(in srgb,var(--orta) 12%,transparent)}
 .dupwarn b{font-weight:700}
+/* telefon bildirimi daveti (Anasayfa) ve Hesabım satırı */
+.pushask{display:flex;gap:10px;align-items:center;margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--ink);border-radius:10px;background:var(--surface);font-size:13.5px;line-height:1.4}
+.pushask p{margin:0;flex:1;min-width:0}
+.pushask .btn{flex:none}
+.pushask .x{flex:none;border:0;background:none;color:var(--muted);font-size:16px;padding:4px;cursor:pointer}
+.facts .pushdd{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.facts .pushdd small{color:var(--muted);font-size:12.5px;line-height:1.4}
 .field input.bad{border-color:var(--acil);box-shadow:0 0 0 2px color-mix(in srgb,var(--acil) 25%,transparent)}
 .facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:14px 0 0;font-size:14px}
 .facts dt{color:var(--muted);font-size:12.5px;padding-top:1px}
@@ -347,6 +354,7 @@ img{max-width:100%}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fdosLogo" viewBox="-4.0 -8.0 249.4 112.0"><path fill="#FFFFFF" d="M0 100V0H39.5V14.25H16.19V42.12H38.25V56.38H16.19V100ZM103.42 80V0H121.87Q132.02 0 136.57 4.35Q141.12 8.7 141.27 18.7Q141.42 26.3 141.47 33.12Q141.52 39.95 141.47 46.77Q141.42 53.6 141.27 61.2Q141.12 71.25 136.57 75.62Q132.02 80 121.82 80ZM116.37 68.6H121.82Q125.07 68.6 126.69 67.1Q128.32 65.6 128.37 62.75Q128.52 57 128.59 51.33Q128.67 45.65 128.67 39.95Q128.67 34.25 128.59 28.55Q128.52 22.85 128.37 17.2Q128.32 14.35 126.69 12.87Q125.07 11.4 121.87 11.4H116.37ZM170.5 80.9Q163.8 80.9 159.82 79.08Q155.85 77.25 154 73.22Q152.15 69.2 151.8 62.6Q151.7 60.3 151.62 57.02Q151.55 53.75 151.55 50.12Q151.55 46.5 151.6 43.12Q151.65 39.75 151.8 37.3Q152.15 30.8 153.97 26.77Q155.8 22.75 159.77 20.92Q163.75 19.1 170.5 19.1Q177.25 19.1 181.17 20.95Q185.1 22.8 186.92 26.82Q188.75 30.85 189.1 37.3Q189.2 39.6 189.25 42.9Q189.3 46.2 189.3 49.83Q189.3 53.45 189.25 56.8Q189.2 60.15 189.1 62.6Q188.75 69.1 186.92 73.15Q185.1 77.2 181.17 79.05Q177.25 80.9 170.5 80.9ZM170.5 71.2Q173.55 71.2 174.82 69.85Q176.1 68.5 176.2 65.8Q176.3 61.85 176.37 57.9Q176.45 53.95 176.45 49.95Q176.45 45.95 176.37 42Q176.3 38.05 176.2 34.15Q176.1 31.45 174.82 30.12Q173.55 28.8 170.5 28.8Q167.5 28.8 166.15 30.12Q164.8 31.45 164.7 34.15Q164.6 38.05 164.52 42.02Q164.45 46 164.45 49.98Q164.45 53.95 164.52 57.92Q164.6 61.9 164.7 65.8Q164.8 68.5 166.15 69.85Q167.5 71.2 170.5 71.2Z"/><g fill="#F2C94C"><path d="M48.4 61.94V47.69H92.59V61.94ZM199.46 15.58 203.62 5.68H198.3V-4H210.03V4.77L204.52 15.58ZM227.93 56.67Q221.3 56.67 218.43 53.83Q215.56 50.98 215.3 44.41Q215.26 43.1 215.28 41.41Q215.3 39.73 215.37 39.05H223.85Q223.77 41.04 223.77 42.71Q223.77 44.38 223.81 45.42Q223.92 47.6 224.95 48.5Q225.98 49.4 227.93 49.4Q230.3 49.4 231.35 48.5Q232.4 47.6 232.43 45.42Q232.43 44.41 232.43 44.09Q232.43 43.77 232.43 43.47Q232.43 43.17 232.43 42.27Q232.43 40.7 231.87 39.74Q231.31 38.79 229.85 38.34L224.97 36.95Q221.78 35.98 219.57 34.57Q217.36 33.16 216.21 30.95Q215.07 28.74 215.03 25.44Q215.03 24.73 215.03 24.09Q215.03 23.45 215.03 22.77Q215.07 16.1 218.05 13.21Q221.03 10.33 228.38 10.33Q235.1 10.33 237.89 13.12Q240.68 15.91 240.95 22.36Q241.02 23.64 240.98 25.36Q240.95 27.09 240.87 27.84H232.1Q232.13 27.01 232.15 25.7Q232.17 24.39 232.15 23.15Q232.13 21.91 232.1 21.27Q231.98 19.25 231.2 18.43Q230.41 17.6 228.38 17.6Q226.25 17.6 225.4 18.43Q224.56 19.25 224.48 21.27Q224.45 22.21 224.43 22.74Q224.41 23.26 224.41 24.61Q224.41 26.34 224.93 27.52Q225.46 28.7 227.3 29.19L231.61 30.28Q236.45 31.48 238.9 34.08Q241.36 36.69 241.36 41.75Q241.36 42.42 241.36 43.19Q241.36 43.96 241.36 44.64Q241.32 51.09 238.25 53.88Q235.17 56.67 227.93 56.67Z"/><rect x="103.42" y="88.00" width="85.88" height="12.00" /></g></symbol></svg>
@@ -557,6 +565,16 @@ const TX = {
   "w.lang": ["Dil", "Language", "Sprache", "Γλώσσα"],
   "w.users": ["Kullanıcılar", "Users", "Benutzer", "Χρήστες"],
   "w.logout": ["Oturumu kapat", "Sign out", "Abmelden", "Αποσύνδεση"],
+  "pn.title": ["Bildirimler", "Notifications", "Benachrichtigungen", "Ειδοποιήσεις"],
+  "pn.on": ["Açık", "On", "An", "Ενεργές"],
+  "pn.enable": ["Bildirimleri aç", "Turn on notifications", "Benachrichtigungen aktivieren", "Ενεργοποίηση ειδοποιήσεων"],
+  "pn.enabled": ["Bildirimler açıldı.", "Notifications turned on.", "Benachrichtigungen aktiviert.", "Οι ειδοποιήσεις ενεργοποιήθηκαν."],
+  "pn.blocked": ["Engellendi. Telefonun ayarlarından bu uygulamaya bildirim izni verin.", "Blocked. Allow notifications for this app in your phone settings.", "Blockiert. Erlaube Benachrichtigungen für diese App in den Telefoneinstellungen.", "Αποκλείστηκαν. Επιτρέψτε τις ειδοποιήσεις για την εφαρμογή από τις ρυθμίσεις του τηλεφώνου."],
+  "pn.ios": ["iPhone'da bildirim için önce uygulamayı ana ekrana ekleyin (Paylaş → Ana Ekrana Ekle) ve oradan açın.", "On iPhone, first add the app to your Home Screen (Share → Add to Home Screen) and open it from there.", "Auf dem iPhone die App zuerst zum Home-Bildschirm hinzufügen (Teilen → Zum Home-Bildschirm) und von dort öffnen.", "Στο iPhone προσθέστε πρώτα την εφαρμογή στην οθόνη Αφετηρίας (Κοινοποίηση → Προσθήκη στην οθόνη Αφετηρίας) και ανοίξτε την από εκεί."],
+  "pn.na": ["Bu tarayıcı telefon bildirimini desteklemiyor.", "This browser doesn't support notifications.", "Dieser Browser unterstützt keine Benachrichtigungen.", "Αυτό το πρόγραμμα περιήγησης δεν υποστηρίζει ειδοποιήσεις."],
+  "pn.wait": ["Hazırlanıyor…", "Getting ready…", "Wird vorbereitet…", "Προετοιμασία…"],
+  "pn.ask": ["Telefon kilitliyken de yeni işleri görmek için bildirimleri aç.", "Turn on notifications to see new jobs even when your phone is locked.", "Aktiviere Benachrichtigungen, um neue Aufträge auch bei gesperrtem Telefon zu sehen.", "Ενεργοποιήστε τις ειδοποιήσεις για να βλέπετε νέες εργασίες ακόμη και με κλειδωμένο τηλέφωνο."],
+  "pn.later": ["Daha sonra", "Later", "Später", "Αργότερα"],
   "w.unassigned": ["Atanmadı", "Not assigned", "Nicht zugewiesen", "Δεν έχει οριστεί"],
   "u.sub": ["Satırı sola kaydır: düzenle ya da sil.", "Swipe a row left to edit or delete.", "Zeile nach links wischen: bearbeiten oder löschen.", "Σύρετε μια γραμμή αριστερά για επεξεργασία ή διαγραφή."],
   "u.add": ["Kullanıcı ekle", "Add user", "Benutzer hinzufügen", "Προσθήκη χρήστη"],
@@ -1038,8 +1056,8 @@ function screenHome(){
       <span class="hs">${esc(deptLine)}</span>
     </button>
   </div>`;
-  if (!tasks.size) return hero + `<div class="empty" style="margin-top:18px"><h3>${tx("h.empty")}</h3><p>${tx("h.emptyP")}</p></div>`;
-  return hero + `<section class="sec">
+  if (!tasks.size) return pushAsk() + hero + `<div class="empty" style="margin-top:18px"><h3>${tx("h.empty")}</h3><p>${tx("h.emptyP")}</p></div>`;
+  return pushAsk() + hero + `<section class="sec">
     <div class="sech"><h3>${tx("h.open")}</h3><span class="cnt">${open.length}</span>
       ${open.length > UP ? `<button type="button" class="more" data-jump="open">${tx("h.all")}</button>` : ""}</div>
     ${open.length ? `<div class="list">${open.slice(0, UP).map(x => card(x)).join("")}</div>` : `<div class="none">${tx("h.noOpen")}.</div>`}
@@ -1255,6 +1273,8 @@ $("#screen").addEventListener("click", e => {
   const sw0 = e.target.closest(".swc");
   if (sw0 && sw0._moved){ sw0._moved = false; return; }
   if (sw0 && sw0.classList.contains("open")){ cardSwipeClose(); return; }
+  if (e.target.closest("[data-push-on]")){ enablePush(); return; }
+  if (e.target.closest("[data-push-later]")){ try { localStorage.setItem(PUSH_ASK_KEY, String(Date.now())); } catch(x){} renderScreen(); return; }
   const j = e.target.closest("[data-jump]");
   if (j){
     ui.tab = "yapilacak"; ui.todo = {...DEF.todo};
@@ -1363,12 +1383,14 @@ function openWho(){
   $("#usersBtn").hidden = !isAdmin();
   $("#wInfo").innerHTML = `<dt>${tx("name")}</dt><dd>${esc(me.name)}</dd><dt>${tx("email")}</dt><dd>${esc(authUser?.email || "")}</dd>
     <dt>${tx("dept")}</dt><dd>${esc(deptOf(me) ? dL(me.dept) : me.role === "admin" ? dL("yonetici") : tx("w.unassigned"))}</dd>
-    <dt>${tx("w.lang")}</dt><dd><div class="sel"><select id="wLang" aria-label="${esc(tx("w.lang"))}">${LANGS.map(l => opt(l, LANG_NAMES[l], l === LANG)).join("")}</select></div></dd>`;
+    <dt>${tx("w.lang")}</dt><dd><div class="sel"><select id="wLang" aria-label="${esc(tx("w.lang"))}">${LANGS.map(l => opt(l, LANG_NAMES[l], l === LANG)).join("")}</select></div></dd>
+    <dt>${tx("pn.title")}</dt><dd class="pushdd" id="wPush">${pushRow()}</dd>`;
   openOv("#ovWho");
 }
 $("#whoBtn").addEventListener("click", openWho);
 $("#whoForm").addEventListener("submit", e => e.preventDefault());
 $("#wInfo").addEventListener("change", e => { if (e.target.id === "wLang") setLang(e.target.value, true); });
+$("#wInfo").addEventListener("click", e => { if (e.target.closest("[data-push-on]")) enablePush(); });
 
 /* ---------- listeler (Supabase tabloları; yoksa yukarıdaki sabitler) ---------- */
 const deptList = () => Object.entries(DEPTS).filter(([, v]) => v.active !== false);
@@ -1898,6 +1920,53 @@ $("#passForm").addEventListener("submit", async e => {
   closeOv("#ovPass"); toast(tx("p.changed"));
 });
 
+/* ---------- telefon bildirimi (OneSignal) ---------- */
+// Bildirimler veritabanından gider (schema.sql 10. bölüm); uygulama yalnızca izni ister ve cihazı kişiye bağlar (OneSignal.login = kullanıcı id).
+// OneSignal'ın dosyası /T-Dos/push/onesignal/ altında, uygulamanın sw.js dosyasından ayrı kapsamda çalışır.
+const ONESIGNAL_APP_ID = "2680bc4d-47f5-4104-adaf-687d5024d5cc";
+const PUSH_ORIGIN = "https://puktao.github.io";
+const PUSH_ASK_KEY = "fdos.pushAsk";
+let OS = null;   // OneSignal hazır olunca dolar
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
+const standalone = () => !!(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+if (location.origin === PUSH_ORIGIN || window.__FDOS_PUSH_TEST) OneSignalDeferred.push(async os => {
+  try {
+    await os.init({appId: ONESIGNAL_APP_ID, serviceWorkerPath: "T-Dos/push/onesignal/OneSignalSDKWorker.js", serviceWorkerParam: {scope: "/T-Dos/push/onesignal/"}, autoResubscribe: true});
+    OS = os;
+    // uygulama ekrandayken bildirim gösterilmez; uygulama içi uyarı zaten çıkıyor
+    os.Notifications.addEventListener("foregroundWillDisplay", e => { if (document.visibilityState === "visible") try { e.preventDefault(); } catch(x){} });
+    os.Notifications.addEventListener("permissionChange", () => renderPush());
+    pushLink(); renderPush();
+  } catch(e){}
+});
+// Cihazı giriş yapan kişiye bağlar; ayırma yalnızca oturum kapatılınca yapılır (açılışta ayır-bağla yapılmaz).
+function pushLink(out){ if (!OS) return; try { if (out) OS.logout(); else if (signedIn && authUser?.id) OS.login(authUser.id); } catch(e){} }
+function pushState(){
+  if (isIOS() && !standalone()) return "ios";
+  if (!OS) return location.origin === PUSH_ORIGIN || window.__FDOS_PUSH_TEST ? "wait" : "na";
+  try { if (!OS.Notifications.isPushSupported()) return "na"; if (OS.Notifications.permission) return "on"; } catch(e){ return "na"; }
+  return window.Notification && Notification.permission === "denied" ? "blocked" : "off";
+}
+function pushRow(){
+  const st = pushState();
+  if (st === "on") return `<b>${tx("pn.on")}</b>`;
+  if (st === "off") return `<button type="button" class="btn primary" data-push-on>${tx("pn.enable")}</button>`;
+  return `<small>${tx({ios: "pn.ios", blocked: "pn.blocked", wait: "pn.wait"}[st] || "pn.na")}</small>`;
+}
+function pushAsk(){
+  if (pushState() !== "off" || !me) return "";
+  try { if (localStorage.getItem(PUSH_ASK_KEY)) return ""; } catch(e){}
+  return `<div class="pushask" role="note"><p>${tx("pn.ask")}</p><button type="button" class="btn primary" data-push-on>${tx("pn.enable")}</button><button type="button" class="x" data-push-later aria-label="${esc(tx("pn.later"))}">✕</button></div>`;
+}
+function renderPush(){ if ($("#wPush")) $("#wPush").innerHTML = pushRow(); if (ui.tab === "ana") renderScreen(); }
+async function enablePush(){
+  if (!OS) return;
+  try { await OS.Notifications.requestPermission(); } catch(e){}
+  pushLink(); renderPush();
+  if (pushState() === "on") toast(tx("pn.enabled"));
+}
+
 /* ---------- dil ---------- */
 function applyStatic(){
   document.documentElement.lang = LANG;
@@ -1961,9 +2030,9 @@ function onSession(session){
   const was = signedIn; signedIn = !!session; authUser = session ? session.user : null;
   if (signedIn){
     closeOv("#ovLogin"); $("#logoutBtn").hidden = false;
-    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); }
+    if (!was){ ui.tab = "ana"; window.scrollTo(0, 0); renderAll(); startLive(); loadLists(); loadProfiles(); pushLink(); }
   } else {
-    stopLive(); tasks = new Map(); loaded = false; langSynced = false; $("#logoutBtn").hidden = true;
+    stopLive(); tasks = new Map(); loaded = false; langSynced = false; $("#logoutBtn").hidden = true; if (was) pushLink(true);
     profiles = []; me = null; dropSnap();
     closeOv("#ovUsers"); renderAll(); openLogin();
   }
