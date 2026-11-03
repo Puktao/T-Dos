@@ -135,7 +135,6 @@ button{font:inherit;color:inherit}
 .card .by{align-self:flex-end;font-size:11.5px;color:var(--muted);text-align:right;margin-top:-2px}   /* açık işte sağ altta bildirenin adı */
 .meta .reopen{margin-left:auto;padding:6px 11px;font-size:13px}   /* "Yeniden aç": Tamamlandı yazısıyla aynı satırda, en sağda */
 .card.done .actions{justify-content:flex-end}   /* "Kontrol edildi" sağda, "Yeniden aç"ın altında */
-.card.done .actions [data-act="verify"]{padding:6px 11px;font-size:13px}
 .card.done.verified{border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
 .btn{font-weight:600;font-size:13.5px;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;line-height:1.2}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
@@ -373,7 +372,7 @@ img{max-width:100%}
 <nav class="tabbar gut" data-i18n-aria="tabs"><div class="col" id="tabbar">
   <button class="tb" data-tab="ana" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="tab.ana">Anasayfa</span></button>
   <button class="tb" data-tab="yapilacak" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="tab.yapilacak">Yapılacaklar</span><span class="bd" id="bdTodo" hidden></span></button>
-  <button class="tb" data-tab="tamamlanan" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span data-i18n="tab.tamamlanan">Tamamlananlar</span><span class="bd" id="bdDone" hidden></span></button>
+  <button class="tb" data-tab="tamamlanan" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span data-i18n="tab.tamamlanan">Tamamlananlar</span></button>
   <button class="tb" data-tab="rapor" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i18n="tab.rapor">Rapor</span></button>
 </div></nav>
 
@@ -592,7 +591,6 @@ const TX = {
   "c.done": ["Bitti {d}", "Done {d}", "Erledigt {d}", "Τέλος {d}"],
   "c.opened": ["Açılış: {d}", "Opened: {d}", "Eröffnet: {d}", "Άνοιγμα: {d}"],
   "c.by": ["Bildiren: {name}", "Reported by: {name}", "Gemeldet von: {name}", "Αναφορά από: {name}"],
-  "c.verify": ["Kontrol edildi", "Checked", "Geprüft", "Ελέγχθηκε"],
   "c.reopen": ["Yeniden aç", "Reopen", "Wieder öffnen", "Επανάνοιγμα"],
   "c.rep": ["{d} GÜNDE {n}. KEZ", "{n}× IN {d} DAYS", "{n}. MAL IN {d} TAGEN", "{n}η ΦΟΡΑ ΣΕ {d} ΗΜΕΡΕΣ"],
   "c.repTitle": ["Aynı yerde, aynı sorun için son {d} günde açılan {n}. iş", "Job no. {n} for the same issue at the same place in the last {d} days", "{n}. Auftrag zum selben Problem am selben Ort in den letzten {d} Tagen", "{n}η εργασία για το ίδιο πρόβλημα στο ίδιο σημείο τις τελευταίες {d} ημέρες"],
@@ -616,8 +614,6 @@ const TX = {
   "h.open": ["Açık işler", "Open jobs", "Offene Aufträge", "Ανοιχτές εργασίες"],
   "h.all": ["Tümünü gör", "See all", "Alle anzeigen", "Όλες"],
   // listeler ve filtre
-  "chk.pending": ["Kontrol bekleyen", "Awaiting check", "Prüfung offen", "Αναμένουν έλεγχο"],
-  "chk.ok": ["Kontrol edilen", "Checked", "Geprüft", "Ελεγμένες"],
   "q.todo": ["Oda, sorun veya kişi ara", "Search room, issue or person", "Zimmer, Problem oder Person suchen", "Αναζήτηση δωματίου, προβλήματος ή ατόμου"],
   "q.done": ["Tamamlananlarda ara", "Search completed jobs", "In erledigten Aufträgen suchen", "Αναζήτηση στις ολοκληρωμένες"],
   "q.aria": ["Ara", "Search", "Suchen", "Αναζήτηση"],
@@ -632,9 +628,6 @@ const TX = {
   "r.sortTodo": ["en eski açılan önce", "oldest first", "älteste zuerst", "οι παλαιότερες πρώτα"],
   "r.sortDone": ["en son biten önce", "latest finished first", "zuletzt erledigte zuerst", "οι πιο πρόσφατες πρώτα"],
   "r.firstJob": ["Sağ alttaki + ile ilk işi kaydet.", "Add the first job with + at the bottom right.", "Den ersten Auftrag mit + unten rechts anlegen.", "Καταχωρίστε την πρώτη εργασία με το + κάτω δεξιά."],
-  "r.noPending": ["Kontrol bekleyen iş yok", "No jobs awaiting check", "Keine Aufträge zur Prüfung", "Καμία εργασία προς έλεγχο"],
-  "r.noPendingP": ["Bitirilen işler burada resepsiyonun kontrolünü bekler. Kontrol edilen oda otomatik olarak satışa açılır.", "Finished jobs wait here for a check. Once checked, the room is released for sale automatically.", "Erledigte Aufträge warten hier auf die Prüfung. Geprüfte Zimmer werden automatisch freigegeben.", "Οι ολοκληρωμένες εργασίες περιμένουν εδώ έλεγχο. Μετά τον έλεγχο το δωμάτιο διατίθεται αυτόματα."],
-  "r.showAllDone": ["Tüm tamamlananları göster", "Show all completed", "Alle erledigten anzeigen", "Εμφάνιση όλων των ολοκληρωμένων"],
   "r.noMatch": ["Aramana uyan iş yok", "No jobs match your search", "Keine passenden Aufträge", "Καμία εργασία δεν ταιριάζει"],
   "r.noMatchP": ["Aramayı değiştir ya da filtreleri kaldır.", "Change the search or remove filters.", "Suche ändern oder Filter entfernen.", "Αλλάξτε την αναζήτηση ή αφαιρέστε φίλτρα."],
   "r.clearAll": ["Arama ve filtreleri temizle", "Clear search and filters", "Suche und Filter löschen", "Καθαρισμός αναζήτησης και φίλτρων"],
@@ -698,6 +691,7 @@ const TX = {
   "g.opened": ["İşi açtı", "Opened the job", "Hat den Auftrag eröffnet", "Άνοιξε την εργασία"],
   "g.openedList": ["İşi açtı ({n} kalemlik liste)", "Opened the job (checklist: {n})", "Hat den Auftrag eröffnet (Liste: {n})", "Άνοιξε την εργασία (λίστα: {n})"],
   "g.done": ["Tamamlandı olarak işaretledi", "Marked as completed", "Als erledigt markiert", "Σημείωσε ως ολοκληρωμένη"],
+  "g.doneOpen": ["Tamamlandı olarak işaretledi, oda satışa açıldı", "Marked as completed, room released for sale", "Als erledigt markiert, Zimmer freigegeben", "Σημείωσε ως ολοκληρωμένη, το δωμάτιο διατίθεται ξανά"],
   "g.checked": ["Kontrol etti", "Checked", "Geprüft", "Έλεγξε"],
   "g.checkedOpen": ["Kontrol etti, oda satışa açıldı", "Checked, room released for sale", "Geprüft, Zimmer freigegeben", "Έλεγξε, το δωμάτιο διατίθεται ξανά"],
   "g.reopened": ["Yeniden açtı", "Reopened", "Wieder geöffnet", "Επανάνοιξε"],
@@ -878,7 +872,7 @@ let me = null;   // giriş yapan kişinin profili (fdos_profiles)
 let profiles = [], authUser = null, usersMsg = "";
 const DEF = {
   todo: {q:"", status:"all"},
-  done: {q:"", check:"kontrol"}
+  done: {q:""}
 };
 const ui = {
   tab: "ana",   // uygulama her açılışta Anasayfa ile başlar
@@ -904,7 +898,6 @@ const isCreator = t => t.createdUid ? t.createdUid === authUser?.id : !!(me && t
 const viewOnly = t => !isAdmin() && !isCreator(t);
 // Durumu işin atandığı departman, işi açan kişi ve yönetici değiştirir.
 const canStatus = t => isAdmin() || isCreator(t) || !!(me && me.dept && t.dept === me.dept);
-// Kontrol (verify) ve yeniden açma: ayrıca işi açan departman.
 // Detay ekranı yalnızca görüntüleme. İşi açan kişi ve yönetici "Güncelle" ile işi Yapılacak İş formunda açar.
 // Kontrolü onaylanmış iş sabittir: Güncelle, durum değiştirme ve liste onayı kapanır (yalnızca "Yeniden aç" kalır).
 const locked = t => !isOpen(t) && !!t.verified;
@@ -914,7 +907,6 @@ const inDept = t => !locked(t) && !!(me && me.dept && t.dept === me.dept);
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
 // Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
 const canDelete = t => isAdmin() || (isCreator(t) && !locked(t));
-const canCheck = t => isAdmin() || isCreator(t);    // "Kontrol edildi": işi atayan kişi ve yönetici
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 function itemsProg(t){
@@ -979,7 +971,7 @@ function actionsFor(t){
   switch (t.status){
     case "yeni": return "";   // yeni işin kartında düğme yok; durum detaydan değişir
     case "beklemede": case "dnd": return b("done", stL("tamam"), "primary");
-    case "tamam": return t.verified || !canCheck(t) ? "" : b("verify", tx("c.verify"), "primary");   // "Yeniden aç" durum satırında
+    case "tamam": return "";   // tamamlanan iş kapanır, onay adımı yok; "Yeniden aç" durum satırında
   }
   return "";
 }
@@ -1058,9 +1050,7 @@ const FILTERS = {
   todo: [
     {key:"status", label: () => tx("status"), opts: () => [["all", tx("all")], ...["yeni", "beklemede", "dnd"].map(k => [k, stL(k)])]}
   ],
-  done: [
-    {key:"check", label: () => tx("status"), opts: () => [["all", tx("all")], ["kontrol", tx("chk.pending")], ["ok", tx("chk.ok")]]}
-  ]
+  done: []   // Tamamlananlar'da filtre yok, yalnızca arama
 };
 const listKind = () => ui.tab === "tamamlanan" ? "done" : "todo";
 const matchQ = q => { q = lower(String(q || "").trim()); return x => !q || [x.room, placeOf(x.room), x.desc, x.cat, cL(x.cat), x.doneBy, x.createdBy, TYPES[x.type]?.label, tL(x.type), DEPTS[x.dept]?.label, dL(x.dept), (x.items || []).map(i => i.text).join(" ")].some(v => lower(v).includes(q)); };
@@ -1073,8 +1063,6 @@ function applyTodo(f){
 }
 function applyDone(f){
   let arr = visTasks().filter(t => !isOpen(t));
-  if (f.check === "kontrol") arr = arr.filter(t => !t.verified);
-  if (f.check === "ok") arr = arr.filter(t => t.verified);
   arr = arr.filter(matchQ(f.q));
   arr.sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
   return arr.slice(0, 150);
@@ -1085,7 +1073,7 @@ function toolbar(kind){
   return `<div class="toolbar">
     <div class="sbox">${searchSvg}<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(kind === "todo" ? tx("q.todo") : tx("q.done"))}" aria-label="${esc(tx("q.aria"))}" value="${esc(f.q)}">
       <button type="button" class="clr" id="qClr" aria-label="${esc(tx("q.clear"))}" ${f.q ? "" : "hidden"}>✕</button></div>
-    <button type="button" class="fbtn ${n ? "on" : ""}" id="fOpen" aria-label="${esc(tx("fl.aria") + (n ? ", " + tx("fl.active", {n}) : ""))}">${filterSvg}<span>${tx("fl.btn")}</span>${n ? `<span class="n">${n}</span>` : ""}</button>
+    ${FILTERS[kind].length ? `<button type="button" class="fbtn ${n ? "on" : ""}" id="fOpen" aria-label="${esc(tx("fl.aria") + (n ? ", " + tx("fl.active", {n}) : ""))}">${filterSvg}<span>${tx("fl.btn")}</span>${n ? `<span class="n">${n}</span>` : ""}</button>` : ""}
   </div>`;
 }
 function activeChips(kind){
@@ -1109,8 +1097,6 @@ function results(kind){
   if (arr.length) return `<p class="muted resmeta">${tx("r.count", {n: arr.length, s: sortLab})}</p><div class="list">${arr.map(x => card(x)).join("")}</div>`;
   const narrowed = f.q || activeDefs(kind, f).length;
   if (kind === "todo" && !tasks.size) return `<div class="empty"><h3>${tx("h.empty")}</h3><p>${tx("r.firstJob")}</p></div>`;
-  if (kind === "done" && f.check === "kontrol" && !f.q && activeDefs(kind, f).length === 1)
-    return `<div class="empty"><h3>${tx("r.noPending")}</h3><p>${tx("r.noPendingP")}</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__all">${tx("r.showAllDone")}</button></p></div>`;
   if (narrowed) return `<div class="empty"><h3>${tx("r.noMatch")}</h3><p>${tx("r.noMatchP")}</p><p style="margin-top:12px"><button type="button" class="btn" data-rm="__everything">${tx("r.clearAll")}</button></p></div>`;
   return kind === "todo"
     ? `<div class="empty"><h3>${tx("h.noOpen")}</h3><p>${tx("r.noOpenP")}</p></div>`
@@ -1215,9 +1201,7 @@ function renderTabs(){
   document.querySelectorAll(".tb").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   const open = visTasks().filter(isOpen);
   const mine = deptOf(me) ? open.filter(t => t.dept === me.dept).length : open.length;
-  const pend = visTasks().filter(t => !isOpen(t) && !t.verified).length;
   $("#bdTodo").textContent = mine; $("#bdTodo").hidden = !mine;
-  $("#bdDone").textContent = pend; $("#bdDone").hidden = !pend;
   $("#hTitle").textContent = tx("tab." + ui.tab); document.body.dataset.tab = ui.tab;
   $("#newBtn").hidden = dbFailed || !(ui.tab === "ana" || ui.tab === "yapilacak");
 }
@@ -1294,13 +1278,13 @@ $("#screen").addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b || b.dataset.act === "open"){ openDetail(id); return; }
   const a = b.dataset.act;
-  if (a === "verify" ? !canCheck(t) : a === "reopen" ? !canVerify(t) : !inDept(t)) return;
+  if (a === "reopen" ? !canVerify(t) : !inDept(t)) return;
   requireMe(() => {
     if (a === "done"){
       if (openItems(t)){ toast(tx("t.itemsFirst", {n: openItems(t)})); openDetail(id); return; }
-      patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name}, "Tamamlandı olarak işaretledi");
+      // onay adımı yok: tamamlanan iş kapanır, satışa kapalı oda açılır
+      patch(id, {status: "tamam", doneAt: Date.now(), doneBy: me.name, ooo: false}, t.ooo ? "Tamamlandı olarak işaretledi, oda satışa açıldı" : "Tamamlandı olarak işaretledi");
     }
-    if (a === "verify") patch(id, {verified: true, verifiedBy: who(), ooo: false}, t.ooo ? "Kontrol etti, oda satışa açıldı" : "Kontrol etti");
     if (a === "reopen"){
       // yeniden açılan işte listedeki onaylar da kalkar
       const items = (t.items || []).map(x => ({...x, done: false, by: null, at: null}));
@@ -1353,7 +1337,7 @@ function setStatus(t, v){
   if (v === t.status) return;
   if (v === "tamam" && openItems(t)){ toast(tx("t.itemsFirst", {n: openItems(t)})); renderDetail(); return; }
   const f = {status: v};
-  if (v === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
+  if (v === "tamam"){ f.doneAt = Date.now(); f.doneBy = me.name; f.ooo = false; } else { f.doneAt = null; f.doneBy = null; f.verified = false; f.verifiedBy = null; }
   patch(t.id, f, `Durumu “${STATUS[v]}” yaptı`);   // geçmişe Türkçe yazılır, ekranda logL ile çevrilir
 }
 $("#detail").addEventListener("change", e => {
@@ -1729,7 +1713,7 @@ const whereOf = d => d.room ? placeOf(d.room) : tL(d.type);
 // Yer adı (ekranda): oda no → "Oda 204", koridor → "Koridor Kat 3", alan → çevrilmiş ad. Kayıtta her zaman Türkçe kalır.
 const placeOf = room => { const r = String(room || ""); if (!r) return ""; if (isRoomNo(r)) return tx("pl.roomN", {r}); const fl = floorOf(r); return fl ? tx("pl.hallN", {n: fl}) : aL(r); };
 // Geçmiş kaydı: veritabanında Türkçe; seçilen dilde gösterilir. Tanınmayan kayıt olduğu gibi kalır.
-const LOG_FIXED = {"İşi açtı": "g.opened", "Tamamlandı olarak işaretledi": "g.done", "Kontrol etti": "g.checked", "Kontrol etti, oda satışa açıldı": "g.checkedOpen", "Yeniden açtı": "g.reopened", "Yeniden açtı, liste onayları kaldırıldı": "g.reopenedList"};
+const LOG_FIXED = {"İşi açtı": "g.opened", "Tamamlandı olarak işaretledi": "g.done", "Tamamlandı olarak işaretledi, oda satışa açıldı": "g.doneOpen", "Kontrol etti": "g.checked", "Kontrol etti, oda satışa açıldı": "g.checkedOpen", "Yeniden açtı": "g.reopened", "Yeniden açtı, liste onayları kaldırıldı": "g.reopenedList"};
 function logL(m){
   const s = String(m || ""); if (!LI()) return s;
   let x;
