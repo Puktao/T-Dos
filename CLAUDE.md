@@ -122,7 +122,8 @@ Telefonda ana ekrana eklenen bir PWA olarak çalışır. Bu dosya, claude.ai'dak
 - [x] Muhasebe departmanı Supabase tablolarına eklendi (kullanıcı doğruladı).
 - [x] `fdos_open_dupes` güncellemesi (açık iş kontrolüne `cozulemedi`) kuruldu (kullanıcı doğruladı: `prosrc` içinde `cozulemedi` → true).
 - [x] Dil sütunu ve `fdos_set_lang` (`schema.sql` 2. bölüm) kuruldu (dışarıdan doğrulandı: fonksiyon var, `anon` kapalı).
-- [ ] Bildirim kurulumu (kullanıcı): Supabase'de `pg_net` eklentisi, Vault'a `onesignal_rest_key`, `schema.sql` 10. bölüm. Sonra telefonlarda "Bildirimleri aç".
+- [x] Bildirim kurulumu (kullanıcı bildirdi): `pg_net`, Vault'ta `onesignal_rest_key`, `schema.sql` 10. bölüm.
+- [ ] Telefonlarda "Bildirimleri aç" ve iki telefonla gerçek deneme (sorun olursa `net._http_response` çıktısına bakılacak).
 - Not: Depo yalnızca F-Do’s içindir; PortioCraft ve F-Hotel projeleriyle bağlantısı yoktur, onlara dokunulmaz.
 
 ## Geliştirme notları
