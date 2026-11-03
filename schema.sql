@@ -394,7 +394,7 @@ as $$
     from public.fdos_tasks t
    where exists (select 1 from public.fdos_profiles p where p.user_id = auth.uid())
      and coalesce(p_room, '') <> ''
-     and t.status in ('yeni', 'beklemede', 'dnd')
+     and t.status in ('yeni', 'beklemede', 'cozulemedi', 'dnd')
      and t.data->>'room' = p_room
      and t.data->>'dept' = p_dept
      and t.data->>'cat'  = p_cat

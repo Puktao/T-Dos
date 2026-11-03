@@ -717,6 +717,7 @@ const TX = {
 const ST_TX = {
   yeni: ["Yeni", "New", "Neu", "Νέα"],
   beklemede: ["Beklemede", "On hold", "Wartend", "Σε αναμονή"],
+  cozulemedi: ["Çözülemedi", "Unresolved", "Nicht gelöst", "Δεν επιλύθηκε"],
   dnd: ["DND Kartlı", "DND sign", "DND-Schild", "Πινακίδα DND"],
   tamam: ["Tamamlandı", "Completed", "Erledigt", "Ολοκληρώθηκε"],
   devam: ["Devam ediyor", "In progress", "In Arbeit", "Σε εξέλιξη"]
@@ -852,10 +853,10 @@ const TYPES = {
   servis:{label:"Servis Talebi", dept:"servis", cats:["Masa / salon hazırlığı","Oda servisi teslim / tepsi toplama","Misafir talebi (restoran / bar)","Toplantı / etkinlik servisi","Ekipman / malzeme eksik","Diğer"]},
   muhasebe:{label:"Muhasebe Talebi", dept:"muhasebe", cats:["Fatura / hesap düzeltme","Ödeme","Avans / masraf","Diğer"]}
 };
-const STATUS = {yeni:"Yeni", beklemede:"Beklemede", dnd:"DND Kartlı", tamam:"Tamamlandı"};
+const STATUS = {yeni:"Yeni", beklemede:"Beklemede", cozulemedi:"Çözülemedi", dnd:"DND Kartlı", tamam:"Tamamlandı"};
 const isRoomNo = r => /^\d{1,5}[A-Za-z]?$/.test(String(r || ""));
 // Seçilebilen durumlar: "DND Kartlı" yalnızca oda numarası olan işte
-const statusOpts = t => ["yeni", "beklemede", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"];
+const statusOpts = t => ["yeni", "beklemede", "cozulemedi", ...(isRoomNo(t.room) ? ["dnd"] : []), "tamam"];   // "Çözülemedi" açık iştir
 const AREAS = ["Lobi","Restoran","Bar","Mutfak","Toplantı Odası","Koridor"];
 
 const $ = s => document.querySelector(s);
@@ -970,7 +971,7 @@ function actionsFor(t){
   if (t.status === "tamam" ? !canVerify(t) : !inDept(t)) return "";
   switch (t.status){
     case "yeni": return "";   // yeni işin kartında düğme yok; durum detaydan değişir
-    case "beklemede": case "dnd": return b("done", stL("tamam"), "primary");
+    case "beklemede": case "cozulemedi": case "dnd": return b("done", stL("tamam"), "primary");
     case "tamam": return "";   // tamamlanan iş kapanır, onay adımı yok; "Yeniden aç" durum satırında
   }
   return "";
@@ -1048,7 +1049,7 @@ const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
 const FILTERS = {
   todo: [
-    {key:"status", label: () => tx("status"), opts: () => [["all", tx("all")], ...["yeni", "beklemede", "dnd"].map(k => [k, stL(k)])]}
+    {key:"status", label: () => tx("status"), opts: () => [["all", tx("all")], ...["yeni", "beklemede", "cozulemedi", "dnd"].map(k => [k, stL(k)])]}
   ],
   done: []   // Tamamlananlar'da filtre yok, yalnızca arama
 };
@@ -1770,7 +1771,7 @@ function refetch(){
   fetching = (async () => {
     try {
       const [a, b] = await Promise.all([
-        sb.from(TABLE).select("id,data").in("status", ["yeni", "beklemede", "dnd"]).limit(1000),
+        sb.from(TABLE).select("id,data").in("status", ["yeni", "beklemede", "cozulemedi", "dnd"]).limit(1000),
         sb.from(TABLE).select("id,data").gte("done_at", sinceMs()).order("done_at", {ascending: false}).limit(1000)
       ]);
       const err = a.error || b.error;
