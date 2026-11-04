@@ -19,10 +19,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: phone app shell — sticky header, one scrolling screen per tab, fixed bottom tab bar. Open jobs are blue, finished jobs green; red is for warnings and delete; everything else is ink on cool grey. */
+/* Layout: phone app shell — sticky header, one scrolling screen per tab, fixed bottom tab bar. Open jobs are blue (sent: purple, on hold: yellow, unsolved/DND: red), finished jobs green; everything else is ink on cool grey. */
 :root{
   --bg:#ECEFF3; --surface:#FFFFFF; --surface-2:#F4F6F9; --ink:#142030; --muted:#5B6779; --line:#D3D9E1;
-  --acil:#C8322A; --acil-ink:#9E211B;
+  --acil:#C8322A; --acil-ink:#9E211B; --acil-soft:#FBE3E1;
   --orta:#E2A700; --orta-soft:#FFF3CC; --orta-ink:#7A5800;
   --sureli:#2563C4; --sureli-soft:#E2EBFA;
   --mor:#7A3FC4; --mor-soft:#EFE6FB;
@@ -34,7 +34,7 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0D131A; --surface:#151E28; --surface-2:#1B2532; --ink:#E6EBF1; --muted:#98A3B2; --line:#2A3544;
-  --acil:#F0695E; --acil-ink:#FF9B92;
+  --acil:#F0695E; --acil-ink:#FF9B92; --acil-soft:#3A1816;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
   --sureli:#5B95F0; --sureli-soft:#18284A;
   --mor:#B38CF2; --mor-soft:#2C2045;
@@ -43,7 +43,7 @@
 }}
 :root[data-theme="dark"]{
   --bg:#0D131A; --surface:#151E28; --surface-2:#1B2532; --ink:#E6EBF1; --muted:#98A3B2; --line:#2A3544;
-  --acil:#F0695E; --acil-ink:#FF9B92;
+  --acil:#F0695E; --acil-ink:#FF9B92; --acil-soft:#3A1816;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
   --sureli:#5B95F0; --sureli-soft:#18284A;
   --mor:#B38CF2; --mor-soft:#2C2045;
@@ -91,6 +91,8 @@ button{font:inherit;color:inherit}
 .card.open{--c:var(--sureli);--cs:var(--sureli-soft)}   /* bana gelen açık iş: mavi */
 .card.open.sent{--c:var(--mor);--cs:var(--mor-soft)}    /* başka departmana gönderdiğim açık iş: mor */
 .card.done{--c:var(--ok);--cs:var(--ok-soft)}            /* tamamlananlar: yeşil */
+.card.open.st-beklemede{--c:var(--orta);--cs:var(--orta-soft)}   /* beklemede: sarı */
+.card.open.st-cozulemedi,.card.open.st-dnd{--c:var(--acil);--cs:var(--acil-soft)}   /* çözülemedi, DND kartlı: kırmızı */
 .card.open,.card.done{background:var(--cs);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
 .card .plate{background:var(--surface)}
 .card.fresh{animation:fresh 2.4s ease-out}
@@ -299,7 +301,7 @@ button{font:inherit;color:inherit}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
 /* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
-#detail.open{--c:var(--sureli);--cs:var(--sureli-soft)} #detail.open.sent{--c:var(--mor);--cs:var(--mor-soft)} #detail.done{--c:var(--ok);--cs:var(--ok-soft)}
+#detail.open{--c:var(--sureli);--cs:var(--sureli-soft)} #detail.open.sent{--c:var(--mor);--cs:var(--mor-soft)} #detail.done{--c:var(--ok);--cs:var(--ok-soft)} #detail.open.st-beklemede{--c:var(--orta);--cs:var(--orta-soft)} #detail.open.st-cozulemedi,#detail.open.st-dnd{--c:var(--acil);--cs:var(--acil-soft)}
 #detail{background:var(--cs,var(--surface))}
 #detail .sheet-head{background:var(--cs,var(--surface));box-shadow:inset 0 6px 0 var(--c,var(--line)),0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
@@ -1007,7 +1009,7 @@ function card(t){
     t.ooo ? `<span class="flag ooo">${tx("c.ooo")}</span>` : "",
     t.guest ? `<span class="flag">${tx("c.guest")}</span>` : "",
   ].join("");
-  const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${isOpen(t) && isSent(t) ? "sent" : ""} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
+  const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${isOpen(t) && isSent(t) ? "sent" : ""} ${isOpen(t) ? "st-" + t.status : ""} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
       <div class="r1"><div class="kind">${esc(typeLabel)} <em>· ${esc(cL(t.cat))}</em></div></div>
@@ -1325,11 +1327,11 @@ function renderDetail(){
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="${esc(tx("d.statusAria"))}">${statusOpts(t).map(k => opt(k, stL(k), k === t.status)).join("")}</select></div>`
     : `<b>${esc(stL(t.status))}</b>`;
-  el.className = "sheet " + (isOpen(t) ? "open" : "done") + (isOpen(t) && isSent(t) ? " sent" : "");
+  el.className = "sheet " + (isOpen(t) ? "open" : "done") + (isOpen(t) && isSent(t) ? " sent" : "") + (isOpen(t) ? " st-" + t.status : "");
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(typeLabel)}</h2><p class="sheet-sub">${esc(cL(t.cat))} · ${stL(t.status)}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">${tx("update")}</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="${esc(tx("close"))}">✕</button></div></div>
-    <div class="card ${isOpen(t) ? "open" : "done"} dcard">
+    <div class="card ${isOpen(t) ? "open st-" + t.status : "done"} dcard">
       ${row(tx("dept"), `<b>${esc(dL(t.dept))}</b>`)}
       ${t.desc ? `<p class="ddesc">${esc(t.desc)}</p>` : ""}
       ${checklistDetail(t)}
