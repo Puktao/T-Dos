@@ -25,6 +25,7 @@
   --acil:#C8322A; --acil-ink:#9E211B;
   --orta:#E2A700; --orta-soft:#FFF3CC; --orta-ink:#7A5800;
   --sureli:#2563C4; --sureli-soft:#E2EBFA;
+  --mor:#7A3FC4; --mor-soft:#EFE6FB;
   --ok:#2B7A4B; --ok-soft:#E0F0E6;
   --scrim:rgba(14,20,28,.5); --shadow:0 2px 6px rgba(20,32,48,.10),0 10px 28px rgba(20,32,48,.14);
   --font-display:"Big Shoulders Display","Arial Narrow",system-ui,sans-serif;
@@ -36,6 +37,7 @@
   --acil:#F0695E; --acil-ink:#FF9B92;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
   --sureli:#5B95F0; --sureli-soft:#18284A;
+  --mor:#B38CF2; --mor-soft:#2C2045;
   --ok:#78C895; --ok-soft:#163222;
   --scrim:rgba(0,0,0,.6); --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }}
@@ -44,6 +46,7 @@
   --acil:#F0695E; --acil-ink:#FF9B92;
   --orta:#F2C94C; --orta-soft:#382D0C; --orta-ink:#F5D36E;
   --sureli:#5B95F0; --sureli-soft:#18284A;
+  --mor:#B38CF2; --mor-soft:#2C2045;
   --ok:#78C895; --ok-soft:#163222;
   --scrim:rgba(0,0,0,.6); --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }
@@ -85,7 +88,8 @@ button{font:inherit;color:inherit}
 .list{display:flex;flex-direction:column;gap:10px}
 .card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 16px;cursor:pointer;position:relative;overflow:hidden}
 .card::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
-.card.open{--c:var(--sureli);--cs:var(--sureli-soft)}   /* yapılacaklar: mavi */
+.card.open{--c:var(--sureli);--cs:var(--sureli-soft)}   /* bana gelen açık iş: mavi */
+.card.open.sent{--c:var(--mor);--cs:var(--mor-soft)}    /* başka departmana gönderdiğim açık iş: mor */
 .card.done{--c:var(--ok);--cs:var(--ok-soft)}            /* tamamlananlar: yeşil */
 .card.open,.card.done{background:var(--cs);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
 .card .plate{background:var(--surface)}
@@ -297,7 +301,7 @@ button{font:inherit;color:inherit}
 .facts dd{margin:0;overflow-wrap:anywhere}
 /* iş detayı kartı: Departman, Son tarih, Açıklama, Liste, Durum; sağ altta Bildiren ve Açılış */
 /* iş detayı: ekran zemini aciliyet kutularının rengiyle aynı; kartlardaki soldaki renkli çentik burada tepede */
-#detail.open{--c:var(--sureli);--cs:var(--sureli-soft)} #detail.done{--c:var(--ok);--cs:var(--ok-soft)}
+#detail.open{--c:var(--sureli);--cs:var(--sureli-soft)} #detail.open.sent{--c:var(--mor);--cs:var(--mor-soft)} #detail.done{--c:var(--ok);--cs:var(--ok-soft)}
 #detail{background:var(--cs,var(--surface))}
 #detail .sheet-head{background:var(--cs,var(--surface));box-shadow:inset 0 6px 0 var(--c,var(--line)),0 1px 0 color-mix(in srgb,var(--c,var(--line)) 35%,var(--line))}
 .dcard{display:block;cursor:default;margin-top:12px;padding:0;background:none!important;border:0!important;border-radius:0;overflow:visible}
@@ -629,7 +633,10 @@ const TX = {
   "h.noOpen": ["Açık iş yok", "No open jobs", "Keine offenen Aufträge", "Καμία ανοιχτή εργασία"],
   "h.empty": ["Henüz iş yok", "No jobs yet", "Noch keine Aufträge", "Καμία εργασία ακόμη"],
   "h.emptyP": ["Bir arıza, temizlik ya da müşteri talebi olduğunda sağ alttaki + ile kaydet; sorumlu departman burada anında görür.", "When there's a fault, cleaning or guest request, add it with + at the bottom right; the responsible department sees it here instantly.", "Bei einer Störung, Reinigung oder einem Gästewunsch mit + unten rechts anlegen; die zuständige Abteilung sieht es hier sofort.", "Για βλάβη, καθαριότητα ή αίτημα πελάτη, καταχωρίστε με το + κάτω δεξιά· το υπεύθυνο τμήμα το βλέπει αμέσως εδώ."],
-  "h.open": ["Açık işler", "Open jobs", "Offene Aufträge", "Ανοιχτές εργασίες"],
+  "h.mine": ["Yapacaklarım", "My jobs", "Meine Aufträge", "Οι εργασίες μου"],
+  "h.sent": ["Takip edilenler", "Following", "Nachverfolgt", "Υπό παρακολούθηση"],
+  "h.noMine": ["Sana gelen açık iş yok.", "No open jobs for you.", "Keine offenen Aufträge für dich.", "Δεν υπάρχουν ανοιχτές εργασίες για εσάς."],
+  "h.noSent": ["Takip ettiğin açık iş yok.", "No open jobs you're following.", "Keine offenen Aufträge zum Nachverfolgen.", "Δεν παρακολουθείτε ανοιχτές εργασίες."],
   "h.all": ["Tümünü gör", "See all", "Alle anzeigen", "Όλες"],
   // listeler ve filtre
   "q.todo": ["Oda, sorun veya kişi ara", "Search room, issue or person", "Zimmer, Problem oder Person suchen", "Αναζήτηση δωματίου, προβλήματος ή ατόμου"],
@@ -925,6 +932,8 @@ const canEdit = t => !!me && !locked(t) && !viewOnly(t);
 const inDept = t => !locked(t) && !!(me && me.dept && t.dept === me.dept);
 const canVerify = t => canStatus(t);                  // "Yeniden aç"
 // Listede sola kaydırıp silme: işi açan kişi (onaylanmamış işte) ve yönetici (her işte).
+// Başka departmana gönderdiğim (açtığım) iş: kartı mor, Anasayfa'da "Takip edilenler"de
+const isSent = t => !!me && isCreator(t) && t.dept !== me.dept;
 const canDelete = t => isAdmin() || (isCreator(t) && !locked(t));
 const openItems = t => (t.items || []).filter(x => !x.done).length;
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -1010,7 +1019,7 @@ function card(t){
     t.ooo ? `<span class="flag ooo">${tx("c.ooo")}</span>` : "",
     t.guest ? `<span class="flag">${tx("c.guest")}</span>` : "",
   ].join("");
-  const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
+  const art = `<article class="card ${isOpen(t) ? "open" : "done"} ${isOpen(t) && isSent(t) ? "sent" : ""} ${!isOpen(t) && t.verified ? "verified" : ""} ${fresh.has(t.id) ? "fresh" : ""}" data-id="${esc(t.id)}">
     ${plate(t.room, t.dept)}
     <div class="body">
       <div class="r1"><div class="kind">${esc(typeLabel)} <em>· ${esc(cL(t.cat))}</em></div></div>
@@ -1057,11 +1066,14 @@ function screenHome(){
     </button>
   </div>`;
   if (!tasks.size) return pushAsk() + hero + `<div class="empty" style="margin-top:18px"><h3>${tx("h.empty")}</h3><p>${tx("h.emptyP")}</p></div>`;
-  return pushAsk() + hero + `<section class="sec">
-    <div class="sech"><h3>${tx("h.open")}</h3><span class="cnt">${open.length}</span>
-      ${open.length > UP ? `<button type="button" class="more" data-jump="open">${tx("h.all")}</button>` : ""}</div>
-    ${open.length ? `<div class="list">${open.slice(0, UP).map(x => card(x)).join("")}</div>` : `<div class="none">${tx("h.noOpen")}.</div>`}
+  // üstte bana (departmanıma) gelenler, altta takip ettiklerim (gönderdiklerim; yönetici için diğer bütün işler)
+  const mine = open.filter(x => !!me?.dept && x.dept === me.dept), follow = open.filter(x => !(me?.dept && x.dept === me.dept));
+  const sec = (title, list, none) => `<section class="sec">
+    <div class="sech"><h3>${title}</h3><span class="cnt">${list.length}</span>
+      ${list.length > UP ? `<button type="button" class="more" data-jump="open">${tx("h.all")}</button>` : ""}</div>
+    ${list.length ? `<div class="list">${list.slice(0, UP).map(x => card(x)).join("")}</div>` : `<div class="none">${none}</div>`}
   </section>`;
+  return pushAsk() + hero + sec(tx("h.mine"), mine, tx("h.noMine")) + sec(tx("h.sent"), follow, tx("h.noSent"));
 }
 const searchSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
 const filterSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
@@ -1331,7 +1343,7 @@ function renderDetail(){
   const status = inDept(t)
     ? `<div class="sel"><select id="dStatus" aria-label="${esc(tx("d.statusAria"))}">${statusOpts(t).map(k => opt(k, stL(k), k === t.status)).join("")}</select></div>`
     : `<b>${esc(stL(t.status))}</b>`;
-  el.className = "sheet " + (isOpen(t) ? "open" : "done");
+  el.className = "sheet " + (isOpen(t) ? "open" : "done") + (isOpen(t) && isSent(t) ? " sent" : "");
   el.innerHTML = `
     <div class="sheet-head">${plate(t.room, t.dept)}<div style="min-width:0"><h2>${esc(typeLabel)}</h2><p class="sheet-sub">${esc(cL(t.cat))} · ${stL(t.status)}</p></div>
       <div class="hact">${canEdit(t) ? `<button type="button" class="btn primary" id="dEdit">${tx("update")}</button>` : ""}<button type="button" class="iconbtn x" data-close aria-label="${esc(tx("close"))}">✕</button></div></div>
